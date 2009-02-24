@@ -1,0 +1,155 @@
+[Wed Feb 18 10:48:03 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 10:48:03 2009] -coruscant.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 10:48:03 2009] -coruscant.slashnet.org- *** Checking ident...
+[Wed Feb 18 10:48:03 2009] -coruscant.slashnet.org- *** Found your hostname
+[Wed Feb 18 10:48:14 2009] -coruscant.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 10:48:14 2009] -coruscant.slashnet.org- *** If you are having problems connecting due to ping timeouts, please type /quote pong 70E7713B or /raw pong 70E7713B now.
+[Wed Feb 18 10:48:14 2009] Joining channels
+[Wed Feb 18 10:48:14 2009] Joining #NEWGIR
+[Wed Feb 18 10:48:14 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 10:48:14 2009] Joined channel #NEWGIR
+[Wed Feb 18 10:48:26 2009] <Godbert/#NEWGIR> newgir, test is hello <markov>you
+[Wed Feb 18 10:48:33 2009] Shutting down
+[Wed Feb 18 10:48:33 2009] Bot thread is shutting down...
+[Wed Feb 18 10:49:18 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 10:49:18 2009] -coruscant.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 10:49:18 2009] -coruscant.slashnet.org- *** Found your hostname (cached)
+[Wed Feb 18 10:49:18 2009] -coruscant.slashnet.org- *** Checking ident...
+[Wed Feb 18 10:49:29 2009] -coruscant.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 10:49:29 2009] -coruscant.slashnet.org- *** If you are having problems connecting due to ping timeouts, please type /quote pong 9A2E2DCB or /raw pong 9A2E2DCB now.
+[Wed Feb 18 10:49:29 2009] Joining channels
+[Wed Feb 18 10:49:29 2009] Joining #NEWGIR
+[Wed Feb 18 10:49:29 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 10:49:29 2009] Joined channel #NEWGIR
+[Wed Feb 18 10:49:30 2009] <Godbert/#NEWGIR> newgir, test is hello <markov>you
+[Wed Feb 18 10:49:46 2009] Shutting down
+[Wed Feb 18 10:49:46 2009] Bot thread is shutting down...
+[Wed Feb 18 10:55:05 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 10:55:05 2009] -coruscant.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 10:55:05 2009] -coruscant.slashnet.org- *** Found your hostname (cached)
+[Wed Feb 18 10:55:05 2009] -coruscant.slashnet.org- *** Checking ident...
+[Wed Feb 18 10:55:16 2009] -coruscant.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 10:55:16 2009] -coruscant.slashnet.org- *** If you are having problems connecting due to ping timeouts, please type /quote pong 9876CC05 or /raw pong 9876CC05 now.
+[Wed Feb 18 10:55:16 2009] Joining channels
+[Wed Feb 18 10:55:16 2009] Joining #NEWGIR
+[Wed Feb 18 10:55:16 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 10:55:16 2009] Joined channel #NEWGIR
+[Wed Feb 18 10:55:20 2009] <Godbert/#NEWGIR> newgir, test is hello <markov>you
+[Wed Feb 18 10:55:23 2009] LEARN: test =is=> hello <markov>you
+[Wed Feb 18 10:55:23 2009] </#NEWGIR> OK, Godbert
+[Wed Feb 18 10:55:34 2009] <Godbert/#NEWGIR> you the fool
+[Wed Feb 18 10:55:35 2009] </#NEWGIR> you the barrel 
+[Wed Feb 18 10:55:41 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 10:55:42 2009] FOUND: test =is=> hello <markov>you
+[Wed Feb 18 10:55:44 2009] </#NEWGIR> hello you to death this morning ? 
+[Wed Feb 18 10:55:59 2009] Shutting down
+[Wed Feb 18 10:55:59 2009] Bot thread is shutting down...
+[Wed Feb 18 10:56:25 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 10:56:26 2009] -pinky.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 10:56:26 2009] -pinky.slashnet.org- *** Checking ident...
+[Wed Feb 18 10:56:26 2009] -pinky.slashnet.org- *** Found your hostname
+[Wed Feb 18 10:56:37 2009] -pinky.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 10:56:38 2009] Joining channels
+[Wed Feb 18 10:56:38 2009] Joining #NEWGIR
+[Wed Feb 18 10:56:38 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 10:56:39 2009] Joined channel #NEWGIR
+[Wed Feb 18 10:56:46 2009] <Godbert/#NEWGIR> you the fool
+[Wed Feb 18 10:56:50 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 10:56:50 2009] FOUND: test =is=> hello <markov>you
+[Wed Feb 18 10:56:51 2009] </#NEWGIR> hello you right click the 'current session' tab there's a thunderstorm. A 
+[Wed Feb 18 10:57:07 2009] <Godbert/#NEWGIR> no newgir, test is hello <vokram>you
+[Wed Feb 18 10:57:08 2009] WAS: test =is=> hello <markov>you
+[Wed Feb 18 10:57:08 2009] IS:  test =is=> hello <vokram>you
+[Wed Feb 18 10:57:08 2009] </#NEWGIR> OK, Godbert
+[Wed Feb 18 10:57:11 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 10:57:12 2009] FOUND: test =is=> hello <vokram>you
+[Wed Feb 18 10:57:20 2009] Shutting down
+[Wed Feb 18 10:57:20 2009] Bot thread is shutting down...
+[Wed Feb 18 10:57:38 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 10:57:38 2009] -coruscant.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 10:57:38 2009] -coruscant.slashnet.org- *** Found your hostname (cached)
+[Wed Feb 18 10:57:38 2009] -coruscant.slashnet.org- *** Checking ident...
+[Wed Feb 18 10:57:49 2009] -coruscant.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 10:57:49 2009] -coruscant.slashnet.org- *** If you are having problems connecting due to ping timeouts, please type /quote pong CE06C047 or /raw pong CE06C047 now.
+[Wed Feb 18 10:57:49 2009] Joining channels
+[Wed Feb 18 10:57:49 2009] Joining #NEWGIR
+[Wed Feb 18 10:57:49 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 10:57:49 2009] Joined channel #NEWGIR
+[Wed Feb 18 10:58:02 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 10:58:02 2009] FOUND: test =is=> hello <vokram>you
+[Wed Feb 18 10:58:05 2009] </#NEWGIR> Show us her loots now before she had olympic hopes she was bothering you  hello
+[Wed Feb 18 10:58:11 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 10:58:12 2009] FOUND: test =is=> hello <vokram>you
+[Wed Feb 18 10:58:13 2009] </#NEWGIR> No, I don't. It's just you  hello
+[Wed Feb 18 10:58:18 2009] Shutting down
+[Wed Feb 18 10:58:18 2009] Bot thread is shutting down...
+[Wed Feb 18 11:10:28 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 11:10:28 2009] -moo.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 11:10:28 2009] -moo.slashnet.org- *** Checking ident...
+[Wed Feb 18 11:10:28 2009] -moo.slashnet.org- *** Found your hostname
+[Wed Feb 18 11:10:39 2009] -moo.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 11:10:39 2009] Joining channels
+[Wed Feb 18 11:10:39 2009] Joining #NEWGIR
+[Wed Feb 18 11:10:39 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 11:10:39 2009] Joined channel #NEWGIR
+[Wed Feb 18 11:10:43 2009] <Godbert/#NEWGIR> time
+[Wed Feb 18 11:10:44 2009] </#NEWGIR> Wed Feb 18 11:10:44 2009EST
+[Wed Feb 18 11:10:48 2009] <Godbert/#NEWGIR> time
+[Wed Feb 18 11:10:49 2009] </#NEWGIR> Wed Feb 18 11:10:49 2009EST
+[Wed Feb 18 11:10:50 2009] <Godbert/#NEWGIR> time
+[Wed Feb 18 11:10:51 2009] </#NEWGIR> Wed Feb 18 11:10:51 2009EST
+[Wed Feb 18 11:10:52 2009] <Godbert/#NEWGIR> time
+[Wed Feb 18 11:10:53 2009] </#NEWGIR> Eggplant past Red Pepper
+[Wed Feb 18 11:10:54 2009] <Godbert/#NEWGIR> time
+[Wed Feb 18 11:10:55 2009] </#NEWGIR> @715
+[Wed Feb 18 11:10:58 2009] <Godbert/#NEWGIR> unixtime
+[Wed Feb 18 11:10:58 2009] </#NEWGIR> 1234973458
+[Wed Feb 18 11:11:00 2009] <Godbert/#NEWGIR> swatch
+[Wed Feb 18 11:11:00 2009] </#NEWGIR> @715
+[Wed Feb 18 11:11:03 2009] <Godbert/#NEWGIR> veggie
+[Wed Feb 18 11:11:07 2009] <Godbert/#NEWGIR> veggietime
+[Wed Feb 18 11:11:07 2009] </#NEWGIR> Eggplant past Red Pepper
+[Wed Feb 18 11:11:09 2009] <Godbert/#NEWGIR> gmtime
+[Wed Feb 18 11:11:09 2009] </#NEWGIR> Wed Feb 18 16:11:09 2009 UTC
+[Wed Feb 18 11:11:11 2009] <Godbert/#NEWGIR> localtime
+[Wed Feb 18 11:11:11 2009] </#NEWGIR> Wed Feb 18 11:11:11 2009EST
+[Wed Feb 18 11:11:14 2009] Shutting down
+[Wed Feb 18 11:11:14 2009] Bot thread is shutting down...
+[Wed Feb 18 11:16:45 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 11:16:46 2009] -coruscant.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 11:16:46 2009] -coruscant.slashnet.org- *** Checking ident...
+[Wed Feb 18 11:16:47 2009] -coruscant.slashnet.org- *** Found your hostname
+[Wed Feb 18 11:16:56 2009] -coruscant.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 11:16:56 2009] -coruscant.slashnet.org- *** If you are having problems connecting due to ping timeouts, please type /quote pong 1933A6A9 or /raw pong 1933A6A9 now.
+[Wed Feb 18 11:16:56 2009] Joining channels
+[Wed Feb 18 11:16:56 2009] Joining #NEWGIR
+[Wed Feb 18 11:16:56 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 11:16:57 2009] Joined channel #NEWGIR
+[Wed Feb 18 11:17:25 2009] <Godbert/#NEWGIR> seen Godnert
+[Wed Feb 18 11:17:25 2009] </#NEWGIR> I haven't seen 'Godnert', Godbert
+[Wed Feb 18 11:17:27 2009] <Godbert/#NEWGIR> seen Godbert
+[Wed Feb 18 11:17:28 2009] </#NEWGIR> Godbert was last seen on 0 39 years, 58 days, 16 hours, 17 minutes and 28 seconds ago, saying: seen Godbert [Wed Dec 31 19:00:00 1969]
+[Wed Feb 18 11:17:48 2009] Shutting down
+[Wed Feb 18 11:17:48 2009] Bot thread is shutting down...
+[Wed Feb 18 11:19:17 2009] Connecting to port 6667 of server irc.slashnet.org...
+[Wed Feb 18 11:19:17 2009] -pinky.slashnet.org- *** Looking up your hostname...
+[Wed Feb 18 11:19:17 2009] -pinky.slashnet.org- *** Checking ident...
+[Wed Feb 18 11:19:17 2009] -pinky.slashnet.org- *** Found your hostname
+[Wed Feb 18 11:19:28 2009] -pinky.slashnet.org- *** No ident response; username prefixed with ~
+[Wed Feb 18 11:19:28 2009] Joining channels
+[Wed Feb 18 11:19:28 2009] Joining #NEWGIR
+[Wed Feb 18 11:19:28 2009] NEWGIR/NEWGIR sets mode +x
+[Wed Feb 18 11:19:28 2009] Joined channel #NEWGIR
+[Wed Feb 18 11:19:57 2009] <Godbert/#NEWGIR> seen Godbert
+[Wed Feb 18 11:19:58 2009] </#NEWGIR> Godbert was last seen on #NEWGIR 0 seconds ago, saying: seen Godbert [Wed Feb 18 11:19:58 2009]
+[Wed Feb 18 11:20:06 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 11:20:07 2009] FOUND: test =is=> hello <vokram>you
+[Wed Feb 18 11:20:07 2009] </#NEWGIR> how jessamyn will shield you hello
+[Wed Feb 18 11:20:21 2009] <Godbert/#NEWGIR> newgir forget test
+[Wed Feb 18 11:20:21 2009] FORGET: test =is=> hello <vokram>you
+[Wed Feb 18 11:20:21 2009] </#NEWGIR> Godbert: I forgot test
+[Wed Feb 18 11:20:24 2009] <Godbert/#NEWGIR> test
+[Wed Feb 18 11:20:27 2009] <Godbert/#NEWGIR> newgir test
+[Wed Feb 18 11:20:28 2009] </#NEWGIR> test version of epicycleaf 
+[Wed Feb 18 11:56:51 2009] Shutting down
+[Wed Feb 18 11:56:51 2009] Bot thread is shutting down...
