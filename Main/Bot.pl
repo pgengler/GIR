@@ -500,6 +500,16 @@ sub enqueue_say()
 	push @commands, "say||$where||$message";
 }
 
+sub enqueue_action()
+{
+	my ($where, $message, $bot) = @_;
+
+	return unless $message;
+
+	# Add to stack
+	push @commands, "action||$where||$message";
+}
+
 ##############
 ## CONSOLE INPUT
 ##############
@@ -543,6 +553,8 @@ sub console_parse()
 		push @commands, "join||$1";
 	} elsif ($str =~ /^\s*say\s+(.+?)\s+(.+)$/i) {
 		push @commands, "say||$1||$2";
+	} elsif ($str =~ /^\s*action\s+(.+)\s+(.+)$/i) {
+		push @commands, "action||$1||$2";
 	} elsif ($str =~ /^\s*discon(nect)?(\s+(.+))?$/i) {
 		my $reason = $3 || $1 || '';
 		push @commands, "discon||$reason";
@@ -563,6 +575,7 @@ sub bot_command()
 		'part'    => \&part,
 		'join'    => \&join,
 		'say'     => \&say,
+		'action'  => \&action,
 		'discon'  => \&quit,
 		'connect' => \&connect,
 	);

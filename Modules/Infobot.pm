@@ -389,7 +389,7 @@ sub reply()
 	} elsif ($result->{'value'} =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*\<action\>\s*(.+)$/) {
-		&Bot::action($where, &parse_special($1, $user));
+		&Bot::enqueue_action($where, &parse_special($1, $user));
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<markov\>\s*(.+)?$/) {
 		my $prepend = &trim($1);
