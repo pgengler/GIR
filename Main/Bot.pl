@@ -560,6 +560,8 @@ sub console_parse()
 		push @commands, "discon||$reason";
 	} elsif ($str =~ /^\s*connect\s*$/i) {
 		push @commands, "connect||";
+	} elsif ($str =~ /^\s*nick\s+(.+)$/) {
+		push @commands, "nick||$1";
 	} else {
 		&status("Unrecognized command");
 	}
@@ -578,6 +580,7 @@ sub bot_command()
 		'action'  => \&action,
 		'discon'  => \&quit,
 		'connect' => \&connect,
+		'nick'    => \&change_nick
 	);
 
 	while (my $command = shift @commands) {
