@@ -23,6 +23,8 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('nickometer', \&Modules::Nickometer::process);
+
+	&Modules::register_help('nickometer', \&Modules::Nickometer::help);
 }
 
 sub process()
@@ -203,6 +205,13 @@ sub round_up()
 	my $float = shift;
 
 	return int($float) + ((int($float) == $float) ? 0 : 1);
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'nickometer <nick>': calculates how lame a nickname is; the user behind the nick may be more or less lame, of course.";
 }
 
 1;

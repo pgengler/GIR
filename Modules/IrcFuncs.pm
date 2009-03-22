@@ -14,29 +14,17 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('help op', \&Modules::IrcFuncs::help_op);
 	&Modules::register_action('op', \&Modules::IrcFuncs::op);
-
-	&Modules::register_action('help deop', \&Modules::IrcFuncs::help_deop);
 	&Modules::register_action('deop', \&Modules::IrcFuncs::deop);
-
-	&Modules::register_action('help kick', \&Modules::IrcFuncs::help_kick);
 	&Modules::register_action('kick', \&Modules::IrcFuncs::kick);
-
 	&Modules::register_action('nick', \&Modules::IrcFuncs::change_nick);
+
+	&Modules::register_help('op', \&Modules::IrcFuncs::help);
+	&Modules::register_help('deop', \&Modules::IrcFuncs::help);
+	&Modules::register_help('kick', \&Modules::IrcFuncs::help);
+	&Modules::register_help('nick', \&Modules::IrcFuncs::help);
 }
 
-sub help_op()
-{
-	my ($type, $user, $message, $where) = @_;
-
-	# Only deal with PMs
-	unless ($type eq 'private') {
-		return;
-	}
-
-	return 'Syntax: op <password> <channel> [<user>]';
-}
 
 sub op()
 {
@@ -55,18 +43,6 @@ sub op()
 	return 'NOREPLY';
 }
 
-sub help_deop()
-{
-	my ($type, $user, $message, $where) = @_;
-
-	# Only deal with PMs
-	unless ($type eq 'private') {
-		return;
-	}
-
-	return 'Syntax: deop <password> <channel> [<user>]';
-}
-
 sub deop()
 {
 	my ($type, $user, $message, $where) = @_;
@@ -82,18 +58,6 @@ sub deop()
 	&Bot::take_op($channel, $target || $user);
 
 	return 'NOREPLY';
-}
-
-sub help_kick()
-{
-	my ($type, $user, $message, $where) = @_;
-
-	# Only deal with PMs
-	unless ($type eq 'private') {
-		return;
-	}
-
-	return 'Syntax: kick <password> <channel> <user> [<reason>]';
 }
 
 sub kick()
@@ -129,6 +93,21 @@ sub change_nick()
 	&Bot::change_nick($nick);
 
 	return 'NOREPLY';
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	if ($data eq 'op') {
+		return "'op <password> <channel> [<user>]': Gives ops to <user> (or you, if no one is named) in <channel>. I need to have ops for this to work, of course. Private messages only.";
+	} elsif ($data eq 'deop') {
+		return "'deop <password> <channel> [<user>]': Removes ops from <user> (or you, if no one is named) in <channel>. I need to have ops for this to work. Private messages only.";
+	} elsif ($data eq 'kick') {
+		return "'kick <password> <channel> <user> [<reason>]': Kicks <user> from <channel>. I need to have ops in that channel for this to work. Private messages only.";
+	} elsif ($data eq 'nick') {
+		return "'nick <password> <name>': Changes my IRC nick to <name>. Private messages only.";
+	}
 }
 
 1;

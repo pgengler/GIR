@@ -18,6 +18,8 @@ sub register()
 
 	&Modules::register_action('8ball', \&Modules::Eightball::process);
 	&Modules::register_action('8-ball', \&Modules::Eightball::process);
+
+	&Modules::register_help('8ball', \&Modules::Eightball::help);
 }
 
 sub process()
@@ -38,6 +40,13 @@ sub process()
 		# Get a random response
 		return $answers[rand(@answers)];
 	}
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'8ball <question>': Used a magic 8-ball to try to divine an answer to your question.";
 }
 
 1;

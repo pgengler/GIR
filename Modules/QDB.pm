@@ -36,11 +36,13 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('qdb', \&Modules::QDB::process);
+
+	&Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
 sub process()
 {
-	my ($type, $user, $data, $where) = @_;
+	my ($type, $user, $data, $where, $addressed) = @_;
 
 	# Check for valid id
 	if ($data =~ /^\s*(\d+)\s*$/) {
@@ -107,6 +109,13 @@ sub uncode()
 	$str =~ s/&nbsp;/ /g;
 
 	return $str;
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'qdb <id>': retrieves quote <id> from qdb.us and displays it.";
 }
 
 1;

@@ -1,6 +1,5 @@
 package Modules::Aviation;
 
-
 #######
 ## PERL SETUP
 #######
@@ -9,8 +8,6 @@ use strict;
 #######
 ## INCLUDES
 #######
-use AnyDBM_File;
-use Fcntl;
 use LWP::UserAgent;
 
 #######
@@ -38,6 +35,9 @@ sub register()
 
 	&Modules::register_action('metar', \&Modules::Aviation::metar);
 	&Modules::register_action('taf', \&Modules::Aviation::taf);
+
+	&Modules::register_help('metar', \&Modules::Aviation::help);
+	&Modules::register_help('taf', \&Modules::Aviation::help);
 }
 
 sub metar()
@@ -121,6 +121,17 @@ sub taf()
 	return "I can't find any forecast for $data." if length($taf) < 10;
 	
 	return $taf;
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	if ($data eq 'metar') {
+		return "'metar <airport>': Fetches and displays the last available METAR for the given airport.";
+	} elsif ($data eq 'taf') {
+		return "'taf <airport>': Fetches and displays the last available TAF for the given airport.";
+	}
 }
 
 1;

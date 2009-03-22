@@ -13,6 +13,7 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('yow', \&Modules::Zippy::zippy);
+	&Modules::register_help('yow', \&Modules::Zippy::help);
 }
 
 sub zippy()
@@ -26,6 +27,13 @@ sub zippy()
 	$yow =~ s/\n/ /g;
 
 	return $yow;	
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "yow: prints a random Zippy the Pinhead message";
 }
 
 1;

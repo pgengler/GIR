@@ -18,6 +18,9 @@ sub register()
 
 	&Modules::register_action('quote', \&Modules::Stock::quote);
 	&Modules::register_action('squote', \&Modules::Stock::short_quote);
+
+	&Modules::register_help('quote', \&Modules::Stock::help);
+	&Modules::register_help('squote', \&Modules::Stock::help);
 }
 
 sub quote()
@@ -52,6 +55,17 @@ sub short_quote()
 	}
 
 	return "$symbol: $info{$symbol,'last'}, $info{$symbol,'net'} ($info{$symbol,'p_change'}%)";
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	if ($data eq 'quote') {
+		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'";
+	} else {
+		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'";
+	}
 }
 
 1;

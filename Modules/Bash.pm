@@ -36,11 +36,13 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('bash', \&Modules::Bash::process);
+
+	&Modules::register_help('bash', \&Modules::Bash::help);
 }
 
 sub process()
 {
-	my ($type, $user, $data, $where) = @_;
+	my ($type, $user, $data, $where, $addressed) = @_;
 
 	# Check for valid id
 	unless ($data =~ /^\d+$/) {
@@ -111,5 +113,13 @@ sub uncode()
 
 	return $str;
 }
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'bash <id>': retrieves quote <id> from bash.org and displays it.";
+}
+
 
 1;

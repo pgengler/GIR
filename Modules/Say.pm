@@ -20,6 +20,9 @@ sub register()
 
 	&Modules::register_action('say', \&Modules::Say::say);
 	&Modules::register_action('action', \&Modules::Say::action);
+
+	&Modules::register_help('say', \&Modules::Say::help);
+	&Modules::register_help('action', \&Modules::Say::help);
 }
 
 sub say()
@@ -42,6 +45,13 @@ sub action()
 	&Bot::action($target, $message);
 
 	return "OK, $user";
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "Usage: 'say <channel/user> <message>' or 'action <channel/user> <message>'\nSay <message> or do a /me <action> in the given channel or target user. I'll probably need to be in the channel.";
 }
 
 1;

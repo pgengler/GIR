@@ -44,6 +44,8 @@ sub register()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
 
 	&Modules::register_listener(\&Modules::Infobot::reply);
+
+	&Modules::register_help('infobot', \&Modules::Infobot::help);
 }
 
 sub process()
@@ -580,6 +582,18 @@ sub trim()
 
 	$str =~ s/^\s+//;
 	$str =~ s/\s+$//;
+
+	return $str;
+}
+
+sub help()
+{
+	my ($type, $who, $message, $where, $addressed) = @_;
+
+	my $str = "The Infobot module is used to store and retrieve facts and other information.\n";
+	$str .= "I learn that x = y when someone says 'x is y' or 'x are y'. Then, when someone asks 'What is x?' or 'x?', I respond with 'x is y'\n";
+	$str .= "You can say 'x is <reply>y' and I won't use the 'x is' part of a response.\n";
+	$str .= "Multiple choices for 'x' can be separated with '|'. I'll choose one of the options to respond with.";
 
 	return $str;
 }

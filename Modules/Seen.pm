@@ -19,11 +19,13 @@ sub register()
 
 	&Modules::register_action('seen', \&Modules::Seen::seen);
 	&Modules::register_listener(\&Modules::Seen::update, 'always');
+
+	&Modules::register_help('seen', \&Modules::Seen::help);
 }
 
 sub seen()
 {
-	my ($type, $user, $data, $where) = @_;
+	my ($type, $user, $data, $where, $addressed) = @_;
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -115,6 +117,13 @@ sub update()
 		$db->execute(lc($user), $data, $where, time());
 	}
 	return undef;
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'seen <user>': displays information about the last time <user> spoke when I was around.";
 }
 
 1;

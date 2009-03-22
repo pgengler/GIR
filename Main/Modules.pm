@@ -16,6 +16,8 @@ my @always_listeners;
 my @high_listeners;
 my @low_listeners;
 
+our %help_functions;
+
 #######
 ## FUNCTIONS
 #######
@@ -68,6 +70,19 @@ sub register_listener()
 	} else {
 		push @high_listeners, $func;
 	}
+}
+
+sub register_help()
+{
+	my ($command, $func) = @_;
+
+	return unless $command && $func;
+
+	if ($help_functions{ $command }) {
+		&Bot::status("WARNING: Registering duplicate help handler for '$command'");
+	}
+
+	$help_functions{ $command } = $func;
 }
 
 sub dispatch()

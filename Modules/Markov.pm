@@ -29,6 +29,10 @@ sub register()
 	&Modules::register_action('vokram', \&Modules::Markov::output_from_end);
 	&Modules::register_listener(\&Modules::Markov::user_learn, 'always');
 	&Modules::register_listener(\&Modules::Markov::learn, 'low');
+
+	&Modules::register_help('markov', \&Modules::Markov::help);
+	&Modules::register_help('markov2', \&Modules::Markov::help);
+	&Modules::register_help('vokram', \&Modules::Markov::help);
 }
 
 #######
@@ -480,6 +484,22 @@ sub user_learn()
 			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $user);
 			$sth->finish();
 		}
+	}
+}
+
+#######
+## HELP
+#######
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	if ($data eq 'markov') {
+		return "'markov [<word> [<word>]]': create and print a Markov chain starting with the given word(s). At most two words can be used to start the chain. See also 'markov2' and 'vokram'";
+	} elsif ($data eq 'markov2') {
+		return "'markov2 <word> [<word>]': create and print a Markov chain containing the given word(s). This can appear anywhere in the chain, not just at the beginning. See also 'markov' and 'vokram'";
+	} elsif ($data eq 'vokram') {
+		return "'vokram <word> [<word>]': create and print a Markov chain that ends with the given word(s). At most two words can be used as the basis for the chain. See also 'markov' and 'markov2'";
 	}
 }
 

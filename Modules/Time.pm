@@ -35,6 +35,8 @@ sub register()
 	&Modules::register_action('gmtime', \&Modules::Time::gm_time);
 	&Modules::register_action('swatch', \&Modules::Time::swatch);
 	&Modules::register_action('veggietime', \&Modules::Time::veggie);
+
+	&Modules::register_help('time', \&Modules::Time::help);
 }
 
 sub select()
@@ -92,6 +94,18 @@ sub veggie()
 	my ($type, $user, $data, $where, $addressed) = @_;
 
 	return &Acme::Time::Asparagus::veggietime();
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	my $str = "time: Returns the current time in one of several possible formats.\n";
+	$str .= "'time' chooses one of the following formats randomly; they can also be accessed individually:\n";
+	$str .= "'unixtime' displays the current UNIX timestamp. 'localtime' displays a human-formatted string of the current local time for my timezone.\n";
+	$str .= "'gmtime' is like 'localtime' but uses UTC/GMT. 'swatch' displays Swatch time. 'veggietime' displays the time using vegetables.";
+
+	return $str;
 }
 
 1;

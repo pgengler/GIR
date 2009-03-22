@@ -16,11 +16,13 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('spell', \&Modules::Spell::process);
+
+	&Modules::register_help('spell', \&Modules::Spell::help);
 }
 
 sub process()
 {
-	my ($type, $user, $data, $where) = @_;
+	my ($type, $user, $data, $where, $addressed) = @_;
 
 	$data =~ s/^\s+//;
 	$data =~ s/\s+$//;
@@ -45,6 +47,11 @@ sub process()
 	return $result;
 }
 
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'spell <word>': Given a possibly-misspelled word; uses ispell to try to find the right spelling.";
+}
 
 1;
-

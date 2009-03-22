@@ -24,6 +24,8 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('host', \&Modules::DNS::lookup);
+
+	&Modules::register_help('host', \&Modules::DNS::help);
 }
 
 sub lookup()
@@ -39,5 +41,11 @@ sub lookup()
 	}
 }
 
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "'host <name>': looks up the IP address for the given host.";
+}
 
 1;

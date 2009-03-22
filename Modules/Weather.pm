@@ -34,6 +34,7 @@ sub register()
 	my $this = shift;
 
 	&Modules::register_action('weather', \&Modules::Weather::process);
+	&Modules::register_help('weather', \&Modules::Weather::help);
 }
 
 sub process()
@@ -73,6 +74,13 @@ sub process()
 	);
 	$cache{ $data } = \%info;
 	return $weather;
+}
+
+sub help()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return "Usage: weather <airport code>\nReturns a formatted string with the latest weather observation for the given airport. Not all airports have weather reporting though most major ones do.";
 }
 
 1;
