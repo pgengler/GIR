@@ -34,6 +34,7 @@ sub quote()
 	my %info = $finance->fetch('usa', $symbol);
 
 	if ($info{$symbol,'last'}  eq '0.00') {
+		&Bot::status("Quote fetch failed for '$symbol'");
 		return;
 	}
 
@@ -51,6 +52,7 @@ sub short_quote()
 	my %info = $finance->fetch('usa', $symbol);
 
 	if ($info{$symbol,'last'}  eq '0.00') {
+		&Bot::status("Quote fetch failed for '$symbol'");
 		return;
 	}
 
