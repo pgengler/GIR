@@ -27,7 +27,7 @@ sub rot13()
 {
 	my ($type, $user, $data, $where) = @_;
 
-	$data = 
+	$data =~ y/A-Za-z/N-ZA-Mn-za-m/;
 
 	return $data;
 }
