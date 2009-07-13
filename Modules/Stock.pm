@@ -64,9 +64,9 @@ sub help()
 	my ($type, $user, $data, $where, $addressed) = @_;
 
 	if ($data eq 'quote') {
-		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'";
+		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'.";
 	} else {
-		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'";
+		return "'squote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'.";
 	}
 }
 
