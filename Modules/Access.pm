@@ -14,7 +14,7 @@ use lib ('./', '../Main/');
 #######
 ## INCLUDES
 #######
-use Database::SQLite;
+use Database::MySQL;
 
 sub new()
 {
@@ -40,15 +40,15 @@ sub show_access()
 	# Only reply to this privately
 	return unless ($type eq 'private');
 
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/access.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});;
 
 	# Look up access for this user
 	my $query = qq~
 		SELECT name
-		FROM permissions p
-		LEFT JOIN user_permissions up ON up.permission_id = p.id
-		WHERE up.user_id = (SELECT id FROM users WHERE nick = ?)
+		FROM access_permissions p
+		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
+		WHERE up.user_id = (SELECT id FROM access_users WHERE nick = ?)
 	~;
 	$db->prepare($query);
 	my $sth = $db->execute($user);
@@ -74,13 +74,13 @@ sub check_access()
 {
 	my ($user, $password, $access) = @_;
 
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/access.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Look up user
 	my $query = qq~
 		SELECT id
-		FROM users
+		FROM access_users
 		WHERE nick = ? AND password = ?
 	~;
 	$db->prepare($query);
@@ -95,8 +95,8 @@ sub check_access()
 	# Check for access
 	$query = qq~
 		SELECT up.permission_id
-		FROM user_permissions up
-		LEFT JOIN permissions p ON p.id = up.permission_id
+		FROM access_user_permissions up
+		LEFT JOIN access_permissions p ON p.id = up.permission_id
 		WHERE up.user_id = ? AND p.name = ?
 	~;
 	$db->prepare($query);
@@ -117,8 +117,8 @@ sub add_access()
 	# Only reply to this privately
 	return unless ($type eq 'private');
 
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/access.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Get the parts; syntax is <password> <user> <access>
 	my ($password, $target_user, $to_add) = split(/\s+/, $data, 3);
@@ -132,7 +132,7 @@ sub add_access()
 	# Check if the access exists
 	my $query = qq~
 		SELECT id
-		FROM permissions
+		FROM access_permissions
 		WHERE name = ?
 	~;
 	$db->prepare($query);
@@ -142,7 +142,7 @@ sub add_access()
 	# Add it if it doesn't
 	unless ($access && $access->{'id'}) {
 		$query = qq~
-			INSERT INTO permissions
+			INSERT INTO access_permissions
 			(name)
 			VALUES
 			(?)
@@ -150,13 +150,7 @@ sub add_access()
 		$db->prepare($query);
 		$db->execute($to_add);
 
-		$query = qq~
-			SELECT last_insert_rowid() id
-		~;
-		$db->prepare($query);
-		$sth = $db->execute();
-
-		$access = $sth->fetchrow_hashref()->{'id'};
+		$access = $db->insert_id();
 	} else {
 		$access = $access->{'id'};
 	}
@@ -164,7 +158,7 @@ sub add_access()
 	# Look up user
 	$query = qq~
 		SELECT id
-		FROM users
+		FROM access_users
 		WHERE nick = ?
 	~;
 	$db->prepare($query);
@@ -178,8 +172,8 @@ sub add_access()
 	# Check if user already has that access
 	$query = qq~
 		SELECT p.id
-		FROM permissions p
-		LEFT JOIN user_permissions up ON up.permission_id = p.id
+		FROM access_permissions p
+		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE up.user_id = ? AND p.id = ?
 	~;
 	$db->prepare($query);
@@ -192,7 +186,7 @@ sub add_access()
 
 	# Add permission to user
 	$query = qq~
-		INSERT INTO user_permissions
+		INSERT INTO access_user_permissions
 		(user_id, permission_id)
 		VALUES
 		(?, ?)
@@ -210,8 +204,8 @@ sub remove_access()
 	# Only reply to this privately
 	return unless ($type eq 'private');
 
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/access.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Get the parts; syntax is <password> <user> <access>
 	my ($password, $target_user, $to_remove) = split(/\s+/, $data, 3);
@@ -225,7 +219,7 @@ sub remove_access()
 	# Look up target user
 	my $query = qq~
 		SELECT id
-		FROM users
+		FROM access_users
 		WHERE nick = ?
 	~;
 	$db->prepare($query);
@@ -239,8 +233,8 @@ sub remove_access()
 	# Look up permission
 	$query = qq~
 		SELECT p.id
-		FROM permissions p
-		LEFT JOIN user_permissions up ON up.permission_id = p.id
+		FROM access_permissions p
+		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE p.name = ? AND up.user_id = ?
 	~;
 	$db->prepare($query);
@@ -253,7 +247,7 @@ sub remove_access()
 
 	# Remove the permission
 	$query = qq~
-		DELETE FROM user_permissions
+		DELETE FROM access_user_permissions
 		WHERE user_id = ? AND permission_id = ?
 	~;
 	$db->prepare($query);
