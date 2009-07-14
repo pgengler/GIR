@@ -3,7 +3,7 @@ package Modules::Seen;
 use strict;
 use lib ('./', '../Main');
 
-use Database::SQLite;
+use Database::MySQL;
 
 sub new()
 {
