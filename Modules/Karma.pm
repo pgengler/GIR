@@ -3,7 +3,7 @@ package Modules::Karma;
 use strict;
 use lib ('./', '../Main');
 
-use Database::SQLite;
+use Database::MySQL;
 
 sub new()
 {
@@ -37,8 +37,8 @@ sub get()
 	my $karma = 0;
 
 	# Open database
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/infobot.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	my $query = qq~
 		SELECT name, karma
@@ -85,8 +85,8 @@ sub update()
 	}
 
 	# Open database
-	my $db = new Database::SQLite;
-	$db->init($Bot::config->{'data_dir'} . '/infobot.db');
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Check if entry already exists
 	my $query = qq~
