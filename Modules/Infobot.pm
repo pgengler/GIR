@@ -384,6 +384,7 @@ sub reply()
 	my @parts = split(/\|/, $result->{'value'});
 	if (scalar(@parts) > 1) {
 		$result->{'value'} = $parts[int(rand(scalar(@parts)))];
+		&Bot::status("CHOSE: $result->{'value'}");
 	}
 
 	if ($result->{'value'} =~ /^\s*\<reply\>\s*(.+)$/) {
@@ -416,25 +417,33 @@ sub reply()
 		} else {
 			return $result;
 		}
-	} elsif ($result->{'value'} =~ /^\s*\<markov2\>\s*(.+)?$/) {
-		my $phrase = &trim($1);
+	} elsif ($result->{'value'} =~ /^\s*(.+)\s*\<markov2\>\s*(.+)?$/) {
+		my $prepend = &trim($1);
+		my $phrase  = &trim($2);
+		my $result  = '';
 		if ($phrase) {
 			$phrase = &parse_special($phrase, $user);
 			my @parts = split(/\s+/, $phrase);
 			if (scalar(@parts) >= 2) {
-				return &Modules::Markov::gen_output_multi($parts[0], $parts[1]);
+				$result = &Modules::Markov::gen_output_multi($parts[0], $parts[1]);
 			} elsif (scalar(@parts) == 1) {
-				return &Modules::Markov::gen_output_multi($parts[0]);
+				$result = &Modules::Markov::gen_output_multi($parts[0]);
 			} else {
-				return &Modules::Markov::gen_output();
+				$result = &Modules::Markov::gen_output();
 			}
 		} else {
-			return &Modules::Markov::gen_output();
+			$result = &Modules::Markov::gen_output();
+		}
+		if ($prepend) {
+			$prepend = &parse_special($prepend, $user);
+			return "$prepend $result";
+		} else {
+			return $result;
 		}
 	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<vokram\>\s*(.+)?$/) {
-		my $append = &trim($1);
-		my $phrase = &trim($2);
-		my $result = '';
+		my $prepend = &trim($1);
+		my $phrase  = &trim($2);
+		my $result  = '';
 		if ($phrase) {
 			$phrase = &parse_special($phrase, $user);
 			my @parts = split(/\s+/, $phrase);
@@ -448,9 +457,9 @@ sub reply()
 		} else {
 			$result = &Modules::Markov::gen_output_from_end();
 		}
-		if ($append) {
-			$append = &parse_special($append, $user);
-			return "$result$append";
+		if ($prepend) {
+			$prepend = &parse_special($prepend, $user);
+			return "$prepend $result";
 		} else {
 			return $result;
 		}
@@ -484,9 +493,9 @@ sub lock()
 	}
 
 	# Make sure the user can do that
-  unless (&Modules::Access::check_access($user, $password, 'lock')) {
-    return "You don't have permission to do that, $user!";
-  }
+		unless (&Modules::Access::check_access($user, $password, 'lock')) {
+		return "You don't have permission to do that, $user!";
+	}
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -531,9 +540,9 @@ sub unlock()
 	my ($password, $phrase) = split(/\s+/, $data, 2);
 
 	# Make sure the user can do that
-  unless (&Modules::Access::check_access($user, $password, 'unlock')) {
-    return "You don't have permission to do that, $user!";
-  }
+	unless (&Modules::Access::check_access($user, $password, 'unlock')) {
+		return "You don't have permission to do that, $user!";
+	}
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -571,6 +580,8 @@ sub parse_special()
 {
 	my ($str, $user) = @_;
 
+	return unless $str;
+
 	$str =~ s/\$who/$user/ig;
 
 	return $str;
@@ -579,6 +590,8 @@ sub parse_special()
 sub trim()
 {
 	my $str = shift;
+
+	return unless $str;
 
 	$str =~ s/^\s+//;
 	$str =~ s/\s+$//;
