@@ -99,6 +99,8 @@ sub process()
 		if (($expr =~ /^\s*[-\d*+\s()\/^\.\|\&\*\!]+\s*$/) && ($expr !~ /^\s*\(?\d+\.?\d*\)?\s*$/) && ($expr !~ /^\s*$/) && ($expr !~ /^\s*[( )]+\s*$/)) {
 			my $result = eval($expr);
 
+			return undef unless $result;
+
 			if ($result =~ /^[-+\de\.]+$/) {
 				$result =~ s/\.0+$//;
 				$result =~ s/(\.\d+)000\d+/$1/; 
