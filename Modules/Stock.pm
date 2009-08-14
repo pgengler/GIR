@@ -27,6 +27,8 @@ sub quote()
 {
 	my ($type, $user, $symbol, $where) = @_;
 
+	&Bot::status("Looking up stock quote for '$symbol'");
+
 	$symbol = uc($symbol);
 
 	my $finance = new Finance::Quote;
@@ -44,6 +46,8 @@ sub quote()
 sub short_quote()
 {
 	my ($type, $user, $symbol, $where) = @_;
+
+	&Bot::status("Looking up stock quote for '$symbol'");
 
 	$symbol = uc($symbol);
 
