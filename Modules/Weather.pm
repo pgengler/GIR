@@ -63,8 +63,8 @@ sub process()
 	my $xml = new XML::Simple;
 	my $doc = $xml->xml_in($text);
 
-	my $heat_index = $doc->{'heat_index_f'} eq 'NA' ? '' : "Heat index: $doc->{'heat_index_string'}. ";
-	my $wind_chill = $doc->{'windchill_f'} eq 'NA' ? '' : "Wind chill: $doc->{'windchill_string'}. ";
+	my $heat_index = (!$doc->{'heat_index_f'} || $doc->{'heat_index_f'} eq 'NA') ? '' : "Heat index: $doc->{'heat_index_string'}. ";
+	my $wind_chill = (!$doc->{'windchill_f'} || $doc->{'windchill_f'} eq 'NA') ? '' : "Wind chill: $doc->{'windchill_string'}. ";
 
 	my $weather = "Current conditions for $doc->{'location'} ($doc->{'station_id'}). $doc->{'observation_time'}. Sky conditions: $doc->{'weather'}. Temperature: $doc->{'temperature_string'}, dewpoint: $doc->{'dewpoint_string'}. ${heat_index}${wind_chill}Relative humidity: $doc->{'relative_humidity'}%. Pressure: $doc->{'pressure_string'}. Winds: $doc->{'wind_string'}. Visibility: $doc->{'visibility_mi'} mile(s).";
 
