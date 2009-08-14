@@ -28,14 +28,18 @@ sub register()
 
 sub op()
 {
-	my ($type, $user, $message, $where) = @_;
+	my ($type, $user, $message, $where, $addressed) = @_;
 
 	# Split into parts
 	my ($password, $channel, $target) = split(/\s+/, $message);
 
 	# Check for access
 	unless (&Modules::Access::check_access($user, $password, 'op')) {
-		return "You don't have permission to do that, $user!";
+		if ($addressed || $type eq 'private') {
+			return "You don't have permission to do that, $user!";
+		} else {
+			return;
+		}
 	}
 
 	&Bot::give_op($channel, $target || $user);
@@ -45,14 +49,18 @@ sub op()
 
 sub deop()
 {
-	my ($type, $user, $message, $where) = @_;
+	my ($type, $user, $message, $where, $addressed) = @_;
 
 	# Split into parts
 	my ($password, $channel, $target) = split(/\s+/, $message);
 
 	# Check for access
 	unless (&Modules::Access::check_access($user, $password, 'deop')) {
-		return "You don't have permission to do that, $user!";
+		if ($addressed || $type eq 'private') {
+			return "You don't have permission to do that, $user!";
+		} else {
+			return;
+		}
 	}
 
 	&Bot::take_op($channel, $target || $user);
@@ -62,14 +70,18 @@ sub deop()
 
 sub kick()
 {
-	my ($type, $user, $message, $where) = @_;
+	my ($type, $user, $message, $where, $addressed) = @_;
 
 	# Split into parts
 	my ($password, $channel, $target, $reason) = split(/\s+/, $message, 4);
 
 	# Check for access
 	unless (&Modules::Access::check_access($user, $password, 'kick')) {
-		return "You don't have permission to do that, $user!";
+		if ($addressed || $type eq 'private') {
+			return "You don't have permission to do that, $user!";
+		} else {
+			return;
+		}
 	}
 
 	&Bot::kick($channel, $target, $reason);
@@ -79,14 +91,18 @@ sub kick()
 
 sub change_nick()
 {
-	my ($type, $user, $message, $where) = @_;
+	my ($type, $user, $message, $where, $addressed) = @_;
 
 	# Split into parts
 	my ($password, $nick) = split(/\s+/, $message, 2);
 
 	# Check for access
 	unless (&Modules::Access::check_access($user, $password, 'nick')) {
-		return "You don't have permission to do that, $user!";
+		if ($addressed || $type eq 'private') {
+			return "You don't have permission to do that, $user!";
+		} else {
+			return;
+		}
 	}
 
 	# Change nickname
