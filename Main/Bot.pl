@@ -388,13 +388,20 @@ sub on_mode()
 	# args has the mode changes in [0] and [n - 1] is an empty string
 	my $num_changes = scalar($event->{'args'}) - 2;
 
-	my @modes = &subsplit($event->{'args'}[0], 2);
+	my @modes = &subsplit($event->{'args'}[0], 1);
+
+	my $modifier = shift @modes;
 
 	for (my $i = 0; $i < scalar(@modes); $i++) {
+		if ($modes[$i] eq '-' || $modes[$i] eq '+') {
+			$modifier = $modes[$i];
+			next;
+		}
+
 		if ($event->{'args'}[$i + 1]) {
-			&status("$giver/$chan sets mode $modes[$i] " . $event->{'args'}[$i + 1]);
+			&status("$giver/$chan sets mode ${modifier}$modes[$i] " . $event->{'args'}[$i + 1]);
 		} else {
-			&status("$giver/$chan sets mode $modes[$i]");
+			&status("$giver/$chan sets mode ${modifier}$modes[$i]");
 		}
 	}
 }
