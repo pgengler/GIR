@@ -5,6 +5,7 @@ use threads;
 use threads::shared;
 
 use File::Copy;
+use Getopt::Long;
 use Net::IRC;
 use POSIX;
 
@@ -17,10 +18,11 @@ package Bot;
 #######
 our $connected :shared  = 0;
 our $running :shared    = 1;
-our $config             = &load_config();
+our $config_file        = 'config';
+our $config             = undef;
 our $irc                = undef;
 our $connection         = undef; 
-our $use_console        = 1;
+our $no_console         = 0;
 my  $nick_retries       = 0;
 my  %ignore;
 our @commands :shared;
@@ -29,10 +31,14 @@ our @commands :shared;
 ## GLOBAL SETUP
 #######
 
-# Check if we should disable the console
-if (scalar(@ARGV) == 1 && $ARGV[0] eq '--silent') {
-	$use_console = 0;
-}
+# Parse command-line arguments
+Getopt::Long::GetOptions(
+	'silent'   => \$no_console,
+	'config=s' => \$config_file
+);
+
+# Load configuration
+$config = &load_config();
 
 # Unbuffer standard output
 select(STDOUT);
@@ -103,7 +109,7 @@ sub bot()
 #######
 sub load_config()
 {
-	open(CONFIG, "config") or die "Can't open config file! -- $!";
+	open(CONFIG, $config_file || "config") or die "Can't open config file! -- $!";
 	my %config_values;
 
 	while (my $line = <CONFIG>) {
@@ -239,7 +245,7 @@ sub status()
 	# Strip trailing \n, if any
 	$message =~ s/\n$//;
 
-	if ($use_console) {
+	unless ($no_console) {
 		print '[' . localtime() . '] ' . $message . "\n";
 	}
 
@@ -525,7 +531,7 @@ sub console()
 	$SIG{'TERM'} = sub { $bot->kill('SIGTERM'); threads->exit(); };
 	$SIG{'INT'} = sub { $bot->kill('SIGTERM'); threads->exit(); };
 
-	if ($use_console) {
+	unless ($no_console) {
 		while (<>) {
 			&console_parse($_);
 			threads->self()->yield();
