@@ -205,7 +205,7 @@ sub gen_output_multi()
 		~;
 		$db->prepare($query);
 
-		while ($word->{'prev'} ne '__BEGIN__') {
+		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
 			$sth    = $db->execute($word->{'prev'}, $word->{'this'});
 			$word   = $sth->fetchrow_hashref();
 			$phrase = "$word->{'this'} $phrase";
@@ -221,7 +221,7 @@ sub gen_output_multi()
 		$db->prepare($query);
 
 		$word = $start;
-		while ($word->{'next'} ne '__END__') {
+		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
 			$sth = $db->execute($word->{'this'}, $word->{'next'});
 			$word = $sth->fetchrow_hashref();
 			$phrase = "$phrase $word->{'this'}";
@@ -252,7 +252,7 @@ sub gen_output_multi()
 		~;
 		$db->prepare($query);
 
-		while ($word->{'prev'} ne '__BEGIN__') {
+		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
 			$sth    = $db->execute($word->{'prev'}, $word->{'this'});
 			$word   = $sth->fetchrow_hashref();
 			$phrase = "$word->{'this'} $phrase";
@@ -268,7 +268,7 @@ sub gen_output_multi()
 		$db->prepare($query);
 
 		$word = $start;
-		while ($word->{'next'} ne '__END__') {
+		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
 			$sth = $db->execute($word->{'this'}, $word->{'next'});
 			$word = $sth->fetchrow_hashref();
 			$phrase = "$phrase $word->{'this'}";
@@ -385,7 +385,7 @@ sub gen_output_from_end()
 
 		$phrase = "$word->{'this'} $phrase";
 
-	} while ($word->{'prev'} ne '__BEGIN__' && $count++ <= 25);
+	} while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__' && $count++ <= 25);
 	return $phrase;
 }
 
