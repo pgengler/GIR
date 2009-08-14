@@ -43,7 +43,7 @@ sub output()
 		SELECT this, next
 		FROM markov
 		WHERE prev = '__BEGIN__' AND who = ?
-		ORDER BY count DESC, RAND()
+		ORDER BY count * RAND() DESC
 	~;
 	$db->prepare($query);
 	my $sth  = $db->execute($data);
@@ -60,7 +60,7 @@ sub output()
 		SELECT prev, this, next
 		FROM markov
 		WHERE prev = ? AND this = ? AND who = ?
-		ORDER BY count DESC, RAND()
+		ORDER BY count * RAND() DESC
 	~;
 	$db->prepare($query);
 	while ($word && $word->{'this'} ne '__END__' && $words++ < 50) {
