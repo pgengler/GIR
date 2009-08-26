@@ -16,7 +16,7 @@ use Database::MySQL;
 #######
 my @dunno = ("I don't know", 'Wish I knew', 'Beats me', 'I have no idea', "I think it's your mother");
 
-my $feedbacked = 0;
+my $feedbacked :shared = 0;
 
 #######
 ## MAIN
@@ -42,6 +42,7 @@ sub register()
 	&Modules::register_action('REGEXP:^(.+)\s+(is|are)\s+also\s+(.+)$', \&Modules::Infobot::process); # append()
 	&Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
+	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
 
 	&Modules::register_listener(\&Modules::Infobot::reply);
 
@@ -573,6 +574,38 @@ sub unlock()
 
 	return "OK, $user";
 }	
+
+sub literal()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return undef unless $data;
+
+	# Open database
+	my $db = new Database::MySQL;
+	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+
+	# Look up this phrase
+	my $query = qq~
+		SELECT phrase, relates, value
+		FROM infobot
+		WHERE LOWER(phrase) = LOWER(?)
+	~;
+	$db->prepare($query);
+	my $sth = $db->execute($data);
+	my $result = $sth->fetchrow_hashref();
+
+	if ($result && $result->{'phrase'}) {
+		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+	} else {
+		# Not found; only reply if explicitly addressed publicly or privately
+		if ($addressed || $type eq 'private') {
+			return "I don't have anything matching '$data', $user";
+		} else {
+			return undef;
+		}
+	}
+}
 
 
 # Handle $who in string
