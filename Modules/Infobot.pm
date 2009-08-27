@@ -474,7 +474,7 @@ sub reply()
 		$feedbacked = 1;
 		$sth->finish();
 		$db->close();
-		&Modules::dispatch($type, $user, $phrase, $where, $addressed);
+		&Modules::dispatch_t($type, $user, $phrase, $where, $addressed);
 		$feedbacked = 0;
 		return 'NOREPLY';
 	} else {
