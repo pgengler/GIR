@@ -151,8 +151,8 @@ sub append()
 				return 'NOREPLY';
 			}
 		}
-
 		$result->{'value'} .= '|' . $value;
+		$result->{'value'} =~ s/\|\|/\|/g;
 
 		$query = qq~
 			UPDATE infobot SET
@@ -160,7 +160,7 @@ sub append()
 			WHERE LOWER(phrase) = LOWER(?)
 		~;
 		$db->prepare($query);
-		$db->execute($result->{'phrase'}, $result->{'value'});
+		$db->execute($result->{'value'}, $result->{'phrase'});
 	} else {
 		if ($addressed || $type eq 'private') {
 			return "I didn't have anything matching '$phrase', $who";
@@ -170,6 +170,7 @@ sub append()
 	if ($addressed) {
 		return "OK, $who";
 	}
+	return 'NOREPLY';
 }
 
 sub forget()
