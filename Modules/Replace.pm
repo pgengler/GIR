@@ -22,15 +22,15 @@ sub register()
 
 sub replace()
 {
-	my ($who, $text) = @_;
+	my ($type, $user, $data, $where, $addressed) = @_;
 
-	$text =~ s/ass/butt/gi;
-	$text =~ s/tit/breast/gi;
-	$text =~ s/sex/love/gi;
-	$text =~ s/cock/penis/gi;
-	$text =~ s/cunt/vagina/gi;
+	$data =~ s/ass/butt/gi;
+	$data =~ s/tit/breast/gi;
+	$data =~ s/sex/love/gi;
+	$data =~ s/cock/penis/gi;
+	$data =~ s/cunt/vagina/gi;
 
-	return $text;
+	return $data;
 }
 
 1;
