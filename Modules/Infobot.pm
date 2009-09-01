@@ -419,7 +419,7 @@ sub reply()
 		} else {
 			return $result;
 		}
-	} elsif ($result->{'value'} =~ /^\s*(.+)\s*\<markov2\>\s*(.+)?$/) {
+	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<markov2\>\s*(.+)?$/) {
 		my $prepend = &trim($1);
 		my $phrase  = &trim($2);
 		my $result  = '';
