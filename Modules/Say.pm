@@ -31,9 +31,10 @@ sub say()
 
 	my ($target, $message) = split(/\s+/, $data, 2);
 
-	&Bot::say($target, $message);
-
-	return "OK, $user";
+	if ($type eq 'private' || $addressed == 1) {
+		&Bot::say($target, $message);
+		return "OK, $user";
+	}
 }
 
 sub action()
@@ -42,9 +43,10 @@ sub action()
 
 	my ($target, $message) = split(/\s+/, $data, 2);
 
-	&Bot::action($target, $message);
-
-	return "OK, $user";
+	if ($type ne 'public' || $addressed == 1) {
+		&Bot::action($target, $message);
+		return "OK, $user";
+	}
 }
 
 sub help()
