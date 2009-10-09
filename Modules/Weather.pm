@@ -63,10 +63,38 @@ sub process()
 	my $xml = new XML::Simple;
 	my $doc = $xml->xml_in($text);
 
-	my $heat_index = (!$doc->{'heat_index_f'} || $doc->{'heat_index_f'} eq 'NA') ? '' : "Heat index: $doc->{'heat_index_string'}. ";
-	my $wind_chill = (!$doc->{'windchill_f'} || $doc->{'windchill_f'} eq 'NA') ? '' : "Wind chill: $doc->{'windchill_string'}. ";
+	# This maps the string to be included in the output to the name of the value in the XML document.
+	# The number before the pipe (|) in the 'text' string is its position in the result string.
+	# A trailing colon (:) after the string and a period after the whole item will be added automatically.
+	# If a pipe (|) is included, any text after it will be appended to the string, before the period.
+	my %components = (
+		'1|Sky conditions'    => 'weather',
+		'2|Temperature'       => 'temperature_string',
+		'3|Dewpoint'          => 'dewpoint_string',
+		'4|Heat index'        => 'heat_index_string',
+		'5|Wind chill'        => 'windchill_string',
+		'6|Relative humidity' => 'relative_humidity|%',
+		'7|Pressure'          => 'pressure_string',
+		'8|Winds'             => 'wind_string',
+		'9|Visibility'        => 'visibility_mi| mile(s)'
+	);
 
-	my $weather = "Current conditions for $doc->{'location'} ($doc->{'station_id'}). $doc->{'observation_time'}. Sky conditions: $doc->{'weather'}. Temperature: $doc->{'temperature_string'}, dewpoint: $doc->{'dewpoint_string'}. ${heat_index}${wind_chill}Relative humidity: $doc->{'relative_humidity'}%. Pressure: $doc->{'pressure_string'}. Winds: $doc->{'wind_string'}. Visibility: $doc->{'visibility_mi'} mile(s).";
+	my $weather = "Current conditions for $doc->{'location'} ($doc->{'station_id'}). $doc->{'observation_time'}. ";
+
+	foreach my $text (sort { $a cmp $b } keys %components) {
+		my $ref    = $components{ $text };
+		my $append = '';
+		$text      =~ s/\d+\|//;
+		if ($ref =~ /(.+)\|(.+)/) {
+			$ref = $1;
+			$append = $2;
+		}
+		my $value = $doc->{ $ref };
+
+		if ($value) {
+			$weather .= sprintf("%s: %s%s. ", $text, $value, $append);
+		}
+	}
 
 	my %info = (
 		'retrieved' => time(),
