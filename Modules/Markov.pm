@@ -27,7 +27,7 @@ sub register()
 	&Modules::register_action('markov', \&Modules::Markov::output);
 	&Modules::register_action('markov2', \&Modules::Markov::output_multi);
 	&Modules::register_action('vokram', \&Modules::Markov::output_from_end);
-	&Modules::register_listener(\&Modules::Markov::user_learn, 'always');
+#	&Modules::register_listener(\&Modules::Markov::user_learn, 'always');
 	&Modules::register_listener(\&Modules::Markov::learn, 'low');
 
 	&Modules::register_help('markov', \&Modules::Markov::help);

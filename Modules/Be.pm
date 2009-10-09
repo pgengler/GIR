@@ -24,7 +24,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('be', \&Modules::Be::output);
+#	&Modules::register_action('be', \&Modules::Be::output);
 }
 
 #######
