@@ -8,6 +8,7 @@ use strict;
 #######
 ## INCLUDES
 #######
+BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File) }
 use AnyDBM_File;
 use Fcntl;
 use LWP::UserAgent;
