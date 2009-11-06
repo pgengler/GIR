@@ -83,7 +83,7 @@ sub process()
 
 		my $content = $response->content;
 
-		if ($content =~ /\<td bgcolor=\"\#ffffff\"\>\<p\>(.+?)(\<br\>\<i\>Comment:\<\/i\>(.+))?\<\/p\>\<\/td\>/s) {
+		if ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
 			$result = &uncode($1);
 			$quotes{ $data } = $result;
 		} else {
