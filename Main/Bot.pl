@@ -206,7 +206,7 @@ sub bot_shutdown()
 	# Look for a quit message
 	my $message = "Leaving";
 	foreach my $command (@commands) {
-		my ($command, $value) = split(/||/, $command, 2);
+		my ($command, $value) = split(/\|\|/, $command, 2);
 		if ($command eq 'quit') {
 			$message = $value;
 			last;
@@ -626,7 +626,7 @@ sub quit()
 {
 	my $message = shift;
 
-	$connection->quit();
+	$connection->quit($message);
 #	$connection->shutdown();
 }
 
