@@ -155,6 +155,11 @@ sub connect()
 		IrcName  => $config->{'nick'},
 		Username => $config->{'nick'}
 	);
+
+	if (!$connection) {
+		&status("Unable to connect to server.");
+		&shutdown();
+	}
 }
 
 #######
