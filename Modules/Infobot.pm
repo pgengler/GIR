@@ -151,7 +151,12 @@ sub append()
 				return 'NOREPLY';
 			}
 		}
-		$result->{'value'} .= '|' . $value;
+
+		if ($value !~ /\s*\|/) {
+			$result->{'value'} .= (' or ' . $value);
+		} else {
+			$result->{'value'} .= $value;
+		}
 		$result->{'value'} =~ s/\|\|/\|/g;
 
 		$query = qq~
