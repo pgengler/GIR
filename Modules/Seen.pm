@@ -30,6 +30,8 @@ sub seen()
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
+	$data =~ s/^\s*(.+?)\s*$/$1/;
+
 	my $nick = lc($data);
 
 	# Check if we've seen this person
