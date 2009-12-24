@@ -41,7 +41,9 @@ sub process()
 {
 	my ($type, $user, $data, $where, $addressed) = @_;
 
-	unless ($data && $data =~ /^\w{4}$/) {
+	if ($data && $data =~ /^(\w{4})\s*$/) {
+		$data = $1;
+	} else {
 		return;
 	}
 
