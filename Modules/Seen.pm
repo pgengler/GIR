@@ -48,26 +48,44 @@ sub seen()
 		my $howlong = time() - $seen->{'when'};
 		$seen->{'when'} = localtime($seen->{'when'});
 
-		my $tstring = ($howlong % 60) . " seconds ago";
-		$howlong = int($howlong / 60);
+		my $tstring = ' ago';
 
-		if ($howlong % 60) {
-			$tstring = ($howlong % 60) . " minutes and $tstring";
+		my $seconds = $howlong % 60;
+		if ($seconds == 1) {
+			$tstring = "1 second" . $tstring;
+		} else {
+			$tstring = "$seconds seconds" . $tstring;
 		}
 		$howlong = int($howlong / 60);
 
-		if ($howlong % 24) {
-			$tstring = ($howlong % 24) . " hours, $tstring";
+		my $minutes = $howlong % 60;
+		if ($minutes == 1) {
+			$tstring = "1 minute and " . $tstring;
+		} elsif ($minutes) {
+			$tstring = "$minutes minutes and " . $tstring;
+		}
+		$howlong = int($howlong / 60);
+
+		my $hours = $howlong % 24;
+		if ($hours == 1) {
+			$tstring = '1 hour, ' . $tstring;
+		} elsif ($hours) {
+			$tstring = "$hours hours, " . $tstring;
 		}
 		$howlong = int($howlong / 24);
 
-		if ($howlong % 365) {
-			$tstring = ($howlong % 365) . " days, $tstring";
+		my $days = $howlong % 365;
+		if ($days == 1) {
+			$tstring = '1 day, ' . $tstring;
+		} elsif ($days) {
+			$tstring = "$days days, " . $tstring;
 		}
 		$howlong = int($howlong / 365);
 
-		if ($howlong > 0) {
-			$tstring = "$howlong years, $tstring";
+		if ($howlong == 1) {
+			$tstring = '1 year, ' . $tstring;
+		} elsif ($howlong) {
+			$tstring = "$howlong years, " . $tstring;
 		}
 
 		return "$data was last seen on $seen->{'where'} $tstring, saying: $seen->{'what'} [$seen->{'when'}]";
