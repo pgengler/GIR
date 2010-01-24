@@ -143,6 +143,7 @@ sub connect()
 {
 	&status("Connecting to port $config->{'server_port'} of server $config->{'server_name'}...");
 
+	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
 	$config->{'config_nick'} = $config->{'nick'} unless $config->{'config_nick'};
 
 	$irc = new Net::IRC;
@@ -152,8 +153,8 @@ sub connect()
 		Nick     => $config->{'nick'},
 		Server   => $config->{'server_name'},
 		Port     => $config->{'server_port'},
-		IrcName  => $config->{'nick'},
-		Username => $config->{'nick'}
+		Ircname  => $config->{'name'} || $config->{'nick'},
+		Username => $config->{'username'} || $config->{'nick'}
 	);
 
 	if (!$connection) {
