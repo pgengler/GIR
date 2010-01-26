@@ -581,6 +581,8 @@ sub console_parse()
 		push @commands, "connect||";
 	} elsif ($str =~ /^\s*nick\s+(.+)$/) {
 		push @commands, "nick||$1";
+	} elsif ($str =~ /^\s*debug\s+(on|off)\s*$/) {
+		push @commands, "debug||$1";
 	} else {
 		&status("Unrecognized command");
 	}
@@ -599,7 +601,8 @@ sub bot_command()
 		'action'  => \&action,
 		'discon'  => \&quit,
 		'connect' => \&connect,
-		'nick'    => \&change_nick
+		'nick'    => \&change_nick,
+		'debug'   => \&set_debug
 	);
 
 	while (my $command = shift @commands) {
@@ -741,6 +744,21 @@ sub remove_ignore()
 
 	undef $ignore{ lc($ignore) };
 }
+
+sub set_debug()
+{
+	my $debug = shift;
+
+	return unless ($debug eq 'on' || $debug eq 'off');
+
+	&status("Setting debug status to $debug");
+
+	my $state = ($debug eq 'on') ? 1 : 0;
+
+	$config->{'debug'} = $state;
+	$connection->debug($state);
+}
+
 
 ##############
 ## HELPERS
