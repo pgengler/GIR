@@ -28,7 +28,8 @@ sub register()
 	&Modules::register_action('markov2', \&Modules::Markov::output_multi);
 	&Modules::register_action('vokram', \&Modules::Markov::output_from_end);
 #	&Modules::register_listener(\&Modules::Markov::user_learn, 'always');
-	&Modules::register_listener(\&Modules::Markov::learn, 'low');
+	&Modules::register_listener(\&Modules::Markov::learn, 1);
+	&Modules::register_listener(\&Modules::Markov::respond_if_addressed, 2);
 
 	&Modules::register_help('markov', \&Modules::Markov::help);
 	&Modules::register_help('markov2', \&Modules::Markov::help);
@@ -485,6 +486,112 @@ sub user_learn()
 			$sth->finish();
 		}
 	}
+}
+
+#######
+## RESPOND IF ADDRESSED
+#######
+## If no other module handled this message and the bot was addressed, generate
+## a response using markov stuff.
+#######
+sub respond_if_addressed()
+{
+	my ($type, $user, $data, $where, $addressed) = @_;
+
+	return unless $addressed;
+
+	# Based on random numbers, decide which markov method to use and which word(s) to seed with
+
+	my @words = split(/\s+/, $data);
+
+	my $msg;
+
+	if (scalar(@words) >= 2) {
+		# First figure out which action to take
+		my $r = rand();
+		if ($r < .4) { # normal markov
+			# Now figure out which word(s) to use
+			$r = rand();
+			if ($r < .2) {
+				&Bot::status("Generating markov response from '$words[0]' and '$words[1]'") if $Bot::config->{'debug'};
+				# Use first two words
+				$msg = &gen_output($words[0], $words[1]);
+			} elsif ($r < .4) {
+				# Pick random word and its follower
+				$r = int(rand(scalar(@words) - 1));
+				&Bot::status("Generating markov response from '" . $words[$r] . "' and '" . $words[$r + 1] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output($words[$r], $words[$r + 1]);
+			} elsif ($r < .6) {
+				# Pick first word
+				&Bot::status("Generating markov response from '$words[0]'") if $Bot::config->{'debug'};
+				$msg = &gen_output($words[0]);
+			} elsif ($r < .8) {
+				# Pick random word
+				$r = int(rand(scalar(@words)));
+				&Bot::status("Generating markov response from '" . $words[$r] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output($words[$r]);
+			} else {
+				# No word
+				&Bot::status("Generating markov response from random word") if $Bot::config->{'debug'};
+				$msg = &gen_output();
+			}
+		} elsif ($r < .8) { # bidirectional markov
+			# Now figure out which word(s) to use
+			$r = rand();
+			if ($r < .25) {
+				# Use first two words
+				&Bot::status("Generating markov2 response from '" . $words[0] . "' and '" . $words[1] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_multi($words[0], $words[1]);
+			} elsif ($r < .5) {
+				# Pick random word and its follower
+				$r = int(rand(scalar(@words) - 1));
+				&Bot::status("Generating markov2 response from '" . $words[$r] . "' and '" . $words[$r + 1] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_multi($words[$r], $words[$r + 1]);
+			} elsif ($r < .75) {
+				# Use first word
+				&Bot::status("Generating markov2 response from '" . $words[0] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_multi($words[0]);
+			} else {
+				# Pick random word
+				$r = int(rand(scalar(@words)));
+				&Bot::status("Generating markov2 response from '" . $words[$r] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_multi($words[$r]);
+			}
+		} else { # reverse markov
+			# Now figure out which word(s) to use
+			my $r = rand();
+			if ($r < .3333) {
+				# Use last two words
+				my $n = scalar(@words) - 1;
+				&Bot::status("Generating vokram response from '" . $words[$n - 1] . "' and '" . $words[$n] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_from_end($words[$n - 1], $words[$n]);
+			} elsif ($r < .66666) {
+				# Use last word
+				my $n = scalar(@words) - 1;
+				&Bot::status("Generating vokram response from '" . $words[$n] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_from_end($words[$n]);
+			} else {
+				# Pick random word
+				$r = int(rand(scalar(@words)));
+				&Bot::status("Generating vokram response from '" . $words[$r] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_from_end($words[$r]);
+			}
+		}
+	} else {
+		if (rand() < .5) {
+			if (rand() < .5) {
+				&Bot::status("Generating markov response from '" . $words[0] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output($words[0]);
+			} else {
+				&Bot::status("Generating markov2 response from '" . $words[0] . "'") if $Bot::config->{'debug'};
+				$msg = &gen_output_multi($words[0]);
+			}
+		} else {
+			&Bot::status("Generating markov response from random word") if $Bot::config->{'debug'};
+			$msg = &gen_output();
+		}
+	}
+	return $msg;
 }
 
 #######

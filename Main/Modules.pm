@@ -12,11 +12,21 @@ use threads::shared;
 #######
 my %actions;
 my %private;
-my @always_listeners;
-my @high_listeners;
-my @low_listeners;
+my %listeners;
 
 our %help_functions;
+
+#######
+## NOTES
+#######
+## Listener functions are registered with a 'priority' value. If this value is
+## -1, the listener is always called, and this happens before any of the
+## registered actions are tried. Otherwise, the actions are tried first and if
+## none generated a response or indicated that processing should stop, the
+## other listeners are tried in descending order by priority. No guarantees
+## are provided about the order of execution for multiple listeners with the
+## same priority value.
+#######
 
 #######
 ## FUNCTIONS
@@ -63,13 +73,7 @@ sub register_listener()
 {
 	my ($func, $priority) = @_;
 
-	if ($priority && $priority eq 'low') {
-		push @low_listeners, $func;
-	} elsif ($priority && $priority eq 'always') {
-		push @always_listeners, $func;
-	} else {
-		push @high_listeners, $func;
-	}
+	push @{ $listeners{ $priority } }, $func;
 }
 
 sub register_help()
@@ -104,7 +108,7 @@ sub dispatch_t()
 
 	my $result = '';
 
-	foreach my $listener (@always_listeners) {
+	foreach my $listener (@{ $listeners{-1} }) {
 		$listener->($type, $user, $message, $where, $addressed);
 	}
 
@@ -156,18 +160,8 @@ sub dispatch_t()
 		}
 	}
 
-	foreach my $listener (@high_listeners) {
-		$result = $listener->($type, $user, $message, $where, $addressed);
-		if ($result && $result ne 'NOREPLY') {
-			&Bot::enqueue_say($where, $result);
-		}
-		if ($result) {
-			return;
-		}
-	}
-
-	unless ($addressed || $type eq 'private') {
-		foreach my $listener (@low_listeners) {
+	foreach my $priority (sort { $b <=> $a } keys %listeners) {
+		foreach my $listener (@{ $listeners{ $priority } }) {
 			$result = $listener->($type, $user, $message, $where, $addressed);
 			if ($result && $result ne 'NOREPLY') {
 				&Bot::enqueue_say($where, $result);
@@ -177,8 +171,6 @@ sub dispatch_t()
 			}
 		}
 	}
-
-	&Bot::enqueue_say($where, &Modules::Markov::gen_output(split(/\s+/, $message))) if $addressed;
 }
 
 1;

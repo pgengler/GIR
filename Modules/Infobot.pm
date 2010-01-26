@@ -44,7 +44,7 @@ sub register()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
 	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
 
-	&Modules::register_listener(\&Modules::Infobot::reply);
+	&Modules::register_listener(\&Modules::Infobot::reply, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
 	&Modules::register_help('infobot', \&Modules::Infobot::help);
 }
