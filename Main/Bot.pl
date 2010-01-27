@@ -563,9 +563,8 @@ sub console_parse()
 		}
 		$bot->kill('SIGTERM');
 		threads->exit();
-	} elsif ($str eq 'reload') {
-		&status("Reloading modules");
-		&Modules::load_modules();
+	} elsif ($str =~ /^reload/) {
+		push @commands, "reload";
 	} elsif ($str =~ /^\s*part\s+(.+?)(\s+(.+))?$/i) {
 		push @commands, "part||$1||$3";
 	} elsif ($str =~ /^\s*join\s+(.+)$/i) {
@@ -602,6 +601,7 @@ sub bot_command()
 		'discon'  => \&quit,
 		'connect' => \&connect,
 		'nick'    => \&change_nick,
+		'reload'  => \&reload_modules,
 		'debug'   => \&set_debug
 	);
 
@@ -743,6 +743,12 @@ sub remove_ignore()
 	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
 
 	undef $ignore{ lc($ignore) };
+}
+
+sub reload_modules()
+{
+	&status("Reloading modules");
+	&Modules::load_modules();
 }
 
 sub set_debug()

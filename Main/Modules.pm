@@ -8,8 +8,14 @@ use threads;
 use threads::shared;
 
 #######
+## INCLUDES
+#######
+use RuntimeLoader;
+
+#######
 ## GLOBALS
 #######
+my @loaded_modules;
 my %actions;
 my %private;
 my %listeners;
@@ -33,6 +39,9 @@ our %help_functions;
 #######
 sub load_modules()
 {
+	# Unload any existing modules
+	&unload_modules();
+
 	my $module_dir = $Bot::config->{'module_dir'};
 
 	opendir(DIR, $module_dir) or &Bot::error('Unable to open the modules directory: ' . $!);
@@ -45,19 +54,49 @@ sub load_modules()
 	foreach my $module (@modules) {
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
-		my $code = qq~
-require "$module_dir/$module";
-my \$mod = new Modules::$module_name;
-\$mod->register();
-		~;
-		eval($code);
-		die $@ if $@;
+
+		&load_module($module_name);
 	}
+}
+
+sub load_module()
+{
+	my $name = shift;
+
+	my $class = new RuntimeLoader('Modules::' . $name);
+
+	$class->add_path($Bot::config->{'module_dir'} . '../');
+
+	my $module = $class->load();
+
+	unless ($module) {
+		die "Error loading class: $@";
+	}
+
+	$module->register();
+
+	push @loaded_modules, $class;
+}
+
+sub unload_modules()
+{
+	while (my $class = shift(@loaded_modules)) {
+		$class->unload();
+	}
+
+	# Clear lists of handlers
+	%actions        = ( );
+	%private        = ( );	
+	%listeners      = ( );
+	%help_functions = ( );
 }
 
 sub register_action()
 {
 	my ($action, $func) = @_;
+
+	my @mod = caller;
+	&Bot::status("Registering handler for '$action' from '$mod[0]' module") if $Bot::config->{'debug'};
 
 	$actions{ $action } = $func;
 }
@@ -66,12 +105,18 @@ sub register_private()
 {
 	my ($action, $func) = @_;
 
+	my @mod = caller;
+	&Bot::status("Registering private handler for '$action' from '$mod[0]' module") if $Bot::config->{'debug'};
+
 	$private{ $action } = $func;
 }
 
 sub register_listener()
 {
 	my ($func, $priority) = @_;
+
+	my @mod = caller;
+	&Bot::status("Registering listener (priority $priority) from '$mod[0]' module") if $Bot::config->{'debug'};
 
 	push @{ $listeners{ $priority } }, $func;
 }
@@ -81,6 +126,9 @@ sub register_help()
 	my ($command, $func) = @_;
 
 	return unless $command && $func;
+
+	my @mod = caller;
+	&Bot::status("Registering help for '$command' from '$mod[0]' module") if $Bot::config->{'debug'};
 
 	if ($help_functions{ $command }) {
 		&Bot::status("WARNING: Registering duplicate help handler for '$command'");
