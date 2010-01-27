@@ -563,8 +563,12 @@ sub console_parse()
 		}
 		$bot->kill('SIGTERM');
 		threads->exit();
-	} elsif ($str =~ /^reload/) {
-		push @commands, "reload";
+	} elsif ($str =~ /^reload(\s+(.+))?\s*$/) {
+		push @commands, "reload||" . ($2 || '');
+	} elsif ($str =~ /^unload\s+(.+)\s*$/) {
+		push @commands, "unload||$1";
+	} elsif ($str =~ /^load\s+(.+)\s*$/) {
+		push @commands, "load||$1";
 	} elsif ($str =~ /^\s*part\s+(.+?)(\s+(.+))?$/i) {
 		push @commands, "part||$1||$3";
 	} elsif ($str =~ /^\s*join\s+(.+)$/i) {
@@ -602,6 +606,8 @@ sub bot_command()
 		'connect' => \&connect,
 		'nick'    => \&change_nick,
 		'reload'  => \&reload_modules,
+		'load'    => \&load_module,
+		'unload'  => \&unload_module,
 		'debug'   => \&set_debug
 	);
 
@@ -747,8 +753,29 @@ sub remove_ignore()
 
 sub reload_modules()
 {
-	&status("Reloading modules");
-	&Modules::load_modules();
+	my $module = shift;
+
+	unless ($module) {
+		&status("Reloading modules");
+		&Modules::load_modules();
+	} else {
+		&Modules::unload_module($module);
+		&Modules::load_module($module);
+	}
+}
+
+sub load_module()
+{
+	my $module = shift;
+
+	&Modules::load_module($module);
+}
+
+sub unload_module()
+{
+	my $module = shift;
+
+	&Modules::unload_module($module);
 }
 
 sub set_debug()

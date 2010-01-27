@@ -38,10 +38,28 @@ sub new()
 }
 
 #######
+## GET MODULE NAME
+#######
+## Return the name of the currently-loaded module.
+#######
+## Parameters:
+##   NONE
+##
+## Return Value:
+##   The name of the currently-loaded module.
+#######
+sub name()
+{
+	my $self = shift;
+
+	return $self->{'_class'};
+}
+
+#######
 ## ADD SEARCH PATH(S)
-######
+#######
 ## Add a path or paths to @INC.
-######
+#######
 ## Parameters:
 ##   @paths
 ##   - a list of paths to be added to @INC
@@ -114,8 +132,6 @@ sub unload()
 	Symbol::delete_package($self->{'_class'});
 	my $file = File::Spec->catfile( split '::', $self->{'_class'} ) . '.pm';
 	delete $INC{$file} if exists $INC{$file};
-
-	return 1;
 }
 
 #######

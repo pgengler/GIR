@@ -24,13 +24,13 @@ sub process()
 	return unless ($addressed || $type eq 'private');
 
 	if ($data) {
-		if ($Modules::help_functions{ $data }) {
-			return $Modules::help_functions{ $data }->($type, $user, $data, $where, $addressed);
+		if ($Modules::help{ $data }) {
+			return $Modules::help{ $data }->($type, $user, $data, $where, $addressed);
 		} elsif ($addressed || $type eq 'private') {
 			return "No help is available for '$data'";
 		}
 	} else {
-		my @topics = sort { $a cmp $b } keys %Modules::help_functions;
+		my @topics = sort { $a cmp $b } keys %Modules::help;
 		return 'Type "help <command>" for help on a specific command; available commands are: ' . join(', ', @topics);
 	}
 }

@@ -15,12 +15,27 @@ use RuntimeLoader;
 #######
 ## GLOBALS
 #######
-my @loaded_modules;
-my %actions;
-my %private;
-my %listeners;
 
-our %help_functions;
+# @loaded_modules is a collection of RuntimeLoader objects
+my @loaded_modules;
+
+# Keep track of all registered handlers and listeners.
+# This has is structured as follows:
+# %registered = (
+#   '<module name>' => {
+#     'actions'   => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
+#     'private'   => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
+#     'listeners' => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
+#     'help'      => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ]
+#   },
+#   ...
+# }
+my %registered;
+
+
+# Keep a single list of actions, private handlers, listeners, and help functions
+my (%actions, %private, %listeners);
+our %help;
 
 #######
 ## NOTES
@@ -73,9 +88,13 @@ sub load_module()
 		die "Error loading class: $@";
 	}
 
+	&Bot::status("Loaded module $name");
+
 	$module->register();
 
 	push @loaded_modules, $class;
+
+	&rebuild_registration_list();
 }
 
 sub unload_modules()
@@ -85,40 +104,118 @@ sub unload_modules()
 	}
 
 	# Clear lists of handlers
+	%registered     = ( );
+
 	%actions        = ( );
 	%private        = ( );	
 	%listeners      = ( );
-	%help_functions = ( );
+	%help           = ( );
+}
+
+sub unload_module()
+{
+	my $name = shift;
+
+	my $mod_name = ($name =~ /^Modules\:\:/) ? $name : 'Modules::' . $name;
+
+	for (my $i = 0; $i < scalar(@loaded_modules); $i++) {
+		my $class = $loaded_modules[$i];
+		if ($class->name() eq $mod_name) {
+			&Bot::status("Unloading module '$name'");
+
+			# Remove from list of modules
+			splice(@loaded_modules, $i, 1);
+
+			# Remove handlers from this module
+			delete $registered{ $mod_name };
+			&rebuild_registration_list();
+
+			# Unload
+			$class->unload();
+
+			return;
+		}
+	}
+
+	&Bot::status("Module '$name' is not loaded!");
 }
 
 sub register_action()
 {
 	my ($action, $func) = @_;
 
-	my @mod = caller;
-	&Bot::status("Registering handler for '$action' from '$mod[0]' module") if $Bot::config->{'debug'};
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
 
-	$actions{ $action } = $func;
+	&Bot::status("Registering handler for '$action' from '$module' module") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }) {
+		push @{ $registered{ $module }->{'actions'} }, {
+			'action'   => $action,
+			'function' => $func
+		};
+	} else {
+		$registered{ $module } = {
+			'actions' => [
+				{
+					'action'   => $action,
+					'function' => $func
+				}
+			]
+		};
+	}
 }
 
 sub register_private()
 {
 	my ($action, $func) = @_;
 
-	my @mod = caller;
-	&Bot::status("Registering private handler for '$action' from '$mod[0]' module") if $Bot::config->{'debug'};
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
 
-	$private{ $action } = $func;
+	&Bot::status("Registering private handler for '$action' from '$module' module") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }) {
+		push @{ $registered{ $module }->{'private'} }, {
+			'action'   => $action,
+			'function' => $func
+		};
+	} else {
+		$registered{ $module } = {
+			'private' => [
+				{
+					'action'   => $action,
+					'function' => $func
+				}
+			]
+		};
+	}
 }
 
 sub register_listener()
 {
 	my ($func, $priority) = @_;
 
-	my @mod = caller;
-	&Bot::status("Registering listener (priority $priority) from '$mod[0]' module") if $Bot::config->{'debug'};
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
 
-	push @{ $listeners{ $priority } }, $func;
+	&Bot::status("Registering listener (priority $priority) from '$module' module") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }) {
+		push @{ $registered{ $module }->{'listeners'} }, {
+			'priority' => $priority,
+			'function' => $func
+		};
+	} else {
+		$registered{ $module } = {
+			'listeners' => [
+				{
+					'priority' => $priority,
+					'function' => $func
+				}
+			]
+		};
+	}
 }
 
 sub register_help()
@@ -127,14 +224,51 @@ sub register_help()
 
 	return unless $command && $func;
 
-	my @mod = caller;
-	&Bot::status("Registering help for '$command' from '$mod[0]' module") if $Bot::config->{'debug'};
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
 
-	if ($help_functions{ $command }) {
-		&Bot::status("WARNING: Registering duplicate help handler for '$command'");
+	&Bot::status("Registering help for '$command' from '$module' module") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }) {
+		push @{ $registered{ $module }->{'help'} }, {
+			'command'  => $command,
+			'function' => $func
+		};
+	} else {
+		$registered{ $module } = {
+			'help' => [
+				{
+					'command'  => $command,
+					'function' => $func
+				}
+			]
+		};
 	}
+}
 
-	$help_functions{ $command } = $func;
+sub rebuild_registration_list()
+{
+	# Reset to empty states
+	%actions   = ( );
+	%private   = ( );
+	%help      = ( );
+	%listeners = ( );
+
+	# Now, repopulate from registered items
+	foreach my $module (keys %registered) {
+		foreach my $action (@{ $registered{ $module }->{'actions'} }) {
+			$actions{ $action->{'action'} } = $action->{'function'};
+		}
+		foreach my $private (@{ $registered{ $module }->{'private'} }) {
+			$private{ $private->{'action'} } = $private->{'function'};
+		}
+		foreach my $help (@{ $registered{ $module }->{'help'} }) {
+			$help{ $help->{'command'} } = $help->{'function'};
+		}
+		foreach my $listener (@{ $registered{ $module }->{'listeners'} }) {
+			push @{ $listeners{ $listener->{'priority'} } }, $listener->{'function'};			
+		}
+	}
 }
 
 sub dispatch()
