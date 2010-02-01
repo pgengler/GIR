@@ -48,7 +48,7 @@ sub select()
 	my $time = $times[int(rand(scalar(@times)))];
 
 	if ($time eq 'unix') {
-		return &unixtime($type, $user, $data, $where, $addressed);
+		return &unix_time($type, $user, $data, $where, $addressed);
 	} elsif ($time eq 'local') {
 		return &local_time($type, $user, $data, $where, $addressed);
 	} elsif ($time eq 'gmt') {
