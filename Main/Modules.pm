@@ -23,7 +23,7 @@ my @loaded_modules;
 # This has is structured as follows:
 # %registered = (
 #   '<module name>' => {
-#     'actions'   => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
+#     'actions'   => [ list of { 'priority' => <priority>, 'action' => <text to handle>, 'function' => <handler function> } ],
 #     'private'   => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
 #     'listeners' => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
 #     'help'      => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ]
@@ -40,13 +40,17 @@ our %help;
 #######
 ## NOTES
 #######
-## Listener functions are registered with a 'priority' value. If this value is
-## -1, the listener is always called, and this happens before any of the
-## registered actions are tried. Otherwise, the actions are tried first and if
-## none generated a response or indicated that processing should stop, the
-## other listeners are tried in descending order by priority. No guarantees
-## are provided about the order of execution for multiple listeners with the
-## same priority value.
+## Listener functions and action handlers are both registered with 'priority'
+## values. For actions, this must be a positive integer; for listeners, this
+## can also be the special value '-1'. A listener registered with -1 priority
+## is called before any action handlers or other listeners.
+## After the 'always' listeners (-1 priority) are called, if none indicated
+## that processing should stop then actions are tried, starting with higher
+## priorities and working down. After that come the 'private' actions,
+## followed by the other listeners (in descending order of priority).
+##
+## No guarantees are made about the order of execution for multiple listeners
+## or actions with the same priority value.
 #######
 
 #######
@@ -142,16 +146,19 @@ sub unload_module()
 
 sub register_action()
 {
-	my ($action, $func) = @_;
+	my ($action, $func, $priority) = @_;
 
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Registering handler for '$action' from '$module' module") if $Bot::config->{'debug'};
+	$priority ||= 1;
+
+	&Bot::status("Registering handler for '$action' from '$module' module with priority $priority") if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'actions'} }, {
 			'action'   => $action,
+			'priority' => $priority,
 			'function' => $func
 		};
 	} else {
@@ -159,6 +166,7 @@ sub register_action()
 			'actions' => [
 				{
 					'action'   => $action,
+					'priority' => $priority,
 					'function' => $func
 				}
 			]
@@ -257,7 +265,10 @@ sub rebuild_registration_list()
 	# Now, repopulate from registered items
 	foreach my $module (keys %registered) {
 		foreach my $action (@{ $registered{ $module }->{'actions'} }) {
-			$actions{ $action->{'action'} } = $action->{'function'};
+			push @{ $actions{ $action->{'priority'} } }, {
+				'action'   => $action->{'action'},
+				'function' => $action->{'function'}
+			};
 		}
 		foreach my $private (@{ $registered{ $module }->{'private'} }) {
 			$private{ $private->{'action'} } = $private->{'function'};
@@ -294,26 +305,30 @@ sub dispatch_t()
 		$listener->($type, $user, $message, $where, $addressed);
 	}
 
-	foreach my $action (@actions) {
-		if ($message =~ /^$action(\!|\.|\?)*$/i || $message =~ /^$action\s+(.+)$/i) {
-			$result = $actions{ $action }->($type, $user, $1, $where, $addressed);
-			if ($result && $result ne 'NOREPLY') {
-				&Bot::enqueue_say($where, $result);
-			}
-			if ($result) {
-				return;
-			}
-		} elsif ($action =~ /^REGEXP\:(.+)$/) {
-			my $match = $1;
-			if ($message =~ /$match/i) {
-				$result = $actions{ $action }->($type, $user, $message, $where, $addressed);
+	foreach my $priority (sort { $b <=> $a } keys %actions) {
+		foreach my $action (@{ $actions{ $priority } }) {
+			my $act = $action->{'action'};
+			if ($message =~ /^$act(\!|\.|\?)*$/i || $message =~ /^$act\s+(.+?)$/i) {
+				$result = $action->{'function'}->($type, $user, $1, $where, $addressed);
 				if ($result && $result ne 'NOREPLY') {
 					&Bot::enqueue_say($where, $result);
 				}
 				if ($result) {
 					return;
 				}
+			} elsif ($act =~ /REGEXP\:(.+)$/) {
+				my $match = $1;
+				if ($message =~ /$match/i) {
+					$result = $action->{'function'}->($type, $user, $message, $where, $addressed);
+					if ($result && $result ne 'NOREPLY') {
+						&Bot::enqueue_say($where, $result);
+					}
+					if ($result) {
+						return;
+					}
+				}
 			}
+
 		}
 	}
 

@@ -18,8 +18,8 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('say', \&Modules::Say::say);
-	&Modules::register_action('action', \&Modules::Say::action);
+	&Modules::register_action('say', \&Modules::Say::say, 2);
+	&Modules::register_action('action', \&Modules::Say::action, 2);
 
 	&Modules::register_help('say', \&Modules::Say::help);
 	&Modules::register_help('action', \&Modules::Say::help);
