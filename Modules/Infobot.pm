@@ -33,6 +33,7 @@ sub register()
 {
 	my $this = shift;
 
+	&Modules::register_action('REGEXP:^(.+)\s+\=(is|are)\=\>\s+(.+)$', \&Modules::Infobot::process, 3); # learn() forcefully
 	&Modules::register_action('REGEXP:^(.+)\s+(is|are)\s+(.+)$', \&Modules::Infobot::process); # learn()
 	&Modules::register_action('REGEXP:^forget\s+(.+)$', \&Modules::Infobot::process); # forget()
 	&Modules::register_action('REGEXP:^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$', \&Modules::Infobot::process); # amend()
@@ -54,7 +55,9 @@ sub process()
 	my ($type, $who, $message, $where, $addressed) = @_;
 
 	# Figure out what we're doing
-	if ($message =~ /^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i) {
+	if ($message =~ /^(.+)\s+\=(is|are)\=\>\s+(.+)$/i) {
+		return &learn($type, $who, $1, $2, $3, $addressed);
+	} elsif ($message =~ /^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i) {
 		return &replace($type, $who, $2, $3, $4, $addressed || $1);
 	} elsif ($message =~ /^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/i) {
 		return &reply($type, $who, $2, $where, $addressed);
