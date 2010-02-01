@@ -404,75 +404,6 @@ sub reply()
 	} elsif ($result->{'value'} =~ /^\s*\<action\>\s*(.+)$/) {
 		&Bot::enqueue_action($where, &parse_special($1, $user));
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<markov\>\s*(.+)?$/) {
-		my $prepend = &trim($1);
-		my $phrase  = &trim($2);
-		my $result  = '';
-		if ($phrase) {
-			$phrase = &parse_special($phrase, $user);
-			my @parts = split(/\s+/, $phrase);
-			if (scalar(@parts) >= 2) {
-				$result = &Modules::Markov::gen_output($parts[0], $parts[1]);
-			} elsif (scalar(@parts) == 1) {
-				$result = &Modules::Markov::gen_output($parts[0]);
-			} else {
-				$result = &Modules::Markov::gen_output();
-			}
-		} else {
-			$result = &Modules::Markov::gen_output();
-		}
-		if ($prepend) {
-			$prepend = &parse_special($prepend, $user);
-			return "$prepend $result";
-		} else {
-			return $result;
-		}
-	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<markov2\>\s*(.+)?$/) {
-		my $prepend = &trim($1);
-		my $phrase  = &trim($2);
-		my $result  = '';
-		if ($phrase) {
-			$phrase = &parse_special($phrase, $user);
-			my @parts = split(/\s+/, $phrase);
-			if (scalar(@parts) >= 2) {
-				$result = &Modules::Markov::gen_output_multi($parts[0], $parts[1]);
-			} elsif (scalar(@parts) == 1) {
-				$result = &Modules::Markov::gen_output_multi($parts[0]);
-			} else {
-				$result = &Modules::Markov::gen_output();
-			}
-		} else {
-			$result = &Modules::Markov::gen_output();
-		}
-		if ($prepend) {
-			$prepend = &parse_special($prepend, $user);
-			return "$prepend $result";
-		} else {
-			return $result;
-		}
-	} elsif ($result->{'value'} =~ /^\s*(.+)?\s*\<vokram\>\s*(.+)?$/) {
-		my $prepend = &trim($1);
-		my $phrase  = &trim($2);
-		my $result  = '';
-		if ($phrase) {
-			$phrase = &parse_special($phrase, $user);
-			my @parts = split(/\s+/, $phrase);
-			if (scalar(@parts) >= 2) {
-				$result = &Modules::Markov::gen_output_from_end($parts[0], $parts[1]);
-			} elsif (scalar(@parts) == 1) {
-				$result = &Modules::Markov::gen_output_from_end($parts[0]);
-			} else {
-				$result = &Modules::Markov::gen_output_from_end();
-			}	
-		} else {
-			$result = &Modules::Markov::gen_output_from_end();
-		}
-		if ($prepend) {
-			$prepend = &parse_special($prepend, $user);
-			return "$prepend $result";
-		} else {
-			return $result;
-		}
 	} elsif ($result->{'value'} =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if ($feedbacked > 0) {
 			$feedbacked = 0;
@@ -485,6 +416,28 @@ sub reply()
 		&Modules::dispatch_t($type, $user, $phrase, $where, $addressed);
 		$feedbacked = 0;
 		return 'NOREPLY';
+	} elsif ($result->{'value'} =~ /^(.+?)?\s*\<(.+?)\>(.+)?$/) {
+		# Feedback
+		my ($extra, $action, $param) = ($1, $2, $3);
+
+		if ($feedbacked > 0) {
+			$feedbacked = 0;
+			return undef;
+		}
+		# Don't need to the DB any more
+		$sth->finish();
+		$db->close();
+
+		my $data = $action;
+		if ($param) {
+			$data .= (' ' . $param);
+		}
+
+		if ($extra) {
+			return $extra . ' ' . &Modules::process($type, $user, $data, $where, $addressed);
+		} else {
+			return &Modules::process($type, $user, $data, $where, $addressed);
+		}
 	} else {
 		return "$result->{'phrase'} $result->{'relates'} " . &parse_special($result->{'value'}, $user);
 	}

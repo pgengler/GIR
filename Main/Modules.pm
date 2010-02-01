@@ -294,9 +294,19 @@ sub dispatch_t()
 {
 	my ($type, $user, $message, $where, $addressed) = @_;
 
+	my $result = &process($type, $user, $message, $where, $addressed);
+
+	if ($result && $result ne 'NOREPLY') {
+		&Bot::enqueue_say($where, $result);
+	}
+}
+
+sub process()
+{
+	my ($type, $user, $message, $where, $addressed) = @_;
+
 	# Figure out if the message matches anything
 	## Sort by length to start with the longest
-	my @actions = sort { length($b) <=> length($a) } keys %actions;
 	my @private = sort { length($b) <=> length($a) } keys %private;
 
 	my $result = '';
@@ -310,22 +320,12 @@ sub dispatch_t()
 			my $act = $action->{'action'};
 			if ($message =~ /^$act(\!|\.|\?)*$/i || $message =~ /^$act\s+(.+?)$/i) {
 				$result = $action->{'function'}->($type, $user, $1, $where, $addressed);
-				if ($result && $result ne 'NOREPLY') {
-					&Bot::enqueue_say($where, $result);
-				}
-				if ($result) {
-					return;
-				}
+				return $result if $result;
 			} elsif ($act =~ /REGEXP\:(.+)$/) {
 				my $match = $1;
 				if ($message =~ /$match/i) {
 					$result = $action->{'function'}->($type, $user, $message, $where, $addressed);
-					if ($result && $result ne 'NOREPLY') {
-						&Bot::enqueue_say($where, $result);
-					}
-					if ($result) {
-						return;
-					}
+					return $result if $result;
 				}
 			}
 
@@ -336,22 +336,12 @@ sub dispatch_t()
 		foreach my $private (@private) {
 			if ($message =~ /^$private(\!|\.|\?)*$/i || $message =~ /^$private\s+(.+)$/i) {
 				$result = $private{ $private }->($type, $user, $1, $where, $addressed);
-				if ($result && $result ne 'NOREPLY') {
-					&Bot::enqueue_say($where, $result);
-				}
-				if ($result) {
-					return;
-				}
+				return $result if $result;
 			} elsif ($private =~ /^REGEXP\:(.+)$/) {
 				my $match = $1;
 				if ($message =~ /$match/i) {
 					$result = $private{ $private }->($type, $user, $message, $where, $addressed);
-					if ($result && $result ne 'NOREPLY') {
-						&Bot::enqueue_say($where, $result);
-					}
-					if ($result) {
-						return;
-					}
+					return $result if $result;
 				}
 			}
 		}
@@ -360,12 +350,7 @@ sub dispatch_t()
 	foreach my $priority (sort { $b <=> $a } keys %listeners) {
 		foreach my $listener (@{ $listeners{ $priority } }) {
 			$result = $listener->($type, $user, $message, $where, $addressed);
-			if ($result && $result ne 'NOREPLY') {
-				&Bot::enqueue_say($where, $result);
-			}
-			if ($result) {
-				return;
-			}
+			return $result if $result;
 		}
 	}
 }
