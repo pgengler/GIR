@@ -270,7 +270,7 @@ sub message()
 {
 	my ($conn, $event) = @_;
 
-	my $from    = $event->{'nick'};
+	my $nick    = $event->{'nick'};
 	my $to      = $event->{'to'}[0];
 	my $message = $event->{'args'}[0];
 
@@ -284,21 +284,21 @@ sub message()
 		$message = $1;
 	}
 
-	if ($ignore{ lc($from) }) {
+	if ($ignore{ lc($nick) }) {
 		if ($to && $to =~ /^\#/) {
-			&status("IGNORED <$from/$to> $orig_message");
+			&status("IGNORED <$nick/$to> $orig_message");
 		} else {
-			&status("IGNORED >$from< $orig_message");
+			&status("IGNORED >$nick< $orig_message");
 		}
 		return;
 	}
 
 	if ($to && $to =~ /^\#/) {
-		&status("<$from/$to> $orig_message");
-		&Modules::dispatch('public', $from, $message, $to, $addressed);
+		&status("<$nick/$to> $orig_message");
+		&Modules::dispatch('public', $nick, $message, $to, $addressed);
 	} else {
-		&status(">$from< $orig_message");
-		&Modules::dispatch('private', $from, $message, $from, $addressed);
+		&status(">$nick< $orig_message");
+		&Modules::dispatch('private', $nick, $message, $nick, $addressed);
 	}
 
 }
