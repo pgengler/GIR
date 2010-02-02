@@ -416,9 +416,11 @@ sub reply()
 		&Modules::dispatch_t($type, $user, $phrase, $where, $addressed);
 		$feedbacked = 0;
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^(.+?)?\s*\<(.+?)\>(.+)?$/) {
+	} elsif ($result->{'value'} =~ /^(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
+
+		&Bot::status(sprintf("Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra)) if $Bot::config->{'debug'};
 
 		if ($feedbacked > 0) {
 			$feedbacked = 0;
