@@ -16,7 +16,7 @@ use Database::MySQL;
 #######
 my @dunno = ("I don't know", 'Wish I knew', 'Beats me', 'I have no idea', "I think it's your mother");
 
-my $feedbacked :shared = 0;
+my $feedbacked = 0;
 
 #######
 ## MAIN
@@ -405,25 +405,24 @@ sub reply()
 		&Bot::enqueue_action($where, &parse_special($1, $user));
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*\<feedback\>\s*(.+)$/) {
-		if ($feedbacked > 0) {
-			$feedbacked = 0;
+		if (++$feedbacked > 2) {
+			&Bot::status("Feedback limit reached!");
 			return undef;
 		}
 		my $phrase = $1;
-		$feedbacked = 1;
 		$sth->finish();
 		$db->close();
 		&Modules::dispatch_t($type, $user, $phrase, $where, $addressed);
-		$feedbacked = 0;
+		$feedbacked--;
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
+	} elsif ($result->{'value'} =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
 
 		&Bot::status(sprintf("Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra)) if $Bot::config->{'debug'};
 
-		if ($feedbacked > 0) {
-			$feedbacked = 0;
+		if (++$feedbacked > 2) {
+			&Bot::status("Feedback limit reached!");
 			return undef;
 		}
 		# Don't need to the DB any more
@@ -435,11 +434,16 @@ sub reply()
 			$data .= (' ' . $param);
 		}
 
+		my $result;
+
 		if ($extra) {
-			return $extra . ' ' . &Modules::process($type, $user, $data, $where, $addressed);
+			$result = $extra . ' ' . &Modules::process($type, $user, $data, $where, $addressed);
+			$feedbacked--;
 		} else {
-			return &Modules::process($type, $user, $data, $where, $addressed);
+			$result = &Modules::process($type, $user, $data, $where, $addressed);
+			$feedbacked--;
 		}
+		return $result;
 	} else {
 		return "$result->{'phrase'} $result->{'relates'} " . &parse_special($result->{'value'}, $user);
 	}
