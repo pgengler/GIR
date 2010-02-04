@@ -89,7 +89,8 @@ sub load_module()
 	my $module = $class->load();
 
 	unless ($module) {
-		die "Error loading class: $@";
+		&Bot::status("Failed to load module '$name': $@");
+		return;
 	}
 
 	&Bot::status("Loaded module $name");
