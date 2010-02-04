@@ -83,8 +83,7 @@ sub process()
 
 		my $content = $response->content;
 
-
-		if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)\<\/p\>/s) {
+		if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
 			$result = &uncode($1);
 			$quotes{ $data } = $result;
 		} elsif ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
