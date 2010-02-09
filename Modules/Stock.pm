@@ -27,6 +27,13 @@ sub quote()
 {
 	my ($type, $user, $symbol, $where) = @_;
 
+	return unless $symbol;
+
+	# Remove leading and trailing whitespace
+	$symbol =~ s/^\s*(.+)\s*$/$1/;
+
+	return unless $symbol;
+
 	&Bot::status("Looking up stock quote for '$symbol'");
 
 	$symbol = uc($symbol);
