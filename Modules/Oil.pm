@@ -31,7 +31,7 @@ sub fetch()
 		chomp $result;
 		my ($price, $change, $pchange, $date, $time) = split(/,/, $result);
 
-		return sprintf('As of %s on %s, oil was at $%s, %s $%s (%s%%)', $time, $date, $price, ($change > 0) ? 'up' : 'down', abs($change), abs($pchange));
+		return sprintf('As of %s on %s, oil was at $%.2f, %s $%.2f (%s%%)', $time, $date, $price, ($change > 0) ? 'up' : 'down', abs($change), abs($pchange));
 	}
 }
 
