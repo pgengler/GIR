@@ -32,6 +32,8 @@ sub seen()
 
 	$data =~ s/^\s*(.+?)\s*$/$1/;
 
+	return unless $data;
+
 	my $nick = lc($data);
 
 	# Check if we've seen this person
