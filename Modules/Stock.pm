@@ -32,6 +32,11 @@ sub quote()
 	# Remove leading and trailing whitespace
 	$symbol =~ s/^\s*(.+)\s*$/$1/;
 
+	# Grab first value if there's any internal whitespace
+	if ($symbol =~ /\s/) {
+		$symbol =~ s/^(.+)\s(.+)$/$1/;
+	}
+
 	return unless $symbol;
 
 	&Bot::status("Looking up stock quote for '$symbol'");
@@ -55,6 +60,14 @@ sub short_quote()
 	my ($type, $user, $symbol, $where) = @_;
 
 	&Bot::status("Looking up stock quote for '$symbol'");
+
+	# Remove leading and trailing whitespace
+	$symbol =~ s/^\s*(.+)\s*$/$1/;
+
+	# Grab first value if there's any internal whitespace
+	if ($symbol =~ /\s/) {
+		$symbol =~ s/^(.+)\s(.+)$/$1/;
+	}
 
 	$symbol = uc($symbol);
 
