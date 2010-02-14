@@ -32,9 +32,9 @@ sub quote()
 	# Remove leading and trailing whitespace
 	$symbol =~ s/^\s*(.+)\s*$/$1/;
 
-	# Grab first value if there's any internal whitespace
+	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
-		$symbol =~ s/^(.+)\s(.+)$/$1/;
+		return
 	}
 
 	return unless $symbol;
@@ -64,9 +64,9 @@ sub short_quote()
 	# Remove leading and trailing whitespace
 	$symbol =~ s/^\s*(.+)\s*$/$1/;
 
-	# Grab first value if there's any internal whitespace
+	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
-		$symbol =~ s/^(.+)\s(.+)$/$1/;
+		return
 	}
 
 	$symbol = uc($symbol);
