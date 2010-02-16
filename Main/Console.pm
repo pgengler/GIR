@@ -43,7 +43,7 @@ sub console_parse()
 	} elsif ($str =~ /^load\s+(.+)\s*$/) {
 		push @Bot::commands, "load||$1";
 	} elsif ($str =~ /^\s*part\s+(.+?)(\s+(.+))?$/i) {
-		push @Bot::commands, "part||$1||$3;
+		push @Bot::commands, "part||$1||" . ($3 || '');
 	} elsif ($str =~ /^\s*join\s+(.+)$/i) {
 		push @Bot::commands, "join||$1";
 	} elsif ($str =~ /^\s*say\s+(.+?)\s+(.+)$/i) {
