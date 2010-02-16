@@ -9,6 +9,7 @@ use Getopt::Long;
 use Net::IRC;
 use POSIX;
 
+use Console;
 use Modules;
 
 package Bot;
@@ -57,8 +58,8 @@ $SIG{'INT'} = \&shutdown;
 ## START IRCING
 #######
 
-my $bot     = threads->create('bot');
-my $console = threads->create('console');
+our $bot     = threads->create('bot');
+our $console = threads->create('Console::console');
 
 $bot->join();
 $console->join();
@@ -527,72 +528,6 @@ sub enqueue_action()
 
 	# Add to stack
 	push @commands, "action||$where||$message";
-}
-
-##############
-## CONSOLE INPUT
-##############
-sub console()
-{
-	$SIG{'TERM'} = sub { $bot->kill('SIGTERM'); threads->exit(); };
-	$SIG{'INT'} = sub { $bot->kill('SIGTERM'); threads->exit(); };
-
-	unless ($no_console) {
-		while (<>) {
-			&console_parse($_);
-			threads->self()->yield();
-		}
-	} else {
-		while (1) {
-			threads->self()->yield();
-		}
-	}
-}
-
-sub console_parse()
-{
-	my $str = shift;
-
-	chomp $str;
-
-	# For now, nothing fancy, just some simple string matches
-	if ($str =~ /^quit(\s+(.+))?$/) {
-		&status("Shutting down");
-		if ($2) {
-			push @commands, "quit||$2";
-		}
-		$bot->kill('SIGTERM');
-		threads->exit();
-	} elsif ($str =~ /^reload(\s+(.+))?\s*$/) {
-		push @commands, "reload||" . ($2 || '');
-	} elsif ($str =~ /^unload\s+(.+)\s*$/) {
-		push @commands, "unload||$1";
-	} elsif ($str =~ /^load\s+(.+)\s*$/) {
-		push @commands, "load||$1";
-	} elsif ($str =~ /^\s*part\s+(.+?)(\s+(.+))?$/i) {
-		push @commands, "part||$1||$3";
-	} elsif ($str =~ /^\s*join\s+(.+)$/i) {
-		push @commands, "join||$1";
-	} elsif ($str =~ /^\s*say\s+(.+?)\s+(.+)$/i) {
-		push @commands, "say||$1||$2";
-	} elsif ($str =~ /^\s*action\s+(.+)\s+(.+)$/i) {
-		push @commands, "action||$1||$2";
-	} elsif ($str =~ /^\s*discon(nect)?(\s+(.+))?$/i) {
-		my $reason = $3 || $1 || '';
-		push @commands, "discon||$reason";
-	} elsif ($str =~ /^\s*connect\s*$/i) {
-		push @commands, "connect||";
-	} elsif ($str =~ /^\s*nick\s+(.+)$/) {
-		push @commands, "nick||$1";
-	} elsif ($str =~ /^\s*debug\s+(on|off)\s*$/) {
-		push @commands, "debug||$1";
-	} else {
-		&status("Unrecognized command");
-	}
-
-	if (scalar(@commands) > 0) {
-		$bot->kill('SIGUSR1');
-	}
 }
 
 sub bot_command()
