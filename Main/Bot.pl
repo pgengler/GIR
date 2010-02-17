@@ -256,7 +256,7 @@ sub status()
 		print '[' . localtime() . '] ' . $message . "\n";
 	}
 
-	open(LOG, '>>' . $config->{'nick'} . '.log');
+	open(LOG, '>>' . $config->{'config_nick'} . '.log');
 	print LOG '[' . localtime() . '] ' . $message . "\n";
 	close(LOG);
 }
