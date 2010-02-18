@@ -121,6 +121,9 @@ sub load_config()
 	}
 	close(CONFIG);
 
+	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
+	$config_values{'config_nick'} = $config_values{'nick'} unless $config_values{'config_nick'};
+
 	return \%config_values;
 }
 
@@ -143,9 +146,6 @@ sub on_error()
 sub connect()
 {
 	&status("Connecting to port $config->{'server_port'} of server $config->{'server_name'}...");
-
-	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
-	$config->{'config_nick'} = $config->{'nick'} unless $config->{'config_nick'};
 
 	$irc = new Net::IRC;
 	$irc->debug($config->{'debug'} ? 1 : 0);
