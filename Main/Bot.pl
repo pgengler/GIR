@@ -289,7 +289,7 @@ sub message()
 	if ($message =~ /^\s*$config->{'nick'}(\,|\:|\s)\s*(.+)$/i) {
 		$addressed = 1;
 		$message = $2;
-	} elsif ($message =~ /(.+)(\,|\:)\s*$config->{'nick'}(\.|\?|\!)?\s*$/i) {
+	} elsif ($message =~ /(.+?)(\,|\:|\s+)\s*$config->{'nick'}(\.|\?|\!)?\s*$/i) {
 		$addressed = 1;
 		$message = $1;
 	}
