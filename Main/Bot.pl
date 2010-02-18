@@ -275,6 +275,15 @@ sub message()
 	my $to      = $event->{'to'}[0];
 	my $message = $event->{'args'}[0];
 
+	if ($ignore{ lc($nick) }) {
+		if ($to && $to =~ /^\#/) {
+			&status("IGNORED <$nick/$to> $message");
+		} else {
+			&status("IGNORED >$nick< $message");
+		}
+		return;
+	}
+
 	my $addressed = 0;
 	my $orig_message = $message;
 	if ($message =~ /^\s*$config->{'nick'}(\,|\:|\s)\s*(.+)$/i) {
@@ -283,15 +292,6 @@ sub message()
 	} elsif ($message =~ /(.+)(\,|\:)\s*$config->{'nick'}$/i) {
 		$addressed = 1;
 		$message = $1;
-	}
-
-	if ($ignore{ lc($nick) }) {
-		if ($to && $to =~ /^\#/) {
-			&status("IGNORED <$nick/$to> $orig_message");
-		} else {
-			&status("IGNORED >$nick< $orig_message");
-		}
-		return;
 	}
 
 	if ($to && $to =~ /^\#/) {
