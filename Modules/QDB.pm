@@ -10,17 +10,8 @@ use strict;
 #######
 use AnyDBM_File;
 use Fcntl;
+use HTML::Entities;
 use LWP::UserAgent;
-
-#######
-## GLOBALS
-#######
-my $no_agent = 0;
-
-BEGIN {
-	eval "use LWP::UserAgent";
-	$no_agent++ if ($@);
-}
 
 ##############
 sub new()
@@ -53,65 +44,46 @@ sub process()
 
 	my $result;
 
-	if ($no_agent) {
-		return 0;
-	} else {
-		my %quotes;
-		tie(%quotes, 'AnyDBM_File', $Bot::config->{'data_dir'} . '/qdbquotes', O_RDWR|O_CREAT);
+	my %quotes;
+	tie(%quotes, 'AnyDBM_File', $Bot::config->{'data_dir'} . '/qdbquotes', O_RDWR|O_CREAT);
 
-		# Check if we have this one cached
-		if ($quotes{ $data }) {
-			my $result = $quotes{ $data };
-			untie %quotes;
-			return $result;
-		}
-
-		# Fetch from qdb.us
-		my $ua = new LWP::UserAgent;
-#		if (my $proxy = Bot::getparam('httpproxy')) {
-#			$ua->proxy('http', $proxy)
-#		};
-
-		$ua->timeout(10);
-		my $request = new HTTP::Request('GET', "http://qdb.us/$data");
-		my $response = $ua->request($request); 
-
-		if (!$response->is_success) {
-			untie %quotes;
-			return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
-		}
-
-		my $content = $response->content;
-
-		if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
-			$result = &uncode($1);
-			$quotes{ $data } = $result;
-		} elsif ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
-			$result = &uncode($1);
-			$quotes{ $data } = $result;
-		} else {
-			$result = "Couldn't get quote $data. It probably doesn't exist.";
-		}
+	# Check if we have this one cached
+	if ($quotes{ $data }) {
+		my $result = $quotes{ $data };
 		untie %quotes;
 		return $result;
 	}
-}
 
-##
-## Unescape some HTML entities
-##
-sub uncode()
-{
-	my $str = shift;
+	# Fetch from qdb.us
+	my $ua = new LWP::UserAgent;
+#	if (my $proxy = Bot::getparam('httpproxy')) {
+#		$ua->proxy('http', $proxy)
+#	};
 
-	$str =~ s/\<br \/\>/\n/g;
-	$str =~ s/&lt;/</g;
-	$str =~ s/&gt;/>/g;
-	$str =~ s/&apos;/'/g;
-	$str =~ s/&quot;/"/g;
-	$str =~ s/&nbsp;/ /g;
+	$ua->timeout(10);
+	my $request = new HTTP::Request('GET', "http://qdb.us/$data");
+	my $response = $ua->request($request); 
 
-	return $str;
+	if (!$response->is_success) {
+		untie %quotes;
+		return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
+	}
+
+	my $content = $response->content;
+
+	if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
+		$result = &HTML::Entities::decode_entities($1);
+		$result =~ s/\<br \/\>/\n/g;
+		$quotes{ $data } = $result;
+	} elsif ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
+		$result = &HTML::Entities::decode_entities($1);
+		$result =~ s/\<br \/\>/\n/g;
+		$quotes{ $data } = $result;
+	} else {
+		$result = "Couldn't get quote $data. It probably doesn't exist.";
+	}
+	untie %quotes;
+	return $result;
 }
 
 sub help()
