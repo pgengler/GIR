@@ -401,7 +401,7 @@ sub on_mode()
 	# args has the mode changes in [0] and [n - 1] is an empty string
 	my $num_changes = scalar($event->{'args'}) - 2;
 
-	my @modes = &subsplit($event->{'args'}[0], 1);
+	my @modes = split(//, $event->{'args'}[0]);
 
 	my $modifier = shift @modes;
 
@@ -726,32 +726,3 @@ sub set_debug()
 	$config->{'debug'} = $state;
 	$connection->debug($state);
 }
-
-
-##############
-## HELPERS
-##############
-
-#######
-## SUBSPLIT
-## Splits the given string into an array of $chars-sized pieces
-#######
-sub subsplit()
-{
-	my ($str, $chars) = @_;
-
-	my $len = length($str);
-
-	my @bits;
-
-	for (my $i = 0; $i < $len; $i++) {
-		last if ($i * $chars > $len);
-		my $bit = substr($str, $i * $chars, $chars);
-		if ($bit) {
-			push @bits, $bit;
-		}
-	}
-
-	return @bits;
-}
-
