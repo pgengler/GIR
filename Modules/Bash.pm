@@ -11,6 +11,7 @@ use strict;
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File) }
 use AnyDBM_File;
 use Fcntl;
+use HTML::Entities;
 use LWP::UserAgent;
 
 #######
@@ -88,7 +89,7 @@ sub process()
 		}
 
 		if ($content =~ /\<p class=\"qt\"\>(.+?)\<\/p\>/s) {
-			$result = &uncode($1);
+			$result = &HTML::Entities::decode_entities($1);
 			$quotes{ $data } = $result;
 		} else {
 			$result = "Couldn't get quote $data. It probably doesn't exist.";
@@ -96,23 +97,6 @@ sub process()
 		untie %quotes;
 		return $result;
 	}
-}
-
-##
-## Unescape some HTML entities
-##
-sub uncode()
-{
-	my $str = shift;
-
-	$str =~ s/\<br \/\>/\n/g;
-	$str =~ s/&lt;/</g;
-	$str =~ s/&gt;/>/g;
-	$str =~ s/&apos;/'/g;
-	$str =~ s/&quot;/"/g;
-	$str =~ s/&nbsp;/ /g;
-
-	return $str;
 }
 
 sub help()
