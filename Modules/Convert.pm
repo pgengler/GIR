@@ -206,7 +206,7 @@ sub register()
 		'yd|nm' => \&yards_to_nautical_miles
 	);	
 
-	&Modules::register_action('REGEXP:^convert\s+(\d*(\.\d+)?)\s+(.+)\s+to\s+(.+)$', \&Modules::Convert::process);
+	&Modules::register_action('REGEXP:^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$', \&Modules::Convert::process);
 }
 
 sub process()
@@ -215,7 +215,7 @@ sub process()
 
 	my ($value, $from, $to);
 
-	if ($data =~ /^convert\s+(\d*(\.\d+)?)\s+(.+)\s+to\s+(.+)$/i) {
+	if ($data =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
 		$value = $1;
 		$from  = lc($3);
 		$to    = lc($4);
