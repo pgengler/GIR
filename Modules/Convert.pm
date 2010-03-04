@@ -537,7 +537,7 @@ sub miles_to_feet()
 {
 	my $dist = shift;
 
-	return $dist / 5280;
+	return $dist * 5280;
 }
 
 sub miles_to_inches()
