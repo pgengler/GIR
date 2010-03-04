@@ -113,6 +113,7 @@ sub register()
 		'fahrenheit'  => 'f',
 		'feet'        => 'ft',
 		'foot'        => 'ft',
+		'fps'         => 'ft/s',
 		'hour'        => 'hr',
 		'hours'       => 'hr',
 		'inch'        => 'in',
@@ -131,6 +132,7 @@ sub register()
 		'miles'       => 'mi',
 		'minute'      => 'min',
 		'minutes'     => 'min',
+		'mph'         => 'mi/hr',
 		'second'      => 's',
 		'seconds'     => 's',
 		'sm'          => 'mi',
@@ -140,70 +142,78 @@ sub register()
 
 	%conversions = (
 		## Temperature conversions
-		'c|f' => \&celcius_to_fahrenheit,
-		'c|k' => \&celcius_to_kelvin,
-		'f|c' => \&fahrenheit_to_celcius,
-		'f|k' => \&fahrenheit_to_kelvin,
-		'k|c' => \&kelvin_to_celcius,
-		'k|f' => \&kelvin_to_fahrenheit,
+		'c|f'    => \&celcius_to_fahrenheit,
+		'c|k'    => \&celcius_to_kelvin,
+		'f|c'    => \&fahrenheit_to_celcius,
+		'f|k'    => \&fahrenheit_to_kelvin,
+		'k|c'    => \&kelvin_to_celcius,
+		'k|f'    => \&kelvin_to_fahrenheit,
 
 		## Distance conversions
-		'cm|ft' => \&centimeters_to_feet,
-		'cm|in' => \&centimeters_to_inches,
-		'cm|km' => \&centimeters_to_kilometers,
-		'cm|m'  => \&centimeters_to_meters,
-		'cm|nm' => \&centimeters_to_nautical_miles,
-		'cm|mi' => \&centimeters_to_miles,
-		'cm|yd' => \&centimeters_to_yards,
-		'ft|cm' => \&feet_to_centimeters,
-		'ft|in' => \&feet_to_inches,
-		'ft|km' => \&feet_to_kilometers,
-		'ft|m'  => \&feet_to_meters,
-		'ft|nm' => \&feet_to_nautical_miles,
-		'ft|mi' => \&feet_to_miles,
-		'ft|yd' => \&feet_to_yards,
-		'in|cm' => \&inches_to_centimeters,
-		'in|ft' => \&inches_to_feet,
-		'in|km' => \&inches_to_kilometers,
-		'in|m'  => \&inches_to_meters,
-		'in|nm' => \&inches_to_nautical_miles,
-		'in|mi' => \&inches_to_miles,
-		'in|yd' => \&inches_to_yards,
-		'km|cm' => \&kilometers_to_centimeters,
-		'km|ft' => \&kilometers_to_feet,
-		'km|in' => \&kilometers_to_inches,
-		'km|m'  => \&kilometers_to_meters,
-		'km|nm' => \&kilometers_to_nautical_miles,
-		'km|mi' => \&kilometers_to_miles,
-		'km|yd' => \&kilometers_to_yards,
-		'm|cm'  => \&meters_to_centimeters,
-		'm|ft'  => \&meters_to_feet,
-		'm|in'  => \&meters_to_inches,
-		'm|km'  => \&meters_to_kilometers,
-		'm|nm'  => \&meters_to_nautical_miles,
-		'm|mi'  => \&meters_to_miles,
-		'm|yd'  => \&meters_to_yards,
-		'nm|cm' => \&nautical_miles_to_centimeters,
-		'nm|ft' => \&nautical_miles_to_feet,
-		'nm|in' => \&nautical_miles_to_inches,
-		'nm|km' => \&nautical_miles_to_kilometers,
-		'nm|m'  => \&nautical_miles_to_meters,
-		'nm|mi' => \&nautical_miles_to_miles,
-		'nm|yd' => \&nautical_miles_to_yards,
-		'mi|cm' => \&miles_to_centimeters,
-		'mi|ft' => \&miles_to_feet,
-		'mi|in' => \&miles_to_inches,
-		'mi|km' => \&miles_to_kilometers,
-		'mi|m'  => \&miles_to_meters,
-		'mi|nm' => \&miles_to_nautical_miles,
-		'mi|yd' => \&miles_to_yards,
-		'yd|cm' => \&yards_to_centimeters,
-		'yd|ft' => \&yards_to_feet,
-		'yd|in' => \&yards_to_inches,
-		'yd|km' => \&yards_to_kilometers,
-		'yd|m'  => \&yards_to_meters,
-		'yd|mi' => \&yards_to_miles,
-		'yd|nm' => \&yards_to_nautical_miles
+		'cm|ft'  => \&centimeters_to_feet,
+		'cm|in'  => \&centimeters_to_inches,
+		'cm|km'  => \&centimeters_to_kilometers,
+		'cm|m'   => \&centimeters_to_meters,
+		'cm|nm'  => \&centimeters_to_nautical_miles,
+		'cm|mi'  => \&centimeters_to_miles,
+		'cm|yd'  => \&centimeters_to_yards,
+		'ft|cm'  => \&feet_to_centimeters,
+		'ft|in'  => \&feet_to_inches,
+		'ft|km'  => \&feet_to_kilometers,
+		'ft|m'   => \&feet_to_meters,
+		'ft|nm'  => \&feet_to_nautical_miles,
+		'ft|mi'  => \&feet_to_miles,
+		'ft|yd'  => \&feet_to_yards,
+		'in|cm'  => \&inches_to_centimeters,
+		'in|ft'  => \&inches_to_feet,
+		'in|km'  => \&inches_to_kilometers,
+		'in|m'   => \&inches_to_meters,
+		'in|nm'  => \&inches_to_nautical_miles,
+		'in|mi'  => \&inches_to_miles,
+		'in|yd'  => \&inches_to_yards,
+		'km|cm'  => \&kilometers_to_centimeters,
+		'km|ft'  => \&kilometers_to_feet,
+		'km|in'  => \&kilometers_to_inches,
+		'km|m'   => \&kilometers_to_meters,
+		'km|nm'  => \&kilometers_to_nautical_miles,
+		'km|mi'  => \&kilometers_to_miles,
+		'km|yd'  => \&kilometers_to_yards,
+		'm|cm'   => \&meters_to_centimeters,
+		'm|ft'   => \&meters_to_feet,
+		'm|in'   => \&meters_to_inches,
+		'm|km'   => \&meters_to_kilometers,
+		'm|nm'   => \&meters_to_nautical_miles,
+		'm|mi'   => \&meters_to_miles,
+		'm|yd'   => \&meters_to_yards,
+		'nm|cm'  => \&nautical_miles_to_centimeters,
+		'nm|ft'  => \&nautical_miles_to_feet,
+		'nm|in'  => \&nautical_miles_to_inches,
+		'nm|km'  => \&nautical_miles_to_kilometers,
+		'nm|m'   => \&nautical_miles_to_meters,
+		'nm|mi'  => \&nautical_miles_to_miles,
+		'nm|yd'  => \&nautical_miles_to_yards,
+		'mi|cm'  => \&miles_to_centimeters,
+		'mi|ft'  => \&miles_to_feet,
+		'mi|in'  => \&miles_to_inches,
+		'mi|km'  => \&miles_to_kilometers,
+		'mi|m'   => \&miles_to_meters,
+		'mi|nm'  => \&miles_to_nautical_miles,
+		'mi|yd'  => \&miles_to_yards,
+		'yd|cm'  => \&yards_to_centimeters,
+		'yd|ft'  => \&yards_to_feet,
+		'yd|in'  => \&yards_to_inches,
+		'yd|km'  => \&yards_to_kilometers,
+		'yd|m'   => \&yards_to_meters,
+		'yd|mi'  => \&yards_to_miles,
+		'yd|nm'  => \&yards_to_nautical_miles,
+
+		# Time conversions
+		'hr|min' => \&hours_to_minutes,
+		'hr|s'   => \&hours_to_seconds,
+		'min|hr' => \&minutes_to_hours,
+		'min|s'  => \&minutes_to_seconds,
+		's|hr'   => \&seconds_to_hours,
+		's|min'  => \&seconds_to_minutes
 	);	
 
 	&Modules::register_action('REGEXP:^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$', \&Modules::Convert::process);
@@ -223,11 +233,42 @@ sub process()
 		my $f  = $aliases{ $from } || $from;
 		my $t  = $aliases{ $to } || $to;
 
-		if ($conversions{"$f|$t"}) {
-			my $result = $conversions{"$f|$t"}->($value);
-			return sprintf("%.2f %s is %.2f %s", $value, $from, $result, $to);
-		} elsif ($addressed) {
-			return "I don't know how to convert between $from and $to!";
+		if ($f =~ m|/|) {
+			# Compound unit
+			my ($from_unit, $from_per) = split(/\//, $f, 2);
+			my ($to_unit, $to_per) = split(/\//, $t, 2);
+
+			unless ($to_per) {
+				if ($addressed) {
+					return "I can't convert $from to $to!";
+				}
+				return;
+			}
+
+			# When converting the units in the denominator, reverse the direction of the conversion.
+			# This is to account for the fact that it _is_ in the denominator.
+
+			my $result;
+			if ($from_unit eq $to_unit && $conversions{"$to_per|$from_per"}) {
+				$result = $conversions{"$to_per|$from_per"}->($value);
+			} elsif ($from_per eq $to_per && $conversions{"$from_unit|$to_unit"}) {
+				$result = $conversions{"$from_unit|$to_unit"}->($value);
+			} elsif ($conversions{"$from_unit|$to_unit"} && $conversions{"$to_per|$from_per"}) {
+				$result = $conversions{"$to_per|$from_per"}->($conversions{"$from_unit|$to_unit"}->($value));
+			} elsif ($addressed) {
+				return "I don't know how to convert between $from and $to!";
+			}
+			if ($result) {
+				return sprintf("%.2f %s is %.2f %s", $value, $from, $result, $to);
+			}
+
+		} else {
+			if ($conversions{"$f|$t"}) {
+				my $result = $conversions{"$f|$t"}->($value);
+				return sprintf("%.2f %s is %.2f %s", $value, $from, $result, $to);
+			} elsif ($addressed) {
+				return "I don't know how to convert between $from and $to!";
+			}
 		}
 	}
 }
@@ -664,6 +705,52 @@ sub yards_to_nautical_miles()
 	my $dist = shift;
 
 	return &miles_to_nautical_miles(&yards_to_miles($dist));
+}
+
+#######
+## TIME CONVERSIONS
+## (UNITS: Hours, Minutes, Seconds)
+#######
+sub hours_to_minutes()
+{
+	my $hours = shift;
+
+	return $hours * 60;
+}
+
+sub hours_to_seconds()
+{
+	my $hours = shift;
+
+	return &minutes_to_seconds(&hours_to_minutes($hours));
+}
+
+sub minutes_to_hours()
+{
+	my $minutes = shift;
+
+	return $minutes / 60;
+}
+
+sub minutes_to_seconds()
+{
+	my $minutes = shift;
+
+	return $minutes * 60;
+}
+
+sub seconds_to_hours()
+{
+	my $seconds = shift;
+
+	return &minutes_to_hours(&seconds_to_minutes($seconds));
+}
+
+sub seconds_to_minutes()
+{
+	my $seconds = shift;
+
+	return $seconds / 60;
 }
 
 1;
