@@ -41,6 +41,9 @@ Getopt::Long::GetOptions(
 # Load configuration
 $config = &load_config();
 
+# Perform pre-loading initialization for module stuff
+&Modules::init();
+
 # Unbuffer standard output
 select(STDOUT);
 $| = 1;

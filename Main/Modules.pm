@@ -10,11 +10,15 @@ use threads::shared;
 #######
 ## INCLUDES
 #######
+use Thread::Pool::Simple;
 use RuntimeLoader;
 
 #######
 ## GLOBALS
 #######
+
+# Thread pool
+my $pool;
 
 # @loaded_modules is a collection of RuntimeLoader objects
 my @loaded_modules;
@@ -56,6 +60,27 @@ our %help;
 #######
 ## FUNCTIONS
 #######
+sub init()
+{
+	&restart_thread_pool();
+}
+
+sub restart_thread_pool()
+{
+	if ($pool) {
+		# If we have an existing pool, wait for its threads to complete
+		$pool->join();
+		# Then destroy the pool
+		undef $pool;
+	}
+	# Create a new pool
+	$pool = new Thread::Pool::Simple(
+		min => 5,
+		max => 10,
+		do  => [\&dispatch_t]
+	);
+}
+
 sub load_modules()
 {
 	# Unload any existing modules
@@ -74,13 +99,14 @@ sub load_modules()
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
 
-		&load_module($module_name);
+		&load_module($module_name, 1);
 	}
+	&restart_thread_pool();
 }
 
 sub load_module()
 {
-	my $name = shift;
+	my ($name, $suppress_restart) = @_;
 
 	my $class = new RuntimeLoader('Modules::' . $name);
 
@@ -100,6 +126,8 @@ sub load_module()
 	push @loaded_modules, $class;
 
 	&rebuild_registration_list();
+	# Only restart the thread pool when we load a specific module; when we're loading everything, don't restart the thread pool when each module is loaded
+	&restart_thread_pool() unless $suppress_restart;
 }
 
 sub unload_modules()
@@ -115,6 +143,8 @@ sub unload_modules()
 	%private        = ( );	
 	%listeners      = ( );
 	%help           = ( );
+
+	&restart_thread_pool();
 }
 
 sub unload_module()
@@ -134,6 +164,7 @@ sub unload_module()
 			# Remove handlers from this module
 			delete $registered{ $mod_name };
 			&rebuild_registration_list();
+			&restart_thread_pool();
 
 			# Unload
 			$class->unload();
@@ -287,8 +318,7 @@ sub dispatch()
 {
 	my ($type, $user, $message, $where, $addressed) = @_;
 
-	my $dispatcher = threads->create('dispatch_t', $type, $user, $message, $where, $addressed);
-	$dispatcher->detach();
+	$pool->add($type, $user, $message, $where, $addressed);
 }
 
 sub dispatch_t()
