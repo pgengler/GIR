@@ -116,6 +116,7 @@ sub load_module()
 
 	unless ($module) {
 		&Bot::status("Failed to load module '$name': $@");
+		$class->unload();
 		return;
 	}
 
