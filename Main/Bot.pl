@@ -95,6 +95,7 @@ sub bot()
 		$connection->add_handler('quit', \&on_quit);
 		$connection->add_handler('error', \&on_error);
 		$connection->add_handler('nicknameinuse', \&nick_in_use);
+		$connection->add_handler('bannedfromchan', \&banned_from_channel);
 		$connection->add_handler('snotice', \&on_server_notice);
 
 		$irc->timeout(.25);
@@ -381,6 +382,15 @@ sub on_join()
 	} else {
 		&status("$nick has joined $channel");
 	}
+}
+
+sub banned_from_channel()
+{
+	my ($conn, $event) = @_;
+
+	my $channel = $event->{'args'}[1];
+
+	&status("Can't join $channel - I've been banned!");
 }
 
 sub on_part()
