@@ -27,6 +27,7 @@ our $no_console         = 0;
 my  $nick_retries       = 0;
 my  %ignore;
 our @commands :shared;
+my %channels;
 
 #######
 ## GLOBAL SETUP
@@ -174,6 +175,11 @@ sub connect()
 sub join_chan()
 {
 	my ($conn, $chan) = @_;
+
+	if (exists $channels{ $chan }) {
+		&status("Already in $chan");
+		return;
+	}
 
 	&status("Joining $chan");
 
@@ -379,6 +385,7 @@ sub on_join()
 
 	if ($config->{'nick'} eq $nick) {
 		&status("Joined channel $channel");
+		$channels{ $channel } = 1;
 	} else {
 		&status("$nick has joined $channel");
 	}
@@ -462,6 +469,7 @@ sub on_kick()
 		&status("$kicker has kicked $kicked from $channel ($reason)");
 	} else {
 		&status("$kicker has kicked me from $channel! ($reason)");
+		delete $channels{ $channel };
 		&join_chan($conn, $channel);
 	}
 }
@@ -609,6 +617,8 @@ sub part()
 	&status("Leaving channel $channel ($reason)");
 
 	$connection->part($channel, $reason);
+
+	delete $channels{ $channel };
 }
 
 sub give_op()
