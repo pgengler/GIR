@@ -80,6 +80,11 @@ sub learn()
 {
 	my ($type, $who, $phrase, $relates, $value, $addressed) = @_;
 
+	# Skip empty/all-whitespace $phrase values
+	unless ($phrase =~ /\S/) {
+		return;
+	}
+
 	# Open database
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
