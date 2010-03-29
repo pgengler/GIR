@@ -60,7 +60,7 @@ sub process()
 	} elsif ($message =~ /^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i) {
 		return &replace($type, $who, $2, $3, $4, $addressed || $1);
 	} elsif ($message =~ /^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/i) {
-		return &reply($type, $who, $2, $where, $addressed);
+		return &reply($type, $who, $2, $where, 1);
 	} elsif ($message =~ /^(.+)\?$/) {
 		return &reply($type, $who, $1, $where, $addressed);
 	} elsif ($message =~ /^(.+)\s+(is|are)\s+also\s+(.+)$/i) {
@@ -369,8 +369,18 @@ sub reply()
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
+	# Determine if this was likely something explicitly requested.
+	# This means that either the bot was addressed or the line ended with a question mark.
+	my $explicit = ($addressed || $data =~ /\?\s*$/) ? 1 : 0;
+
 	# Take off any trailing punctuation
 	$data =~ s/[\?|\!|\.|\,|\s*]+$//;
+
+	# Ignore anything that wasn't explicitly requested and is too short
+	if (exists($Bot::config->{'infobot_min_length'}) && !$explicit && length($data) < $Bot::config->{'infobot_min_length'}) {
+		&Bot::status("Skipping '$data' because it's too short");
+		return;
+	}
 
 	# Look for a match for the whole string
 	my $query = qq~
