@@ -32,7 +32,7 @@ sub say()
 	my ($target, $message) = split(/\s+/, $data, 2);
 
 	if ($type eq 'private' || $addressed == 1) {
-		&Bot::say($target, $message);
+		&Bot::enqueue_say($target, $message);
 		return "OK, $user";
 	}
 }
@@ -44,7 +44,7 @@ sub action()
 	my ($target, $message) = split(/\s+/, $data, 2);
 
 	if ($type ne 'public' || $addressed == 1) {
-		&Bot::action($target, $message);
+		&Bot::enqueue_action($target, $message);
 		return "OK, $user";
 	}
 }
