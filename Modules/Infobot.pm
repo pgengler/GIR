@@ -373,6 +373,9 @@ sub reply()
 	# This means that either the bot was addressed or the line ended with a question mark.
 	my $explicit = ($addressed || $data =~ /\?\s*$/) ? 1 : 0;
 
+	# Trim whitespace
+	$data =~ s/^\s*(.+?)\s*$/$1/;
+
 	# Take off any trailing punctuation
 	$data =~ s/[\?|\!|\.|\,|\s*]+$//;
 
