@@ -76,6 +76,9 @@ sub bot()
 	$SIG{'INT'}  = sub { &bot_shutdown(); $console->kill('SIGINT'); threads->exit(); };
 
 	while (1) {
+		# Reset list of joined channels
+		%channels = ();
+
 		# Connect to the server
 		&connect();
 
