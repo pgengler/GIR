@@ -1,0 +1,7 @@
+CREATE TABLE words (
+	prev VARCHAR(255) NOT NULL,
+	this VARCHAR(255) NOT NULL,
+	next VARCHAR(255) NOT NULL,
+	count INT NOT NULL DEFAULT 1,
+	PRIMARY KEY (prev, this, next)
+);

@@ -1,0 +1,4 @@
+CREATE TABLE karma (
+	name VARCHAR(255) NOT NULL,
+	karma INT NOT NULL DEFAULT 0
+);
