@@ -99,14 +99,14 @@ sub load_modules()
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
 
-		&load_module($module_name, 1);
+		&load_module($module_name, 1, 1);
 	}
 	&restart_thread_pool();
 }
 
 sub load_module()
 {
-	my ($name, $suppress_restart) = @_;
+	my ($name, $suppress_restart, $auto) = @_;
 
 	my $class = new RuntimeLoader('Modules::' . $name);
 
@@ -122,7 +122,15 @@ sub load_module()
 
 	&Bot::status("Loaded module $name");
 
-	$module->register();
+	# If register() method returns -1, it means that it should not be loaded.
+	# We call unload_module() to make sure the module doesn't leave any handlers running while claiming it shouldn't load.
+	my $ret = $module->register($auto) || 0;
+
+	if ($ret == -1) {
+		&Bot::status("Module '$name' requested to not be loaded.");
+		&unload_module($name, 1);
+		return;
+	}
 
 	push @loaded_modules, $class;
 
@@ -150,7 +158,7 @@ sub unload_modules()
 
 sub unload_module()
 {
-	my $name = shift;
+	my ($name, $silent) = @_;
 
 	my $mod_name = ($name =~ /^Modules\:\:/) ? $name : 'Modules::' . $name;
 
@@ -174,7 +182,7 @@ sub unload_module()
 		}
 	}
 
-	&Bot::status("Module '$name' is not loaded!");
+	&Bot::status("Module '$name' is not loaded!") unless $silent;
 }
 
 sub register_action()

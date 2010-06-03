@@ -721,7 +721,7 @@ sub reload_modules()
 		&Modules::load_modules();
 	} else {
 		&Modules::unload_module($module);
-		&Modules::load_module($module);
+		&Modules::load_module($module, 0, 0);
 	}
 }
 
@@ -729,7 +729,7 @@ sub load_module()
 {
 	my $module = shift;
 
-	&Modules::load_module($module);
+	&Modules::load_module($module, 0, 0);
 }
 
 sub unload_module()
