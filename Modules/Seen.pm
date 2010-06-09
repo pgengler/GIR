@@ -38,7 +38,7 @@ sub seen()
 
 	# Check if we've seen this person
 	my $query = qq~
-		SELECT who, what, `where`, `when`
+		SELECT who, what, `where`, UNIX_TIMESTAMP(`when`) AS `when`
 		FROM seen
 		WHERE who = ?
 	~;
@@ -123,20 +123,20 @@ sub update()
 			UPDATE seen SET
 				`where` = ?,
 				what = ?,
-				`when` = ?
+				`when` = NOW()
 			WHERE who = ?
 		~;
 		$db->prepare($query);
-		$db->execute($where, $data, time(), lc($user));
+		$db->execute($where, $data, lc($user));
 	} else {
 		$query = qq~
 			INSERT INTO seen
 			(who, what, `where`, `when`)
 			VALUES
-			(?, ?, ?, ?)
+			(?, ?, ?, NOW())
 		~;
 		$db->prepare($query);
-		$db->execute(lc($user), $data, $where, time());
+		$db->execute(lc($user), $data, $where);
 	}
 	return undef;
 }
