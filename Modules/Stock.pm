@@ -23,9 +23,10 @@ sub register()
 	&Modules::register_help('squote', \&Modules::Stock::help);
 }
 
-sub quote()
+sub quote($)
 {
-	my ($type, $user, $symbol, $where) = @_;
+	my $params = shift;
+	my $symbol = $params->{'message'};
 
 	return unless $symbol;
 
@@ -34,7 +35,7 @@ sub quote()
 
 	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
-		return
+		return;
 	}
 
 	return unless $symbol;
@@ -55,9 +56,10 @@ sub quote()
 	return $info{$symbol,'name'} . ': Last: ' . $info{$symbol,'last'} . ' Change: ' . $info{$symbol,'net'} . '(' . $info{$symbol,'p_change'} . '%) Open: ' . $info{$symbol,'open'} . ' Close: ' . $info{$symbol,'close'} . ' Day Range: ' . $info{$symbol,'day_range'} . ' Year Range: ' . $info{$symbol,'year_range'} . ' Volume: ' . $info{$symbol,'volume'};
 }
 
-sub short_quote()
+sub short_quote($)
 {
-	my ($type, $user, $symbol, $where) = @_;
+	my $params = shift;
+	my $symbol = $params->{'message'};
 
 	&Bot::status("Looking up stock quote for '$symbol'");
 
@@ -66,7 +68,7 @@ sub short_quote()
 
 	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
-		return
+		return;
 	}
 
 	$symbol = uc($symbol);
@@ -83,11 +85,11 @@ sub short_quote()
 	return "$symbol: $info{$symbol,'last'}, $info{$symbol,'net'} ($info{$symbol,'p_change'}%)";
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if ($data eq 'quote') {
+	if ($params->{'message'} eq 'quote') {
 		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'.";
 	} else {
 		return "'squote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'.";

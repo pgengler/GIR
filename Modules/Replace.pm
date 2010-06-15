@@ -20,9 +20,11 @@ sub register()
 	&Modules::register_action('buttbuttinate', \&Modules::Replace::replace);
 }
 
-sub replace()
+sub replace($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+
+	my $data = $params->{'message'};
 
 	$data =~ s/ass/butt/gi;
 	$data =~ s/tit/breast/gi;

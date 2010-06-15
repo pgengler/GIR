@@ -19,9 +19,9 @@ sub register()
 	&Modules::register_action('how much is oil', \&Modules::Oil::fetch);
 }
 
-sub fetch()
+sub fetch($)
 {
-	my ($type, $user, $data, $where) = @_;
+	my $params = shift;
 
 	my $url = 'http://www.howmuchisoil.com/csv.cgi';
 

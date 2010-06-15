@@ -26,59 +26,59 @@ sub register()
 }
 
 
-sub op()
+sub op($)
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Split into parts
-	my ($password, $channel, $target) = split(/\s+/, $message);
+	my ($password, $channel, $target) = split(/\s+/, $params->{'message'});
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'op')) {
-		if ($addressed || $type eq 'private') {
-			return "You don't have permission to do that, $user!";
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'op')) {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "You don't have permission to do that, $params->{'user'}!";
 		} else {
 			return;
 		}
 	}
 
-	&Bot::give_op($channel, $target || $user);
+	&Bot::give_op($channel, $target || $params->{'user'});
 
 	return 'NOREPLY';
 }
 
-sub deop()
+sub deop($)
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Split into parts
-	my ($password, $channel, $target) = split(/\s+/, $message);
+	my ($password, $channel, $target) = split(/\s+/, $params->{'message'});
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'deop')) {
-		if ($addressed || $type eq 'private') {
-			return "You don't have permission to do that, $user!";
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'deop')) {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "You don't have permission to do that, $params->{'user'}!";
 		} else {
 			return;
 		}
 	}
 
-	&Bot::take_op($channel, $target || $user);
+	&Bot::take_op($channel, $target || $params->{'user'});
 
 	return 'NOREPLY';
 }
 
-sub kick()
+sub kick($)
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Split into parts
-	my ($password, $channel, $target, $reason) = split(/\s+/, $message, 4);
+	my ($password, $channel, $target, $reason) = split(/\s+/, $params->{'message'}, 4);
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'kick')) {
-		if ($addressed || $type eq 'private') {
-			return "You don't have permission to do that, $user!";
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'kick')) {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "You don't have permission to do that, $params->{'user'}!";
 		} else {
 			return;
 		}
@@ -89,17 +89,17 @@ sub kick()
 	return 'NOREPLY';
 }
 
-sub change_nick()
+sub change_nick($)
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Split into parts
-	my ($password, $nick) = split(/\s+/, $message, 2);
+	my ($password, $nick) = split(/\s+/, $params->{'message'}, 2);
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'nick')) {
-		if ($addressed || $type eq 'private') {
-			return "You don't have permission to do that, $user!";
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'nick')) {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "You don't have permission to do that, $params->{'user'}!";
 		} else {
 			return;
 		}
@@ -111,17 +111,17 @@ sub change_nick()
 	return 'NOREPLY';
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if ($data eq 'op') {
+	if ($params->{'message'} eq 'op') {
 		return "'op <password> <channel> [<user>]': Gives ops to <user> (or you, if no one is named) in <channel>. I need to have ops for this to work, of course. Private messages only.";
-	} elsif ($data eq 'deop') {
+	} elsif ($params->{'message'} eq 'deop') {
 		return "'deop <password> <channel> [<user>]': Removes ops from <user> (or you, if no one is named) in <channel>. I need to have ops for this to work. Private messages only.";
-	} elsif ($data eq 'kick') {
+	} elsif ($params->{'message'} eq 'kick') {
 		return "'kick <password> <channel> <user> [<reason>]': Kicks <user> from <channel>. I need to have ops in that channel for this to work. Private messages only.";
-	} elsif ($data eq 'nick') {
+	} elsif ($params->{'message'} eq 'nick') {
 		return "'nick <password> <name>': Changes my IRC nick to <name>. Private messages only.";
 	}
 }

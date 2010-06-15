@@ -297,24 +297,31 @@ sub message()
 		return;
 	}
 
-	my $addressed = 0;
-	my $orig_message = $message;
+	my $params = {
+		'addressed' => 0,
+		'message'   => $message,
+		'original'  => $message,
+		'user'      => $nick,
+		'where'     => $to
+	};
+
 	if ($message =~ /^\s*$config->{'nick'}(\,|\:|\s)\s*(.+)$/i) {
-		$addressed = 1;
-		$message = $2;
+		$params->{'addressed'} = 1;
+		$params->{'message'}   = $2;
 	} elsif ($message =~ /(.+?)(\,|\:|\s+)\s*$config->{'nick'}(\.|\?|\!)?\s*$/i) {
-		$addressed = 1;
-		$message = $1;
+		$params->{'addressed'} = 1;
+		$params->{'message'}   = $1;
 	}
 
 	if ($to && $to =~ /^\#/) {
-		&status("<$nick/$to> $orig_message");
-		&Modules::dispatch('public', $nick, $message, $to, $addressed);
+		&status("<$nick/$to> $params->{'original'}");
+		$params->{'type'} = 'public';
 	} else {
-		&status(">$nick< $orig_message");
-		&Modules::dispatch('private', $nick, $message, $nick, $addressed);
+		&status(">$nick< $params->{'original'}");
+		$params->{'type'}  = 'private';
+		$params->{'where'} = $nick;
 	}
-
+	&Modules::dispatch($params);
 }
 
 #######

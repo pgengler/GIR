@@ -17,17 +17,17 @@ sub register()
 	&Modules::register_action('help', \&Modules::Help::process);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	return unless ($addressed || $type eq 'private');
+	return unless ($params->{'addressed'} || $params->{'type'} eq 'private');
 
-	if ($data) {
-		if ($Modules::help{ $data }) {
-			return $Modules::help{ $data }->($type, $user, $data, $where, $addressed);
-		} elsif ($addressed || $type eq 'private') {
-			return "No help is available for '$data'";
+	if ($params->{'message'}) {
+		if ($Modules::help{ $params->{'message'} }) {
+			return $Modules::help{ $params->{'message'} }->($params);
+		} else {
+			return "No help is available for '$params->{'message'}'";
 		}
 	} else {
 		my @topics = sort { $a cmp $b } keys %Modules::help;

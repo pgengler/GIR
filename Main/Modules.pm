@@ -325,25 +325,25 @@ sub rebuild_registration_list()
 
 sub dispatch()
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
-	$pool->add($type, $user, $message, $where, $addressed);
+	$pool->add($params);
 }
 
 sub dispatch_t()
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
-	my $result = &process($type, $user, $message, $where, $addressed);
+	my $result = &process($params);
 
 	if ($result && $result ne 'NOREPLY') {
-		&Bot::enqueue_say($where, $result);
+		&Bot::enqueue_say($params->{'where'}, $result);
 	}
 }
 
 sub process()
 {
-	my ($type, $user, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Figure out if the message matches anything
 	## Sort by length to start with the longest
@@ -352,19 +352,20 @@ sub process()
 	my $result = '';
 
 	foreach my $listener (@{ $listeners{-1} }) {
-		$listener->($type, $user, $message, $where, $addressed);
+		$listener->($params);
 	}
 
 	foreach my $priority (sort { $b <=> $a } keys %actions) {
 		foreach my $action (@{ $actions{ $priority } }) {
 			my $act = $action->{'action'};
-			if ($message =~ /^$act(\!|\.|\?)*$/i || $message =~ /^$act\s+(.+?)$/i) {
-				$result = $action->{'function'}->($type, $user, $1, $where, $addressed);
+			if ($params->{'message'} =~ /^$act(\!|\.|\?)*$/i || $params->{'message'} =~ /^$act\s+(.+?)$/i) {
+				local $params->{'message'} = $1;
+				$result = $action->{'function'}->($params);
 				return $result if $result;
 			} elsif ($act =~ /REGEXP\:(.+)$/) {
 				my $match = $1;
-				if ($message =~ /$match/i) {
-					$result = $action->{'function'}->($type, $user, $message, $where, $addressed);
+				if ($params->{'message'} =~ /$match/i) {
+					$result = $action->{'function'}->($params);
 					return $result if $result;
 				}
 			}
@@ -372,15 +373,16 @@ sub process()
 		}
 	}
 
-	if ($type eq 'private') {
+	if ($params->{'type'} eq 'private') {
 		foreach my $private (@private) {
-			if ($message =~ /^$private(\!|\.|\?)*$/i || $message =~ /^$private\s+(.+)$/i) {
-				$result = $private{ $private }->($type, $user, $1, $where, $addressed);
+			if ($params->{'message'} =~ /^$private(\!|\.|\?)*$/i || $params->{'message'} =~ /^$private\s+(.+)$/i) {
+				local $params->{'message'} = $1;
+				$result = $private{ $private }->($params);
 				return $result if $result;
 			} elsif ($private =~ /^REGEXP\:(.+)$/) {
 				my $match = $1;
-				if ($message =~ /$match/i) {
-					$result = $private{ $private }->($type, $user, $message, $where, $addressed);
+				if ($params->{'message'} =~ /$match/i) {
+					$result = $private{ $private }->($params);
 					return $result if $result;
 				}
 			}
@@ -389,7 +391,7 @@ sub process()
 
 	foreach my $priority (sort { $b <=> $a } keys %listeners) {
 		foreach my $listener (@{ $listeners{ $priority } }) {
-			$result = $listener->($type, $user, $message, $where, $addressed);
+			$result = $listener->($params);
 			return $result if $result;
 		}
 	}

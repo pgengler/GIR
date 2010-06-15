@@ -32,11 +32,12 @@ sub register()
 	&Modules::register_help('bash', \&Modules::Bash::help);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Check for valid id
+	my $data = $params->{'message'};
 	unless ($data =~ /^\d+$/) {
 		return;
 	}
@@ -86,12 +87,11 @@ sub process()
 	return $result;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'bash <id>': retrieves quote <id> from bash.org and displays it.";
 }
-
 
 1;

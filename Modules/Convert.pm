@@ -219,13 +219,13 @@ sub register()
 	&Modules::register_action('REGEXP:^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$', \&Modules::Convert::process);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	my ($value, $from, $to);
 
-	if ($data =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
+	if ($params->{'message'} =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
 		$value = $1;
 		$from  = lc($3);
 		$to    = lc($4);
@@ -239,7 +239,7 @@ sub process()
 			my ($to_unit, $to_per) = split(/\//, $t, 2);
 
 			unless ($to_per) {
-				if ($addressed) {
+				if ($params->{'addressed'}) {
 					return "I can't convert $from to $to!";
 				}
 				return;
@@ -255,7 +255,7 @@ sub process()
 				$result = $conversions{"$from_unit|$to_unit"}->($value);
 			} elsif ($conversions{"$from_unit|$to_unit"} && $conversions{"$to_per|$from_per"}) {
 				$result = $conversions{"$to_per|$from_per"}->($conversions{"$from_unit|$to_unit"}->($value));
-			} elsif ($addressed) {
+			} elsif ($params->{'addressed'}) {
 				return "I don't know how to convert between $from and $to!";
 			}
 			if ($result) {
@@ -266,7 +266,7 @@ sub process()
 			if ($conversions{"$f|$t"}) {
 				my $result = $conversions{"$f|$t"}->($value);
 				return sprintf("%.2f %s is %.2f %s", $value, $from, $result, $to);
-			} elsif ($addressed) {
+			} elsif ($params->{'addressed'}) {
 				return "I don't know how to convert between $from and $to!";
 			}
 		}
@@ -276,42 +276,42 @@ sub process()
 #######
 ## TEMPERATURE CONVERSIONS
 #######
-sub celcius_to_fahrenheit()
+sub celcius_to_fahrenheit($)
 {
 	my $temp = shift;
 
 	return ((9.0 * $temp) / 5.0) + 32;
 }
 
-sub celcius_to_kelvin()
+sub celcius_to_kelvin($)
 {
 	my $temp = shift;
 
 	return $temp + 273.15;
 }
 
-sub fahrenheit_to_celcius()
+sub fahrenheit_to_celcius($)
 {
 	my $temp = shift;
 
 	return (5.0 * ($temp - 32)) / 9.0;
 }
 
-sub fahrenheit_to_kelvin()
+sub fahrenheit_to_kelvin($)
 {
 	my $temp = shift;
 
 	return &celcius_to_kelvin(&fahrenheit_to_celcius($temp));
 }
 
-sub kelvin_to_celcius()
+sub kelvin_to_celcius($)
 {
 	my $temp = shift;
 
 	return $temp - 273.15;
 }
 
-sub kelvin_to_fahrenheit()
+sub kelvin_to_fahrenheit($)
 {
 	my $temp = shift;
 
@@ -322,385 +322,385 @@ sub kelvin_to_fahrenheit()
 ## DISTANCE CONVERSIONS
 ## (UNITS: Centimeters, Feet, Inches, Kilometers, Meters, Nautical Miles, (Statute) Miles, Yards)
 #######
-sub centimeters_to_feet()
+sub centimeters_to_feet($)
 {
 	my $dist = shift;
 
 	return &inches_to_feet(&centimeters_to_inches($dist));
 }
 
-sub centimeters_to_inches()
+sub centimeters_to_inches($)
 {
 	my $dist = shift;
 
 	return $dist * 0.393700787;
 }
 
-sub centimeters_to_kilometers()
+sub centimeters_to_kilometers($)
 {
 	my $dist = shift;
 
 	return &meters_to_kilometers(&centimeters_to_meters($dist));
 }
 
-sub centimeters_to_meters()
+sub centimeters_to_meters($)
 {
 	my $dist = shift;
 
 	return $dist / 1000;
 }
 
-sub centimeters_to_nautical_miles()
+sub centimeters_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return &meters_to_nautical_miles(&centimeters_to_meters($dist));
 }
 
-sub centimeters_to_miles()
+sub centimeters_to_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_miles(&centimeters_to_feet($dist));
 }
 
-sub centimeters_to_yards()
+sub centimeters_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&centimeters_to_feet($dist));
 }
 
-sub feet_to_centimeters()
+sub feet_to_centimeters($)
 {
 	my $dist = shift;
 
 	return &inches_to_centimeters(&feet_to_inches($dist));
 }
 
-sub feet_to_inches()
+sub feet_to_inches($)
 {
 	my $dist = shift;
 
 	return $dist * 12;
 }
 
-sub feet_to_kilometers()
+sub feet_to_kilometers($)
 {
 	my $dist = shift;
 
 	return &meters_to_kilometers(&feet_to_meters($dist));
 }
 
-sub feet_to_meters()
+sub feet_to_meters($)
 {
 	my $dist = shift;
 
 	return &centimeters_to_meters(&feet_to_centimeters($dist));
 }
 
-sub feet_to_miles()
+sub feet_to_miles($)
 {
 	my $dist = shift;
 
 	return $dist / 5280;
 }
 
-sub feet_to_nautical_miles()
+sub feet_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return &miles_to_nautical_miles(&feet_to_miles($dist));
 }
 
-sub feet_to_yards()
+sub feet_to_yards($)
 {
 	my $dist = shift;
 
 	return $dist / 3;
 }
 
-sub inches_to_centimeters()
+sub inches_to_centimeters($)
 {
 	my $dist = shift;
 
 	return $dist / 0.393700787;
 }
 
-sub inches_to_feet()
+sub inches_to_feet($)
 {
 	my $dist = shift;
 
 	return $dist / 12;
 }
 
-sub inches_to_kilometers()
+sub inches_to_kilometers($)
 {
 	my $dist = shift;
 
 	return &meters_to_kilometers(&inches_to_meters($dist));
 }
 
-sub inches_to_meters()
+sub inches_to_meters($)
 {
 	my $dist = shift;
 
 	return &centimeters_to_meters(&inches_to_centimeters($dist));
 }
 
-sub inches_to_miles()
+sub inches_to_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_miles(&inches_to_feet($dist));
 }
 
-sub inches_to_nautical_miles()
+sub inches_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_nautical_miles(&inches_to_feet($dist));
 }
 
-sub inches_to_yards()
+sub inches_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&inches_to_feet($dist));
 }
 
-sub kilometers_to_centimeters()
+sub kilometers_to_centimeters($)
 {
 	my $dist = shift;
 
 	return &meters_to_centimeters(&kilometers_to_meters($dist));
 }
 
-sub kilometers_to_feet()
+sub kilometers_to_feet($)
 {
 	my $dist = shift;
 
 	return &meters_to_feet(&kilometers_to_meters($dist));
 }
 
-sub kilometers_to_inches()
+sub kilometers_to_inches($)
 {
 	my $dist = shift;
 
 	return &feet_to_inches(&kilometers_to_feet($dist));
 }
 
-sub kilometers_to_meters()
+sub kilometers_to_meters($)
 {
 	my $dist = shift;
 
 	return $dist * 1000;
 }
 
-sub kilometers_to_miles()
+sub kilometers_to_miles($)
 {
 	my $dist = shift;
 
 	return $dist * 0.621371192;
 }
 
-sub kilometers_to_nautical_miles()
+sub kilometers_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return &miles_to_nautical_miles(&kilometers_to_miles($dist));
 }
 
-sub kilometers_to_yards()
+sub kilometers_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&kilometers_to_feet($dist));
 }
 
-sub meters_to_centimeters()
+sub meters_to_centimeters($)
 {
 	my $dist = shift;
 
 	return $dist * 1000;
 }
 
-sub meters_to_feet()
+sub meters_to_feet($)
 {
 	my $dist = shift;
 
 	return $dist * 3.2808399;
 }
 
-sub meters_to_inches()
+sub meters_to_inches($)
 {
 	my $dist = shift;
 
 	return &feet_to_inches(&meters_to_feet($dist));
 }
 
-sub meters_to_kilometers()
+sub meters_to_kilometers($)
 {
 	my $dist = shift;
 
 	return $dist / 1000;
 }
 
-sub meters_to_miles()
+sub meters_to_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_miles(&meters_to_feet($dist));
 }
 
-sub meters_to_nautical_miles()
+sub meters_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_nautical_miles(&meters_to_feet($dist));
 }
 
-sub meters_to_yards()
+sub meters_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&meters_to_feet($dist));
 }
 
-sub miles_to_centimeters()
+sub miles_to_centimeters($)
 {
 	my $dist = shift;
 
 	return &kilometers_to_centimeters(&miles_to_kilometers($dist));
 }
 
-sub miles_to_feet()
+sub miles_to_feet($)
 {
 	my $dist = shift;
 
 	return $dist * 5280;
 }
 
-sub miles_to_inches()
+sub miles_to_inches($)
 {
 	my $dist = shift;
 
 	return &feet_to_inches(&miles_to_feet($dist));
 }
 
-sub miles_to_kilometers()
+sub miles_to_kilometers($)
 {
 	my $dist = shift;
 
 	return $dist / 0.621371192;
 }
 
-sub miles_to_meters()
+sub miles_to_meters($)
 {
 	my $dist = shift;
 
 	return &kilometers_to_meters(&miles_to_kilometers($dist));
 }
 
-sub miles_to_nautical_miles()
+sub miles_to_nautical_miles($)
 {
 	my $dist = shift;
 
 	return $dist * 0.868976242;
 }
 
-sub miles_to_yards()
+sub miles_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&miles_to_feet($dist));
 }
 
-sub nautical_miles_to_centimeters()
+sub nautical_miles_to_centimeters($)
 {
 	my $dist = shift;
 
 	return &miles_to_centimeters(&nautical_miles_to_miles($dist));
 }
 
-sub nautical_miles_to_feet()
+sub nautical_miles_to_feet($)
 {
 	my $dist = shift;
 
 	return &miles_to_feet(&nautical_miles_to_miles($dist));
 }
 
-sub nautical_miles_to_inches()
+sub nautical_miles_to_inches($)
 {
 	my $dist = shift;
 
 	return &feet_to_inches(&nautical_miles_to_feet($dist));
 }
 
-sub nautical_miles_to_kilometers()
+sub nautical_miles_to_kilometers($)
 {
 	my $dist = shift;
 
 	return &miles_to_kilometers(&nautical_miles_to_miles($dist));
 }
 
-sub nautical_miles_to_meters()
+sub nautical_miles_to_meters($)
 {
 	my $dist = shift;
 
 	return &kilometers_to_meters(&nautical_miles_to_kilometers($dist));
 }
 
-sub nautical_miles_to_miles()
+sub nautical_miles_to_miles($)
 {
 	my $dist = shift;
 
 	return $dist / 0.868976242;
 }
 
-sub nautical_miles_to_yards()
+sub nautical_miles_to_yards($)
 {
 	my $dist = shift;
 
 	return &feet_to_yards(&nautical_miles_to_feet($dist));
 }
 
-sub yards_to_centimeters()
+sub yards_to_centimeters($)
 {
 	my $dist = shift;
 
 	return &feet_to_centimeters(&yards_to_feet($dist));
 }
 
-sub yards_to_feet()
+sub yards_to_feet($)
 {
 	my $dist = shift;
 
 	return $dist * 3;
 }
 
-sub yards_to_inches()
+sub yards_to_inches($)
 {
 	my $dist = shift;
 
 	return &feet_to_inches(&yards_to_feet($dist));
 }
 
-sub yards_to_kilometers()
+sub yards_to_kilometers($)
 {
 	my $dist = shift;
 
 	return &meters_to_kilometers(&yards_to_meters($dist));
 }
 
-sub yards_to_miles()
+sub yards_to_miles($)
 {
 	my $dist = shift;
 
 	return &feet_to_miles(&yards_to_feet($dist));
 }
 
-sub yards_to_nautical_miles()
+sub yards_to_nautical_miles($)
 {
 	my $dist = shift;
 
@@ -711,42 +711,42 @@ sub yards_to_nautical_miles()
 ## TIME CONVERSIONS
 ## (UNITS: Hours, Minutes, Seconds)
 #######
-sub hours_to_minutes()
+sub hours_to_minutes($)
 {
 	my $hours = shift;
 
 	return $hours * 60;
 }
 
-sub hours_to_seconds()
+sub hours_to_seconds($)
 {
 	my $hours = shift;
 
 	return &minutes_to_seconds(&hours_to_minutes($hours));
 }
 
-sub minutes_to_hours()
+sub minutes_to_hours($)
 {
 	my $minutes = shift;
 
 	return $minutes / 60;
 }
 
-sub minutes_to_seconds()
+sub minutes_to_seconds($)
 {
 	my $minutes = shift;
 
 	return $minutes * 60;
 }
 
-sub seconds_to_hours()
+sub seconds_to_hours($)
 {
 	my $seconds = shift;
 
 	return &minutes_to_hours(&seconds_to_minutes($seconds));
 }
 
-sub seconds_to_minutes()
+sub seconds_to_minutes($)
 {
 	my $seconds = shift;
 

@@ -40,10 +40,11 @@ sub register()
 	&Modules::register_help('taf', \&Modules::Aviation::help);
 }
 
-sub metar()
+sub metar($)
 {
-	my ($type, $user, $data, $where) = @_;
+	my $params = shift;
 
+	my $data = $params->{'message'};
 	unless ($data =~ /^\s*[\w\d]{3,4}\s*$/) {
 		return "$data doesn't seem to be a valid airport identifier";
 	}
@@ -58,7 +59,7 @@ sub metar()
 
 	my $metar_url = "http://weather.noaa.gov/cgi-bin/mgetmetar.pl?cccc=$data";
 	
-	# Grab METAR report from Web.   
+	# Grab METAR report from Web.
 	my $agent   = new LWP::UserAgent;
 	my $request = new HTTP::Request(GET => $metar_url);
 	my $reply   = $agent->request($request);
@@ -80,10 +81,11 @@ sub metar()
 	return $metar;
 }
 
-sub taf()
+sub taf($)
 {
-	my ($type, $user, $data, $where) = @_;
+	my $params = shift;
 
+	my $data = $params->{'message'};
 	unless ($data =~ /^\s*[\w\d]{3,4}\s*$/) {
 		return "$data doesn't seem to be a valid airport identifier";
 	}
@@ -123,13 +125,13 @@ sub taf()
 	return $taf;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if ($data eq 'metar') {
+	if ($params->{'message'} eq 'metar') {
 		return "'metar <airport>': Fetches and displays the last available METAR for the given airport.";
-	} elsif ($data eq 'taf') {
+	} elsif ($params->{'message'} eq 'taf') {
 		return "'taf <airport>': Fetches and displays the last available TAF for the given airport.";
 	}
 }

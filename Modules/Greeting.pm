@@ -35,16 +35,16 @@ sub register()
 	&Modules::register_action("REGEXP:^\\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\\s*tal)(\\,|\\s)?($Bot::config->{'nick'})?\\s*\$", \&Modules::Greeting::process);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if (!$addressed and rand() > 0.35) {
+	if (!$params->{'addressed'} and rand() > 0.35) {
 		# 65% chance of replying to a random greeting when not addressed
 		return;
 	}
 
-	return $hello[int(rand(@hello))] . ', ' . $user;
+	return $hello[int(rand(@hello))] . ', ' . $params->{'user'};
 
 }
 

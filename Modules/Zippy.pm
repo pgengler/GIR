@@ -16,8 +16,10 @@ sub register()
 	&Modules::register_help('yow', \&Modules::Zippy::help);
 }
 
-sub zippy()
+sub zippy($)
 {
+	my $params = shift;
+
 	open(ZIPPY, "/usr/games/fortune zippy |");
 	my $yow;
 	while (<ZIPPY>) {
@@ -29,9 +31,9 @@ sub zippy()
 	return $yow;	
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "yow: prints a random Zippy the Pinhead message";
 }

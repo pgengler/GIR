@@ -20,10 +20,11 @@ sub register()
 	&Modules::register_help('spell', \&Modules::Spell::help);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
+	my $data = $params->{'message'};
 	$data =~ s/^\s+//;
 	$data =~ s/\s+$//;
 
@@ -47,9 +48,9 @@ sub process()
 	return $result;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'spell <word>': Given a possibly-misspelled word; uses ispell to try to find the right spelling.";
 }

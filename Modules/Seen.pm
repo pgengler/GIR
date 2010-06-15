@@ -17,6 +17,8 @@ sub register()
 {
 	my $this = shift;
 
+	return;
+
 	&Modules::register_action('seen', \&Modules::Seen::seen);
 	&Modules::register_listener(\&Modules::Seen::update, -1);
 

@@ -28,14 +28,14 @@ sub register()
 #######
 ## MAIN
 #######
-sub ignore()
+sub ignore($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	my ($password, $nick) = split(/\s+/, $data, 2);
+	my ($password, $nick) = split(/\s+/, $params->{'message'}, 2);
 
 	# Check that we have access for this
-	unless (&Modules::Access::check_access($user, $password, 'ignore')) {
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'ignore')) {
 		return "You don't have access for that!";
 	}
 
@@ -45,14 +45,14 @@ sub ignore()
 	return "$nick has been added to the ignore list";
 }
 
-sub unignore()
+sub unignore($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	my ($password, $nick) = split(/\s+/, $data, 2);
+	my ($password, $nick) = split(/\s+/, $params->{'message'}, 2);
 
 	# Check that we have access for this
-	unless (&Modules::Access::check_access($user, $password, 'ignore')) {
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'ignore')) {
 		return "You don't have access for that!";
 	}
 

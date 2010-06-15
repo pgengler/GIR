@@ -39,9 +39,10 @@ sub register()
 #######
 ## OUTPUT
 #######
-sub output()
+sub output($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	my $first  = undef;
 	my $second = undef;
@@ -56,7 +57,7 @@ sub output()
 	return &gen_output($first, $second);
 }
 
-sub gen_output()
+sub gen_output(;$$)
 {
 	my ($first, $second) = @_;
 
@@ -154,9 +155,12 @@ sub gen_output()
 #######
 ## OUTPUT (FORWARD & BACKWARD)
 #######
-sub output_multi()
+sub output_multi($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
+
+&Bot::status("data == $data");
 
 	my $first  = undef;
 	my $second = undef;
@@ -169,7 +173,7 @@ sub output_multi()
 	return &gen_output_multi($first, $second);
 }
 
-sub gen_output_multi()
+sub gen_output_multi(;$$)
 {
 	my ($first, $second) = @_;
 
@@ -283,9 +287,10 @@ sub gen_output_multi()
 #######
 ## OUTPUT FROM END
 #######
-sub output_from_end()
+sub output_from_end($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	my $first  = undef;
 	my $second = undef;
@@ -298,7 +303,7 @@ sub output_from_end()
 	return &gen_output_from_end($first, $second);
 }
 
-sub gen_output_from_end()
+sub gen_output_from_end(;$$)
 {
 	my ($first, $second) = @_;
 	my $word;
@@ -393,12 +398,13 @@ sub gen_output_from_end()
 #######
 ## LEARN
 #######
-sub learn()
+sub learn($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	# Skip 'lrrr' and 'tumblr'
-	return if ($user eq 'lrrr' || $user eq 'tumblr');
+	return if ($params->{'user'} eq 'lrrr' || $params->{'user'} eq 'tumblr');
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -439,9 +445,10 @@ sub learn()
 #######
 ## LEARN (USER)
 #######
-sub user_learn()
+sub user_learn($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -473,7 +480,7 @@ sub user_learn()
 				WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255) AND who = ?
 			~;
 			$db->prepare($query);
-			$db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $user);
+			$db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $params->{'user'});
 		} else {
 			$query = qq~
 				INSERT INTO markov
@@ -482,7 +489,7 @@ sub user_learn()
 				(?, ?, ?, ?)
 			~;
 			$db->prepare($query);
-			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $user);
+			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $params->{'user'});
 			$sth->finish();
 		}
 	}
@@ -494,11 +501,12 @@ sub user_learn()
 ## If no other module handled this message and the bot was addressed, generate
 ## a response using markov stuff.
 #######
-sub respond_if_addressed()
+sub respond_if_addressed($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
-	return unless $addressed;
+	return unless $params->{'addressed'};
 
 	# Based on random numbers, decide which markov method to use and which word(s) to seed with
 
@@ -597,15 +605,15 @@ sub respond_if_addressed()
 #######
 ## HELP
 #######
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if ($data eq 'markov') {
+	if ($params->{'message'} eq 'markov') {
 		return "'markov [<word> [<word>]]': create and print a Markov chain starting with the given word(s). At most two words can be used to start the chain. See also 'markov2' and 'vokram'";
-	} elsif ($data eq 'markov2') {
+	} elsif ($params->{'message'} eq 'markov2') {
 		return "'markov2 <word> [<word>]': create and print a Markov chain containing the given word(s). This can appear anywhere in the chain, not just at the beginning. See also 'markov' and 'vokram'";
-	} elsif ($data eq 'vokram') {
+	} elsif ($params->{'message'} eq 'vokram') {
 		return "'vokram <word> [<word>]': create and print a Markov chain that ends with the given word(s). At most two words can be used as the basis for the chain. See also 'markov' and 'markov2'";
 	}
 }

@@ -28,22 +28,22 @@ sub register()
 	&Modules::register_help('host', \&Modules::DNS::help);
 }
 
-sub lookup()
+sub lookup($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	my $packed_ip = gethostbyname($data);
+	my $packed_ip = gethostbyname($params->{'message'});
 
 	if (defined($packed_ip)) {
-		return "$data resolves to " . inet_ntoa($packed_ip);
+		return "$params->{'message'} resolves to " . inet_ntoa($packed_ip);
 	} else {
-		return 'Host not found' if $addressed;
+		return 'Host not found' if $params->{'addressed'};
 	}
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'host <name>': looks up the IP address for the given host.";
 }

@@ -22,13 +22,13 @@ sub register()
 	&Modules::register_action('REGEXP:^(.+)(\+\+|\-\-)$', \&Modules::Karma::update);
 }
 
-sub get()
+sub get($)
 {
-	my ($type, $user, $message, $where) = @_;
+	my $params = shift;
 
 	# Get requested name from $message
 	my $name;
-	if ($message =~ /^karma\s+(.+)$/) {
+	if ($params->{'message'} =~ /^karma\s+(.+)$/) {
 		$name = $1;
 	} else {
 		return;
@@ -62,25 +62,25 @@ sub get()
 	}
 }
 
-sub update()
+sub update($)
 {
-	my ($type, $user, $message, $where) = @_;
+	my $params = shift;
 
-	unless ($type eq 'public') {
+	unless ($params->{'type'} eq 'public') {
 		return 'Karma updates must be done in public!';
 	}
 
 	# Parse message for name and direction
 	my $name;
 	my $direction;
-	if ($message =~ /^(.+)(\+\+|\-\-)$/) {
+	if ($params->{'message'} =~ /^(.+)(\+\+|\-\-)$/) {
 		$name = $1;
 		$direction = $2;
 	} else {
 		return;
 	}
 
-	if (lc($user) eq lc($name)) {
+	if (lc($params->{'user'}) eq lc($name)) {
 		return "You can't change your own karma!";
 	}
 

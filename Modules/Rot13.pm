@@ -23,18 +23,19 @@ sub register()
 	&Modules::register_help('rot13', \&Modules::Rot13::help);
 }
 
-sub rot13()
+sub rot13($)
 {
-	my ($type, $user, $data, $where) = @_;
+	my $params = shift;
 
+	my $data = $params->{'message'};
 	$data =~ y/A-Za-z/N-ZA-Mn-za-m/;
 
 	return $data;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'rot13 <text>': Performs the ROT13 operation on the given text.";
 }

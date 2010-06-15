@@ -32,9 +32,9 @@ sub register()
 #######
 sub output()
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	return unless $addressed;
+	return unless $params->{'addressed'};
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -46,7 +46,7 @@ sub output()
 		ORDER BY count * RAND() DESC
 	~;
 	$db->prepare($query);
-	my $sth  = $db->execute($data);
+	my $sth  = $db->execute($params->{'message'});
 	my $word = $sth->fetchrow_hashref();
 
 	unless ($word && $word->{'this'}) {
@@ -65,7 +65,7 @@ sub output()
 	$db->prepare($query);
 	while ($word && $word->{'this'} ne '__END__' && $words++ < 50) {
 		$phrase = $phrase . $word->{'this'} . ' ';
-		$sth    = $db->execute($word->{'this'}, $word->{'next'}, $data);
+		$sth    = $db->execute($word->{'this'}, $word->{'next'}, $params->{'message'});
 		$word   = $sth->fetchrow_hashref();
 	}
 

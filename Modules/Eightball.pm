@@ -22,9 +22,9 @@ sub register()
 	&Modules::register_help('8ball', \&Modules::Eightball::help);
 }
 
-sub process()
+sub process($)
 {
-	my ($who, $data) = @_;
+	my $params = shift;
 
 	# Check if answers are loaded
 	unless (@answers) {
@@ -42,9 +42,9 @@ sub process()
 	}
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'8ball <question>': Used a magic 8-ball to try to divine an answer to your question.";
 }

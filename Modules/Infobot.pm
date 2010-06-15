@@ -45,40 +45,44 @@ sub register()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
 	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
 
-	&Modules::register_listener(\&Modules::Infobot::reply, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
+	&Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
 	&Modules::register_help('infobot', \&Modules::Infobot::help);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $who, $message, $where, $addressed) = @_;
+	my $params  = shift;
+	my $message = $params->{'message'};
 
 	# Figure out what we're doing
 	if ($message =~ /^(.+)\s+\=(is|are)\=\>\s+(.+)$/i) {
-		return &learn($type, $who, $1, $2, $3, $addressed);
+		return &learn($params, $1, $2, $3);
 	} elsif ($message =~ /^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i) {
-		return &replace($type, $who, $2, $3, $4, $addressed || $1);
+		if ($1) {
+			$params->{'addressed'} = 1;
+		}
+		return &replace($params, $2, $3, $4);
 	} elsif ($message =~ /^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/i) {
-		return &reply($type, $who, $2, $where, 1);
+		return &reply($params, $2);
 	} elsif ($message =~ /^(.+)\?$/) {
-		return &reply($type, $who, $1, $where, $addressed);
+		return &reply($params, $1);
 	} elsif ($message =~ /^(.+)\s+(is|are)\s+also\s+(.+)$/i) {
-		return &append($type, $who, $1, $2, $3, $addressed);
+		return &append($params, $1, $2, $3);
 	} elsif ($message =~ /^(.+)\s+(is|are)\s+(.+)$/i) {
-		return &learn($type, $who, $1, $2, $3, $addressed);
+		return &learn($params, $1, $2, $3);
 	} elsif ($message =~ /^forget\s+(.+)$/i) {
-		return &forget($type, $who, $1, $addressed);
+		return &forget($params, $1);
 	} elsif ($message =~ /^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/i) {
-		return &amend($type, $who, $1, $2, $3, $addressed);
+		return &amend($params, $1, $2, $3);
 	} else {
 		&Bot::status("Infobot::process fell through somehow: message == $message") if $Bot::config->{'debug'};
 	}
 }
 
-sub learn()
+sub learn($$$$)
 {
-	my ($type, $who, $phrase, $relates, $value, $addressed) = @_;
+	my ($params, $phrase, $relates, $value) = @_;
 
 	# Skip empty/all-whitespace $phrase values
 	unless ($phrase =~ /\S/) {
@@ -103,7 +107,7 @@ sub learn()
 	$sth->finish();
 
 	if ($result && $result->{'phrase'}) {
-		if ($addressed || $type eq 'private') {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
 			return "... but $phrase $relates $result->{'value'}...";
 		} else {
 			return 'NOREPLY';
@@ -121,16 +125,16 @@ sub learn()
 		&Bot::status("LEARN: $phrase =$relates=> $value");
 	}
 
-	if ($addressed || $type eq 'private') {
-		return "OK, $who";
+	if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+		return "OK, $params->{'user'}";
 	} else {
 		return 'NOREPLY';
 	}
 }
 
-sub append()
+sub append($$$$)
 {
-	my ($type, $who, $phrase, $relates, $value, $addressed) = @_;
+	my ($params, $phrase, $relates, $value) = @_;
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -152,9 +156,9 @@ sub append()
 	if ($result && $result->{'phrase'}) {
 		# Make sure the item isn't locked
 		if ($result->{'locked'}) {
-			if ($addressed || $type eq 'private') {
+			if ($params->{'addressed'} || $params->{'type'} eq 'private') {
 				&Bot::status("LOCKED: $result->{'phrase'}");
-				return "I can't update that, $who";
+				return "I can't update that, $params->{'user'}";
 			} else {
 				return 'NOREPLY';
 			}
@@ -175,20 +179,20 @@ sub append()
 		$db->prepare($query);
 		$db->execute($result->{'value'}, $result->{'phrase'});
 	} else {
-		if ($addressed || $type eq 'private') {
-			return "I didn't have anything matching '$phrase', $who";
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "I didn't have anything matching '$phrase', $params->{'user'}";
 		}
 	}
 
-	if ($addressed) {
-		return "OK, $who";
+	if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+		return "OK, $params->{'user'}";
 	}
 	return 'NOREPLY';
 }
 
-sub forget()
+sub forget($$)
 {
-	my ($type, $who, $what, $addressed) = @_;
+	my ($params, $what) = @_;
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -230,21 +234,21 @@ sub forget()
 	$sth->finish();
 
 	if ($found) {
-		return "$who: I forgot $what";
+		return "$params->{'user'}: I forgot $what";
 	} elsif ($locked) {
-		if ($addressed || $type eq 'private') {
-			return "I can't forget that, $who";
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "I can't forget that, $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
-	} elsif ($addressed || $type eq 'private') {
-		return "$who, I didn't have anything matching $what";
+	} elsif ($params->{'addressed'} || $params->{'type'} eq 'private') {
+		return "$params->{'user'}, I didn't have anything matching $what";
 	}
 }
 
-sub amend()
+sub amend($$$$)
 {
-	my ($type, $who, $what, $replace, $with, $addressed) = @_;
+	my ($params, $what, $replace, $with) = @_;
 
 	my $rep_part = quotemeta($replace);
 
@@ -264,8 +268,8 @@ sub amend()
 	my $result = $sth->fetchrow_hashref();
 
 	unless ($result && $result->{'phrase'}) {
-		if ($addressed || $type eq 'private') {
-			return "I don't have anything matching '$what', $who";
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "I don't have anything matching '$what', $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
@@ -273,17 +277,21 @@ sub amend()
 
 	# Check if it's locked
 	if ($result->{'locked'}) {
-		if ($addressed || $type eq 'private') {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
 			&Bot::status("LOCKED: $result->{'phrase'}");
-			return "I can't update that, $who";
+			return "I can't update that, $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
 	}
 
 	# Check that it matches
-	unless ($result->{'value'} =~ /$rep_part/i && ($addressed || $type eq 'private')) {
-		return "That doesn't contain '$replace', $who";
+	unless ($result->{'value'} =~ /$rep_part/i) {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "That doesn't contain '$replace', $params->{'user'}";
+		} else {
+			return;
+		}
 	}
 
 	&Bot::status("OLD: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
@@ -302,14 +310,14 @@ sub amend()
 	$db->prepare($query);
 	$db->execute($result->{'value'}, $result->{'phrase'});
 
-	if ($addressed || $type eq 'private') {
-		return "OK, $who";
+	if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+		return "OK, $params->{'user'}";
 	}
 }
 
-sub replace()
+sub replace($$$$)
 {
-	my ($type, $who, $what, $relates, $value, $addressed) = @_;
+	my ($params, $what, $relates, $value) = @_;
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -326,8 +334,8 @@ sub replace()
 	my $result = $sth->fetchrow_hashref();
 
 	unless ($result && $result->{'phrase'}) {
-		if ($addressed || $type eq 'private') {
-			return "I don't have anything matching '$what', $who";
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "I don't have anything matching '$what', $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
@@ -335,9 +343,9 @@ sub replace()
 
 	# Check if the item is locked
 	if ($result->{'locked'}) {
-		if ($addressed || $type eq 'private') {
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
 			&Bot::status("LOCKED: $result->{'phrase'}");
-			return "I can't update that, $who";
+			return "I can't update that, $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
@@ -356,14 +364,21 @@ sub replace()
 	$db->prepare($query);
 	$db->execute($value, $relates, $what);
 
-	if ($addressed || $type eq 'private') {
-		return "OK, $who";
+	if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+		return "OK, $params->{'user'}";
 	}
 }
 
-sub reply()
+sub reply_listener($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+
+	return &reply($params, $params->{'message'});
+}
+
+sub reply($$)
+{
+	my ($params, $data) = @_;
 
 	# Open database
 	my $db = new Database::MySQL;
@@ -371,7 +386,7 @@ sub reply()
 
 	# Determine if this was likely something explicitly requested.
 	# This means that either the bot was addressed or the line ended with a question mark.
-	my $explicit = ($addressed || $data =~ /\?\s*$/) ? 1 : 0;
+	my $explicit = ($params->{'addressed'} || $data =~ /\?\s*$/) ? 1 : 0;
 
 	# Trim whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;
@@ -397,10 +412,10 @@ sub reply()
 	my $result = $sth->fetchrow_hashref();
 
 	unless ($result && $result->{'phrase'}) {
-		if (defined($type)) {
+		if (defined($params->{'type'})) {
 			return;
-		} elsif ($addressed || $type eq 'private') {
-			return $dunno[int(rand(scalar(@dunno)))] . ", $user";
+		} elsif ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return $dunno[int(rand(scalar(@dunno)))] . ", $params->{'user'}";
 		} else {
 			return 'NOREPLY';
 		}
@@ -416,21 +431,21 @@ sub reply()
 	}
 
 	if ($result->{'value'} =~ /^\s*\<reply\>\s*(.+)$/) {
-		return &parse_special($1, $user);
+		return &parse_special($1, $params->{'user'});
 	} elsif ($result->{'value'} =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*\<action\>\s*(.+)$/) {
-		&Bot::enqueue_action($where, &parse_special($1, $user));
+		&Bot::enqueue_action($params->{'where'}, &parse_special($1, $params->{'user'}));
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
 			&Bot::status("Feedback limit reached!");
 			return undef;
 		}
-		my $phrase = $1;
+		local $params->{'message'} = $1;
 		$sth->finish();
 		$db->close();
-		&Modules::dispatch_t($type, $user, $phrase, $where, $addressed);
+		&Modules::dispatch_t($params);
 		$feedbacked--;
 		return 'NOREPLY';
 	} elsif ($result->{'value'} =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
@@ -455,33 +470,35 @@ sub reply()
 		my $result;
 
 		if ($extra) {
-			$result = $extra . ' ' . &Modules::process($type, $user, $data, $where, $addressed);
+			local $params->{'message'} = $data;
+			$result = $extra . ' ' . &Modules::process($params);
 			$feedbacked--;
 		} else {
-			$result = &Modules::process($type, $user, $data, $where, $addressed);
+			local $params->{'message'} = $data;
+			$result = &Modules::process($params);
 			$feedbacked--;
 		}
 		return $result;
 	} else {
-		return "$result->{'phrase'} $result->{'relates'} " . &parse_special($result->{'value'}, $user);
+		return "$result->{'phrase'} $result->{'relates'} " . &parse_special($result->{'value'}, $params->{'user'});
 	}
 }
 
-sub lock()
+sub lock($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Split into parts
-	my ($password, $phrase) = split(/\s+/, $data, 2);
+	my ($password, $phrase) = split(/\s+/, $params->{'message'}, 2);
 
 	# Only handle this privately
-	unless ($type eq 'private') {
+	unless ($params->{'type'} eq 'private') {
 		return 'NOREPLY';
 	}
 
 	# Make sure the user can do that
-		unless (&Modules::Access::check_access($user, $password, 'lock')) {
-		return "You don't have permission to do that, $user!";
+		unless (&Modules::Access::check_access($params->{'user'}, $password, 'lock')) {
+		return "You don't have permission to do that, $params->{'user'}!";
 	}
 
 	# Open database
@@ -499,7 +516,7 @@ sub lock()
 
 	my $entry = $sth->fetchrow_hashref();
 	unless ($entry && $entry->{'phrase'}) {
-		return "I don't have anything matching '$phrase', $user";
+		return "I don't have anything matching '$phrase', $params->{'user'}";
 	}
 
 	# Update record
@@ -511,24 +528,24 @@ sub lock()
 	$db->prepare($query);
 	$db->execute($phrase);
 
-	return "OK, $user";
+	return "OK, $params->{'user'}";
 }
 
-sub unlock()
+sub unlock($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Only handle this privately
-	unless ($type eq 'private') {
+	unless ($params->{'type'} eq 'private') {
 		return 'NOREPLY';
 	}
 
 	# Split into parts
-	my ($password, $phrase) = split(/\s+/, $data, 2);
+	my ($password, $phrase) = split(/\s+/, $params->{'message'}, 2);
 
 	# Make sure the user can do that
-	unless (&Modules::Access::check_access($user, $password, 'unlock')) {
-		return "You don't have permission to do that, $user!";
+	unless (&Modules::Access::check_access($params->{'user'}, $password, 'unlock')) {
+		return "You don't have permission to do that, $params->{'user'}!";
 	}
 
 	# Open database
@@ -546,7 +563,7 @@ sub unlock()
 
 	my $entry = $sth->fetchrow_hashref();
 	unless ($entry && $entry->{'phrase'}) {
-		return "I don't have anything matching '$phrase', $user";
+		return "I don't have anything matching '$phrase', $params->{'user'}";
 	}
 
 	# Update record
@@ -558,12 +575,13 @@ sub unlock()
 	$db->prepare($query);
 	$db->execute($phrase);
 
-	return "OK, $user";
+	return "OK, $params->{'user'}";
 }	
 
-sub literal()
+sub literal($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	return undef unless $data;
 
@@ -585,8 +603,8 @@ sub literal()
 		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 	} else {
 		# Not found; only reply if explicitly addressed publicly or privately
-		if ($addressed || $type eq 'private') {
-			return "I don't have anything matching '$data', $user";
+		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
+			return "I don't have anything matching '$data', $params->{'user'}";
 		} else {
 			return undef;
 		}
@@ -595,7 +613,7 @@ sub literal()
 
 
 # Handle $who in string
-sub parse_special()
+sub parse_special($$)
 {
 	my ($str, $user) = @_;
 
@@ -606,7 +624,7 @@ sub parse_special()
 	return $str;
 }
 
-sub trim()
+sub trim($)
 {
 	my $str = shift;
 
@@ -618,9 +636,9 @@ sub trim()
 	return $str;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $who, $message, $where, $addressed) = @_;
+	my $params = shift;
 
 	my $str = "The Infobot module is used to store and retrieve facts and other information.\n";
 	$str .= "I learn that x = y when someone says 'x is y' or 'x are y'. Then, when someone asks 'What is x?' or 'x?', I respond with 'x is y'\n";

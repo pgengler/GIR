@@ -25,33 +25,33 @@ sub register()
 	&Modules::register_help('action', \&Modules::Say::help);
 }
 
-sub say()
+sub say($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	my ($target, $message) = split(/\s+/, $data, 2);
+	my ($target, $message) = split(/\s+/, $params->{'message'}, 2);
 
-	if ($type eq 'private' || $addressed == 1) {
+	if ($params->{'type'} eq 'private' || $params->{'addressed'}) {
 		&Bot::enqueue_say($target, $message);
-		return "OK, $user";
+		return "OK, $params->{'user'}";
 	}
 }
 
-sub action()
+sub action($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	my ($target, $message) = split(/\s+/, $data, 2);
+	my ($target, $message) = split(/\s+/, $params->{'message'}, 2);
 
-	if ($type ne 'public' || $addressed == 1) {
+	if ($params->{'type'} ne 'public' || $params->{'addressed'}) {
 		&Bot::enqueue_action($target, $message);
-		return "OK, $user";
+		return "OK, $params->{'user'}";
 	}
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "Usage: 'say <channel/user> <message>' or 'action <channel/user> <message>'\nSay <message> or do a /me <action> in the given channel or target user. I'll probably need to be in the channel.";
 }

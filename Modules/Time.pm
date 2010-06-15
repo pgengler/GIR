@@ -39,67 +39,66 @@ sub register()
 	&Modules::register_help('time', \&Modules::Time::help);
 }
 
-sub select()
+sub select($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
-
+	my $params = shift;
 
 	my @times = ('unix', 'local', 'gmt', 'swatch', 'veggie');
 	my $time = $times[int(rand(scalar(@times)))];
 
 	if ($time eq 'unix') {
-		return &unix_time($type, $user, $data, $where, $addressed);
+		return &unix_time($params);
 	} elsif ($time eq 'local') {
-		return &local_time($type, $user, $data, $where, $addressed);
+		return &local_time($params);
 	} elsif ($time eq 'gmt') {
-		return &gm_time($type, $user, $data, $where, $addressed);
+		return &gm_time($params);
 	} elsif ($time eq 'swatch') {
-		return &swatch($type, $user, $data, $where, $addressed);
+		return &swatch($params);
 	} elsif ($time eq 'veggie') {
-		return &veggie($type, $user, $data, $where, $addressed);
+		return &veggie($params);
 	}
 }
 
-sub unix_time()
+sub unix_time($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return time() . '';
 }
 
-sub local_time()
+sub local_time($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	my @parts = localtime(time());
 
 	return localtime(time()) . ($parts[8] ? ' EDT' : ' EST');
 }
 
-sub gm_time()
+sub gm_time($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return gmtime(time()) . ' UTC';
 }
 
-sub swatch()
+sub swatch($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return '@' . &Time::Beat::beats(time());
 }
 
-sub veggie()
+sub veggie($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return &Acme::Time::Asparagus::veggietime();
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	my $str = "time: Returns the current time in one of several possible formats.\n";
 	$str .= "'time' chooses one of the following formats randomly; they can also be accessed individually:\n";

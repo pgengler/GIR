@@ -31,12 +31,13 @@ sub register()
 	&Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
-sub process()
+sub process($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	# Check for valid id
-	if ($data =~ /^\s*(\d+)\s*$/) {
+	my $data = '';
+	if ($params->{'message'} =~ /^\s*(\d+)\s*$/) {
 		$data = $1;
 	} else {
 		return;
@@ -86,9 +87,9 @@ sub process()
 	return $result;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'qdb <id>': retrieves quote <id> from qdb.us and displays it.";
 }
