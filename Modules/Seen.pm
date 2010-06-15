@@ -17,21 +17,21 @@ sub register()
 {
 	my $this = shift;
 
-	return;
-
 	&Modules::register_action('seen', \&Modules::Seen::seen);
 	&Modules::register_listener(\&Modules::Seen::update, -1);
 
 	&Modules::register_help('seen', \&Modules::Seen::help);
 }
 
-sub seen()
+sub seen($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
+	my $data   = $params->{'message'};
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
+	# Remove leading/trailing whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;
 
 	return unless $data;
@@ -94,15 +94,18 @@ sub seen()
 
 		return "$data was last seen on $seen->{'where'} $tstring, saying: $seen->{'what'} [$seen->{'when'}]";
 	} else {
-		return "I haven't seen '$data', $user";
+		return "I haven't seen '$data', $params->{'user'}";
 	}
 }
 
-sub update()
+sub update($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
-	if ($type eq 'private') {
+	my $where = $params->{'where'};
+	my $data  = $params->{'original'};
+
+	if ($params->{'type'} eq 'private') {
 		$where = 'a private message';
 		$data = '<private>';
 	}
@@ -117,7 +120,7 @@ sub update()
 		WHERE who = ?
 	~;
 	$db->prepare($query);
-	my $sth = $db->execute(lc($user));
+	my $sth = $db->execute(lc($params->{'user'}));
 	my $seen = $sth->fetchrow_hashref();
 
 	if ($seen && $seen->{'who'}) {
@@ -129,7 +132,7 @@ sub update()
 			WHERE who = ?
 		~;
 		$db->prepare($query);
-		$db->execute($where, $data, lc($user));
+		$db->execute($where, $data, lc($params->{'user'}));
 	} else {
 		$query = qq~
 			INSERT INTO seen
@@ -138,14 +141,14 @@ sub update()
 			(?, ?, ?, NOW())
 		~;
 		$db->prepare($query);
-		$db->execute(lc($user), $data, $where);
+		$db->execute(lc($params->{'user'}), $data, $where);
 	}
 	return undef;
 }
 
-sub help()
+sub help($)
 {
-	my ($type, $user, $data, $where, $addressed) = @_;
+	my $params = shift;
 
 	return "'seen <user>': displays information about the last time <user> spoke when I was around.";
 }
