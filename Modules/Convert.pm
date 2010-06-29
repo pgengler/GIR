@@ -221,11 +221,11 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	my ($value, $from, $to);
 
-	if ($params->{'message'} =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
+	if ($message->message() =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
 		$value = $1;
 		$from  = lc($3);
 		$to    = lc($4);
@@ -239,7 +239,7 @@ sub process($)
 			my ($to_unit, $to_per) = split(/\//, $t, 2);
 
 			unless ($to_per) {
-				if ($params->{'addressed'}) {
+				if ($message->is_addressed()) {
 					return "I can't convert $from to $to!";
 				}
 				return;
@@ -255,7 +255,7 @@ sub process($)
 				$result = $conversions{"$from_unit|$to_unit"}->($value);
 			} elsif ($conversions{"$from_unit|$to_unit"} && $conversions{"$to_per|$from_per"}) {
 				$result = $conversions{"$to_per|$from_per"}->($conversions{"$from_unit|$to_unit"}->($value));
-			} elsif ($params->{'addressed'}) {
+			} elsif ($message->is_addressed()) {
 				return "I don't know how to convert between $from and $to!";
 			}
 			if ($result) {
@@ -266,7 +266,7 @@ sub process($)
 			if ($conversions{"$f|$t"}) {
 				my $result = $conversions{"$f|$t"}->($value);
 				return sprintf("%.2f %s is %.2f %s", $value, $from, $result, $to);
-			} elsif ($params->{'addressed'}) {
+			} elsif ($message->is_addressed()) {
 				return "I don't know how to convert between $from and $to!";
 			}
 		}

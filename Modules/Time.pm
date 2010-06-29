@@ -41,34 +41,34 @@ sub register()
 
 sub select($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	my @times = ('unix', 'local', 'gmt', 'swatch', 'veggie');
 	my $time = $times[int(rand(scalar(@times)))];
 
 	if ($time eq 'unix') {
-		return &unix_time($params);
+		return &unix_time($message);
 	} elsif ($time eq 'local') {
-		return &local_time($params);
+		return &local_time($message);
 	} elsif ($time eq 'gmt') {
-		return &gm_time($params);
+		return &gm_time($message);
 	} elsif ($time eq 'swatch') {
-		return &swatch($params);
+		return &swatch($message);
 	} elsif ($time eq 'veggie') {
-		return &veggie($params);
+		return &veggie($message);
 	}
 }
 
 sub unix_time($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return time() . '';
 }
 
 sub local_time($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	my @parts = localtime(time());
 
@@ -77,28 +77,28 @@ sub local_time($)
 
 sub gm_time($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return gmtime(time()) . ' UTC';
 }
 
 sub swatch($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return '@' . &Time::Beat::beats(time());
 }
 
 sub veggie($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return &Acme::Time::Asparagus::veggietime();
 }
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	my $str = "time: Returns the current time in one of several possible formats.\n";
 	$str .= "'time' chooses one of the following formats randomly; they can also be accessed individually:\n";

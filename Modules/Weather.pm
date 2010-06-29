@@ -39,21 +39,22 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
 
-	if ($data && $data =~ /^(\w{4})\s*$/) {
-		$data = $1;
+	my $station = $message->message();
+
+	if ($station && $station =~ /^(\w{4})\s*$/) {
+		$station = $1;
 	} else {
 		return;
 	}
 
 	# Check if we have cached data, and it's still valid
-	if ($cache{ $data } && $cache{ $data }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
-		return $cache{ $data }->{'weather'};
+	if ($cache{ $station } && $cache{ $station }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
+		return $cache{ $station }->{'weather'};
 	}
 
-	my $text = &get($base_url . $data . '.xml');
+	my $text = &get($base_url . $station . '.xml');
 
 	unless ($text) {
 		return 'Something failed in contacting the NOAA server.';
@@ -103,13 +104,13 @@ sub process($)
 		'retrieved' => time(),
 		'weather'   => $weather
 	);
-	$cache{ $data } = \%info;
+	$cache{ $station } = \%info;
 	return $weather;
 }
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "Usage: weather <airport code>\nReturns a formatted string with the latest weather observation for the given airport. Not all airports have weather reporting though most major ones do.";
 }

@@ -35,10 +35,10 @@ sub register()
 
 sub show_access($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Only reply to this privately
-	return unless ($params->{'type'} eq 'private');
+	return if $message->is_public();
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});;
@@ -51,7 +51,7 @@ sub show_access($)
 		WHERE up.user_id = (SELECT id FROM access_users WHERE nick = ?)
 	~;
 	$db->prepare($query);
-	my $sth = $db->execute($params->{'user'});
+	my $sth = $db->execute($message->from());
 
 	my @permissions;
 	while (my $permission = $sth->fetchrow_hashref()) {
@@ -112,21 +112,22 @@ sub check_access($$$)
 
 sub add_access($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Only reply to this privately
-	return unless ($params->{'type'} eq 'private');
+	return if $message->is_public();
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Get the parts; syntax is <password> <user> <access>
-	my ($password, $target_user, $to_add) = split(/\s+/, $params->{'message'}, 3);
+	my $user = $message->from();
+	my ($password, $target_user, $to_add) = split(/\s+/, $message->message(), 3);
 
-	my $allowed = &check_access($params->{'user'}, $password, 'add_access');
+	my $allowed = &check_access($user, $password, 'add_access');
 
 	unless ($allowed) {
-		return "You don't have permission to do that, $params->{'user'}!";
+		return "You don't have permission to do that, $user!";
 	}
 
 	# Check if the access exists
@@ -199,21 +200,22 @@ sub add_access($)
 
 sub remove_access($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Only reply to this privately
-	return unless ($params->{'type'} eq 'private');
+	return if $message->is_public();
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Get the parts; syntax is <password> <user> <access>
-	my ($password, $target_user, $to_remove) = split(/\s+/, $params->{'message'}, 3);
+	my $user = $message->from();
+	my ($password, $target_user, $to_remove) = split(/\s+/, $message->message(), 3);
 
-	my $allowed = &check_access($params->{'user'}, $password, 'remove_access');
+	my $allowed = &check_access($user, $password, 'remove_access');
 
 	unless ($allowed) {
-		return "You don't have permission to do that, $params->{'user'}!";
+		return "You don't have permission to do that, $user!";
 	}
 
 	# Look up target user
@@ -227,7 +229,7 @@ sub remove_access($)
 	my $user_info = $sth->fetchrow_hashref();
 
 	unless ($user_info && $user_info->{'id'}) {
-		return "$target_user isn't registered, $params->{'user'}";
+		return "$target_user isn't registered, $user";
 	}
 
 	# Look up permission
@@ -242,7 +244,7 @@ sub remove_access($)
 	my $permission = $sth->fetchrow_hashref();
 
 	unless ($permission && $permission->{'id'}) {
-		return "$target_user doesn't have that permission, $params->{'user'}";
+		return "$target_user doesn't have that permission, $user";
 	}
 
 	# Remove the permission
@@ -255,4 +257,5 @@ sub remove_access($)
 
 	return 'Permission removed';
 }
+
 1;

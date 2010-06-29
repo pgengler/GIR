@@ -22,9 +22,9 @@ sub register()
 
 sub replace($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $data = $message->message();
 
 	$data =~ s/ass/butt/gi;
 	$data =~ s/tit/breast/gi;

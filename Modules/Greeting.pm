@@ -37,14 +37,14 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	if (!$params->{'addressed'} and rand() > 0.35) {
+	if (!$message->is_addressed() && rand() > 0.35) {
 		# 65% chance of replying to a random greeting when not addressed
 		return;
 	}
 
-	return $hello[int(rand(@hello))] . ', ' . $params->{'user'};
+	return $hello[int(rand(@hello))] . ', ' . $message->from();
 
 }
 

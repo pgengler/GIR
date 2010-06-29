@@ -18,7 +18,7 @@ sub register()
 
 sub zippy($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	open(ZIPPY, "/usr/games/fortune zippy |");
 	my $yow;
@@ -33,7 +33,7 @@ sub zippy($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "yow: prints a random Zippy the Pinhead message";
 }

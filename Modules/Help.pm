@@ -19,15 +19,16 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	return unless ($params->{'addressed'} || $params->{'type'} eq 'private');
+	return unless $message->is_explicit();
 
-	if ($params->{'message'}) {
-		if ($Modules::help{ $params->{'message'} }) {
-			return $Modules::help{ $params->{'message'} }->($params);
+	if ($message->message()) {
+		my $target = $message->message();
+		if ($Modules::help{ $target }) {
+			return $Modules::help{ $target }->($message);
 		} else {
-			return "No help is available for '$params->{'message'}'";
+			return "No help is available for '$target'";
 		}
 	} else {
 		my @topics = sort { $a cmp $b } keys %Modules::help;

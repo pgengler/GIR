@@ -30,20 +30,20 @@ sub register()
 
 sub lookup($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $packed_ip = gethostbyname($params->{'message'});
+	my $packed_ip = gethostbyname($message->message());
 
 	if (defined($packed_ip)) {
-		return "$params->{'message'} resolves to " . inet_ntoa($packed_ip);
+		return $message->message() . " resolves to " . inet_ntoa($packed_ip);
 	} else {
-		return 'Host not found' if $params->{'addressed'};
+		return 'Host not found' if $message->is_addressed();
 	}
 }
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'host <name>': looks up the IP address for the given host.";
 }

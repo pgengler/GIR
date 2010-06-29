@@ -25,18 +25,19 @@ sub register()
 
 sub seen($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+
+	my $nick    = $message->message();
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Remove leading/trailing whitespace
-	$data =~ s/^\s*(.+?)\s*$/$1/;
+	$nick =~ s/^\s*(.+?)\s*$/$1/;
 
-	return unless $data;
+	return unless $nick;
 
-	my $nick = lc($data);
+	$nick = lc($nick);
 
 	# Check if we've seen this person
 	my $query = qq~
@@ -92,20 +93,20 @@ sub seen($)
 			$tstring = "$howlong years, " . $tstring;
 		}
 
-		return "$data was last seen on $seen->{'where'} $tstring, saying: $seen->{'what'} [$seen->{'when'}]";
+		return "$nick was last seen on $seen->{'where'} $tstring, saying: $seen->{'what'} [$seen->{'when'}]";
 	} else {
-		return "I haven't seen '$data', $params->{'user'}";
+		return "I haven't seen '$nick', " . $message->from();
 	}
 }
 
 sub update($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $where = $params->{'where'};
-	my $data  = $params->{'original'};
+	my $where = $message->where();
+	my $data  = $message->raw();
 
-	if ($params->{'type'} eq 'private') {
+	unless ($message->is_public()) {
 		$where = 'a private message';
 		$data = '<private>';
 	}
@@ -120,7 +121,7 @@ sub update($)
 		WHERE who = ?
 	~;
 	$db->prepare($query);
-	my $sth = $db->execute(lc($params->{'user'}));
+	my $sth = $db->execute(lc($message->from()));
 	my $seen = $sth->fetchrow_hashref();
 
 	if ($seen && $seen->{'who'}) {
@@ -132,7 +133,7 @@ sub update($)
 			WHERE who = ?
 		~;
 		$db->prepare($query);
-		$db->execute($where, $data, lc($params->{'user'}));
+		$db->execute($where, $data, lc($message->from()));
 	} else {
 		$query = qq~
 			INSERT INTO seen
@@ -141,14 +142,14 @@ sub update($)
 			(?, ?, ?, NOW())
 		~;
 		$db->prepare($query);
-		$db->execute(lc($params->{'user'}), $data, $where);
+		$db->execute(lc($message->from()), $data, $where);
 	}
 	return undef;
 }
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'seen <user>': displays information about the last time <user> spoke when I was around.";
 }

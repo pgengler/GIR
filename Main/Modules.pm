@@ -11,6 +11,8 @@ use threads::shared;
 ## INCLUDES
 #######
 use Thread::Pool::Simple;
+
+use Message;
 use RuntimeLoader;
 
 #######
@@ -325,25 +327,25 @@ sub rebuild_registration_list()
 
 sub dispatch()
 {
-	my $params = shift;
+	my $message = shift;
 
-	$pool->add($params);
+	$pool->add($message);
 }
 
 sub dispatch_t()
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $result = &process($params);
+	my $result = &process($message);
 
 	if ($result && $result ne 'NOREPLY') {
-		&Bot::enqueue_say($params->{'where'}, $result);
+		&Bot::enqueue_say($message->where(), $result);
 	}
 }
 
 sub process()
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Figure out if the message matches anything
 	## Sort by length to start with the longest
@@ -352,20 +354,24 @@ sub process()
 	my $result = '';
 
 	foreach my $listener (@{ $listeners{-1} }) {
-		$listener->($params);
+		$listener->($message);
 	}
 
 	foreach my $priority (sort { $b <=> $a } keys %actions) {
 		foreach my $action (@{ $actions{ $priority } }) {
 			my $act = $action->{'action'};
-			if ($params->{'message'} =~ /^$act(\!|\.|\?)*$/i || $params->{'message'} =~ /^$act\s+(.+?)$/i) {
-				local $params->{'message'} = $1;
-				$result = $action->{'function'}->($params);
+			if ($message->message() =~ /^$act(\!|\.|\?)*$/i || $message->message() =~ /^$act\s+(.+?)$/i) {
+				my $msg = new Message({
+					'nick'  => $message->from(),
+					'where' => $message->where(),
+					'data'  => $1,
+				});
+				$result = $action->{'function'}->($msg);
 				return $result if $result;
 			} elsif ($act =~ /REGEXP\:(.+)$/) {
 				my $match = $1;
-				if ($params->{'message'} =~ /$match/i) {
-					$result = $action->{'function'}->($params);
+				if ($message->message() =~ /$match/i) {
+					$result = $action->{'function'}->($message);
 					return $result if $result;
 				}
 			}
@@ -373,16 +379,20 @@ sub process()
 		}
 	}
 
-	if ($params->{'type'} eq 'private') {
+	unless ($message->is_public()) {
 		foreach my $private (@private) {
-			if ($params->{'message'} =~ /^$private(\!|\.|\?)*$/i || $params->{'message'} =~ /^$private\s+(.+)$/i) {
-				local $params->{'message'} = $1;
-				$result = $private{ $private }->($params);
+			if ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
+				my $msg = new Message({
+					'nick'  => $message->from(),
+					'where' => $message->where(),
+					'data'  => $1,
+				});
+				$result = $private{ $private }->($msg);
 				return $result if $result;
 			} elsif ($private =~ /^REGEXP\:(.+)$/) {
 				my $match = $1;
-				if ($params->{'message'} =~ /$match/i) {
-					$result = $private{ $private }->($params);
+				if ($message->message() =~ /$match/i) {
+					$result = $private{ $private }->($message);
 					return $result if $result;
 				}
 			}
@@ -391,7 +401,7 @@ sub process()
 
 	foreach my $priority (sort { $b <=> $a } keys %listeners) {
 		foreach my $listener (@{ $listeners{ $priority } }) {
-			$result = $listener->($params);
+			$result = $listener->($message);
 			return $result if $result;
 		}
 	}

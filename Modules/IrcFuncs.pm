@@ -28,57 +28,60 @@ sub register()
 
 sub op($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Split into parts
-	my ($password, $channel, $target) = split(/\s+/, $params->{'message'});
+	my $user = $message->from();
+	my ($password, $channel, $target) = split(/\s+/, $message->message());
 
 	# Check for access
-	unless (&Modules::Access::check_access($params->{'user'}, $password, 'op')) {
-		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
-			return "You don't have permission to do that, $params->{'user'}!";
+	unless (&Modules::Access::check_access($user, $password, 'op')) {
+		if ($message->is_explicit()) {
+			return "You don't have permission to do that, $user!";
 		} else {
 			return;
 		}
 	}
 
-	&Bot::give_op($channel, $target || $params->{'user'});
+	&Bot::give_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
 
 sub deop($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Split into parts
-	my ($password, $channel, $target) = split(/\s+/, $params->{'message'});
+	my $user = $message->from();
+	my ($password, $channel, $target) = split(/\s+/, $message->message());
 
 	# Check for access
-	unless (&Modules::Access::check_access($params->{'user'}, $password, 'deop')) {
-		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
-			return "You don't have permission to do that, $params->{'user'}!";
+	unless (&Modules::Access::check_access($user, $password, 'deop')) {
+		if ($message->is_explicit()) {
+			return "You don't have permission to do that, $user!";
 		} else {
 			return;
 		}
 	}
 
-	&Bot::take_op($channel, $target || $params->{'user'});
+	&Bot::take_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
 
 sub kick($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Split into parts
-	my ($password, $channel, $target, $reason) = split(/\s+/, $params->{'message'}, 4);
+	my $user = $message->from();
+	my ($password, $channel, $target, $reason) = split(/\s+/, $message->message(), 4);
 
 	# Check for access
-	unless (&Modules::Access::check_access($params->{'user'}, $password, 'kick')) {
-		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
-			return "You don't have permission to do that, $params->{'user'}!";
+	unless (&Modules::Access::check_access($user, $password, 'kick')) {
+		if ($message->is_explicit()) {
+			return "You don't have permission to do that, $user!";
 		} else {
 			return;
 		}
@@ -91,15 +94,16 @@ sub kick($)
 
 sub change_nick($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Split into parts
-	my ($password, $nick) = split(/\s+/, $params->{'message'}, 2);
+	my $user = $message->from();
+	my ($password, $nick) = split(/\s+/, $message->message(), 2);
 
 	# Check for access
-	unless (&Modules::Access::check_access($params->{'user'}, $password, 'nick')) {
-		if ($params->{'addressed'} || $params->{'type'} eq 'private') {
-			return "You don't have permission to do that, $params->{'user'}!";
+	unless (&Modules::Access::check_access($user, $password, 'nick')) {
+		if ($message->is_explicit()) {
+			return "You don't have permission to do that, $user!";
 		} else {
 			return;
 		}
@@ -113,15 +117,15 @@ sub change_nick($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	if ($params->{'message'} eq 'op') {
+	if ($message->message() eq 'op') {
 		return "'op <password> <channel> [<user>]': Gives ops to <user> (or you, if no one is named) in <channel>. I need to have ops for this to work, of course. Private messages only.";
-	} elsif ($params->{'message'} eq 'deop') {
+	} elsif ($message->message() eq 'deop') {
 		return "'deop <password> <channel> [<user>]': Removes ops from <user> (or you, if no one is named) in <channel>. I need to have ops for this to work. Private messages only.";
-	} elsif ($params->{'message'} eq 'kick') {
+	} elsif ($message->message() eq 'kick') {
 		return "'kick <password> <channel> <user> [<reason>]': Kicks <user> from <channel>. I need to have ops in that channel for this to work. Private messages only.";
-	} elsif ($params->{'message'} eq 'nick') {
+	} elsif ($message->message() eq 'nick') {
 		return "'nick <password> <name>': Changes my IRC nick to <name>. Private messages only.";
 	}
 }

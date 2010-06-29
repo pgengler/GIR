@@ -33,11 +33,11 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Check for valid id
 	my $data = '';
-	if ($params->{'message'} =~ /^\s*(\d+)\s*$/) {
+	if ($message->message() =~ /^\s*(\d+)\s*$/) {
 		$data = $1;
 	} else {
 		return;
@@ -89,7 +89,7 @@ sub process($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'qdb <id>': retrieves quote <id> from qdb.us and displays it.";
 }

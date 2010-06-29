@@ -25,8 +25,9 @@ sub register()
 
 sub quote($)
 {
-	my $params = shift;
-	my $symbol = $params->{'message'};
+	my $message = shift;
+
+	my $symbol = $message->message();
 
 	return unless $symbol;
 
@@ -58,8 +59,9 @@ sub quote($)
 
 sub short_quote($)
 {
-	my $params = shift;
-	my $symbol = $params->{'message'};
+	my $message = shift;
+
+	my $symbol = $message->message();
 
 	&Bot::status("Looking up stock quote for '$symbol'");
 
@@ -87,9 +89,9 @@ sub short_quote($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	if ($params->{'message'} eq 'quote') {
+	if ($message->message() eq 'quote') {
 		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'.";
 	} else {
 		return "'squote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'.";

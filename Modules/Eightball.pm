@@ -24,7 +24,7 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Check if answers are loaded
 	unless (@answers) {
@@ -44,7 +44,7 @@ sub process($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'8ball <question>': Used a magic 8-ball to try to divine an answer to your question.";
 }

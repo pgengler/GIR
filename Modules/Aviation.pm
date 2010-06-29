@@ -42,9 +42,9 @@ sub register()
 
 sub metar($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $data = $message->message();
 	unless ($data =~ /^\s*[\w\d]{3,4}\s*$/) {
 		return "$data doesn't seem to be a valid airport identifier";
 	}
@@ -65,7 +65,7 @@ sub metar($)
 	my $reply   = $agent->request($request);
 	
 	unless ($reply->is_success) {
-		return "Either $data doesn't exist (try a 4-letter station code like KAGC), or the site NOAA site is unavailable right now.";
+		return "Either $data doesn't exist (try a 4-letter station code like KMMU), or the NOAA site is unavailable right now.";
 	}
 	
 	# extract METAR from incredibly and painfully verbose webpage
@@ -83,9 +83,9 @@ sub metar($)
 
 sub taf($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $data = $message->message();
 	unless ($data =~ /^\s*[\w\d]{3,4}\s*$/) {
 		return "$data doesn't seem to be a valid airport identifier";
 	}
@@ -106,7 +106,7 @@ sub taf($)
 	my $reply = $agent->request($request);
 	
 	unless ($reply->is_success) {
-		return "Either $data doesn't exist (try a 4-letter station code like KAGC), or the site NOAA site is unavailable right now.";
+		return "Either $data doesn't exist (try a 4-letter station code like KEWR), or the NOAA site is unavailable right now.";
 	}
 	
 	# extract TAF from equally verbose webpage
@@ -127,11 +127,11 @@ sub taf($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	if ($params->{'message'} eq 'metar') {
+	if ($message->message() eq 'metar') {
 		return "'metar <airport>': Fetches and displays the last available METAR for the given airport.";
-	} elsif ($params->{'message'} eq 'taf') {
+	} elsif ($message->message() eq 'taf') {
 		return "'taf <airport>': Fetches and displays the last available TAF for the given airport.";
 	}
 }

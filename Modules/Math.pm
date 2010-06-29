@@ -23,8 +23,9 @@ sub register()
 
 sub process()
 {
-	my $params = shift;
-	my $data = $params->{'message'};
+	my $message = shift;
+
+	my $data = $message->message();
 
 	if (($data !~ /^\s*$/) && ($data !~ /(\d+\.){2,}/)) {
 		my $expr = $data;

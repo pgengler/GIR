@@ -22,9 +22,9 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $data = $message->message();
 	$data =~ s/^\s+//;
 	$data =~ s/\s+$//;
 
@@ -50,7 +50,7 @@ sub process($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'spell <word>': Given a possibly-misspelled word; uses ispell to try to find the right spelling.";
 }

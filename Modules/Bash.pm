@@ -34,10 +34,10 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	# Check for valid id
-	my $data = $params->{'message'};
+	my $data = $message->message();
 	unless ($data =~ /^\d+$/) {
 		return;
 	}
@@ -89,7 +89,7 @@ sub process($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'bash <id>': retrieves quote <id> from bash.org and displays it.";
 }

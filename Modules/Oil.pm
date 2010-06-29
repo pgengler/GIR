@@ -21,7 +21,7 @@ sub register()
 
 sub fetch($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	my $url = 'http://www.howmuchisoil.com/csv.cgi';
 

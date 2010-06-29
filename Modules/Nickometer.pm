@@ -29,15 +29,15 @@ sub register()
 
 sub process($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $nick = $message->message();
 
-	if (lc($data) eq 'me') {
-		$data = $params->{'user'};
+	if (lc($nick) eq 'me') {
+		$nick = $message->from();
 	}
 
-	my $percentage = &nickometer($data);
+	my $percentage = &nickometer($nick);
 
 	if ($percentage =~ /NaN/) {
 		$percentage = "off the scale";
@@ -45,7 +45,7 @@ sub process($)
 		$percentage = $percentage . '%';
 	}
 
-	return "'$data' is $percentage lame, $params->{'user'}";
+	return "'$nick' is $percentage lame, " . $message->from();
 }
 
 sub nickometer($)
@@ -213,7 +213,7 @@ sub round_up($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'nickometer <nick>': calculates how lame a nickname is; the user behind the nick may be more or less lame, of course.";
 }

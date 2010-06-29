@@ -25,9 +25,9 @@ sub register()
 
 sub rot13($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my $data = $params->{'message'};
+	my $data = $message->message();
 	$data =~ y/A-Za-z/N-ZA-Mn-za-m/;
 
 	return $data;
@@ -35,7 +35,7 @@ sub rot13($)
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "'rot13 <text>': Performs the ROT13 operation on the given text.";
 }

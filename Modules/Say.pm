@@ -27,31 +27,31 @@ sub register()
 
 sub say($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my ($target, $message) = split(/\s+/, $params->{'message'}, 2);
+	my ($target, $msg) = split(/\s+/, $message->message(), 2);
 
-	if ($params->{'type'} eq 'private' || $params->{'addressed'}) {
-		&Bot::enqueue_say($target, $message);
-		return "OK, $params->{'user'}";
+	if ($message->is_explicit()) {
+		&Bot::enqueue_say($target, $msg);
+		return "OK, " . $message->from();
 	}
 }
 
 sub action($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	my ($target, $message) = split(/\s+/, $params->{'message'}, 2);
+	my ($target, $msg) = split(/\s+/, $message->message(), 2);
 
-	if ($params->{'type'} ne 'public' || $params->{'addressed'}) {
-		&Bot::enqueue_action($target, $message);
-		return "OK, $params->{'user'}";
+	if ($message->is_explicit()) {
+		&Bot::enqueue_action($target, $msg);
+		return "OK, " . $message->from();
 	}
 }
 
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
 	return "Usage: 'say <channel/user> <message>' or 'action <channel/user> <message>'\nSay <message> or do a /me <action> in the given channel or target user. I'll probably need to be in the channel.";
 }

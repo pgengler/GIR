@@ -41,8 +41,8 @@ sub register()
 #######
 sub output($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+	my $data    = $message->message();
 
 	my $first  = undef;
 	my $second = undef;
@@ -157,10 +157,8 @@ sub gen_output(;$$)
 #######
 sub output_multi($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
-
-&Bot::status("data == $data");
+	my $message = shift;
+	my $data    = $message->message();
 
 	my $first  = undef;
 	my $second = undef;
@@ -289,8 +287,8 @@ sub gen_output_multi(;$$)
 #######
 sub output_from_end($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+	my $data    = $message->message();
 
 	my $first  = undef;
 	my $second = undef;
@@ -400,11 +398,11 @@ sub gen_output_from_end(;$$)
 #######
 sub learn($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+	my $data    = $message->message();
 
 	# Skip 'lrrr' and 'tumblr'
-	return if ($params->{'user'} eq 'lrrr' || $params->{'user'} eq 'tumblr');
+	return if ($message->from() eq 'lrrr' || $message->from() eq 'tumblr');
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -447,8 +445,8 @@ sub learn($)
 #######
 sub user_learn($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+	my $data    = $message->message();
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
@@ -480,7 +478,7 @@ sub user_learn($)
 				WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255) AND who = ?
 			~;
 			$db->prepare($query);
-			$db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $params->{'user'});
+			$db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $message->from());
 		} else {
 			$query = qq~
 				INSERT INTO markov
@@ -489,7 +487,7 @@ sub user_learn($)
 				(?, ?, ?, ?)
 			~;
 			$db->prepare($query);
-			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $params->{'user'});
+			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $message->from());
 			$sth->finish();
 		}
 	}
@@ -503,10 +501,10 @@ sub user_learn($)
 #######
 sub respond_if_addressed($)
 {
-	my $params = shift;
-	my $data   = $params->{'message'};
+	my $message = shift;
+	my $data    = $message->message();
 
-	return unless $params->{'addressed'};
+	return unless $message->is_explicit();
 
 	# Based on random numbers, decide which markov method to use and which word(s) to seed with
 
@@ -607,13 +605,13 @@ sub respond_if_addressed($)
 #######
 sub help($)
 {
-	my $params = shift;
+	my $message = shift;
 
-	if ($params->{'message'} eq 'markov') {
+	if ($message->message() eq 'markov') {
 		return "'markov [<word> [<word>]]': create and print a Markov chain starting with the given word(s). At most two words can be used to start the chain. See also 'markov2' and 'vokram'";
-	} elsif ($params->{'message'} eq 'markov2') {
+	} elsif ($message->message() eq 'markov2') {
 		return "'markov2 <word> [<word>]': create and print a Markov chain containing the given word(s). This can appear anywhere in the chain, not just at the beginning. See also 'markov' and 'vokram'";
-	} elsif ($params->{'message'} eq 'vokram') {
+	} elsif ($message->message() eq 'vokram') {
 		return "'vokram <word> [<word>]': create and print a Markov chain that ends with the given word(s). At most two words can be used as the basis for the chain. See also 'markov' and 'markov2'";
 	}
 }
