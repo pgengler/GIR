@@ -14,18 +14,23 @@ use Modules;
 
 package Bot;
 
+use constant {
+	false => 0,
+	true  => 1
+};
+
 #######
 ## GLOBAL VARS
 #######
-our $connected :shared  = 0;
-our $running :shared    = 1;
+our $connected :shared  = false;
+our $running :shared    = true;
 our $config_file        = 'config';
 our $config             = undef;
 our $irc                = undef;
 our $connection         = undef; 
-our $no_console         = 0;
+our $no_console         = false;
 my  $nick_retries       = 0;
-my  %ignore;
+my  %ignores;
 our @commands :shared;
 my %channels;
 
@@ -156,7 +161,7 @@ sub connect()
 	&status("Connecting to port $config->{'server_port'} of server $config->{'server_name'}...");
 
 	$irc = new Net::IRC;
-	$irc->debug($config->{'debug'} ? 1 : 0);
+	$irc->debug($config->{'debug'} ? true : false);
 	$irc->timeout(5);
 	$connection = $irc->newconn(
 		Nick     => $config->{'nick'},
@@ -237,8 +242,8 @@ sub bot_shutdown()
 
 	$connection->disconnect();
 
-	$running = 0;
-	$connected = 0;
+	$running = false;
+	$connected = false;
 
 	threads->exit();
 }
@@ -290,8 +295,8 @@ sub message()
 	my $to   = $message->where();
 	my $text = $message->raw();
 
-	if ($ignore{ lc($nick) }) {
-		if ($to && $to =~ /^\#/) {
+	if (&should_ignore($message)) {
+		if ($message->is_public()) {
 			&status("IGNORED <$nick/$to> $text");
 		} else {
 			&status("IGNORED >$nick< $text");
@@ -330,7 +335,7 @@ sub on_disconnect()
 {
 	my ($conn, $event) = @_;
 
-	$connected = 0;
+	$connected = false;
 }
 
 sub on_nick_change()
@@ -378,7 +383,7 @@ sub on_join()
 
 	if ($config->{'nick'} eq $nick) {
 		&status("Joined channel $channel");
-		$channels{ $channel } = 1;
+		$channels{ $channel } = true;
 	} else {
 		&status("$nick has joined $channel");
 	}
@@ -479,7 +484,7 @@ sub on_invite()
 		&status("$inviter invited invitee to $channel");
 	} else {
 		&status("$inviter invited me to $channel");
-		my %allowed_channels = map { $_ => 1 } split(/\s+/, $config->{'allowed_channels'});
+		my %allowed_channels = map { $_ => true } split(/\s+/, $config->{'allowed_channels'});
 		if ($allowed_channels{ $channel }) {
 			&join_chan($conn, $channel);
 		} else {
@@ -577,9 +582,41 @@ sub load_ignore()
 	open(IGNORE, $config->{'ignore_list'}) || return;
 	while (my $ignore = <IGNORE>) {
 		chomp $ignore;
-		$ignore{ lc($ignore) } = 1;
+		$ignores{ lc($ignore) } = true;
 	}
 	close(IGNORE);
+}
+
+#######
+## SHOULD MESSAGE BE IGNORED?
+#######
+## Parameters:
+##   $message
+##   - a Message object that should be tested
+##
+## Return value:
+##   If the message should be ignored (because the sender's hostmask
+##   matched an entry on the ignore list), returns true.
+##   Otherwise, returns false.
+#######
+sub should_ignore($)
+{
+	my $message = shift;
+
+	foreach my $ignore (keys %ignores) {
+		# Escape everything, then unescape allowed wildcards
+		my $ign = quotemeta($ignore);
+
+		# Convert '*' in hostmask to '.*' in regexp
+		$ign =~ s/\\\*/\.\*/g;
+		# Convert '?' in hostmask to '.' in regexp
+		$ign =~ s/\\\?/\./g;
+
+		if ($message->fullhost() =~ /$ign/i) {
+			return true;
+		}
+	}
+	return false;
 }
 
 ##############
@@ -679,7 +716,7 @@ sub add_ignore()
 	print IGNORE $ignore . "\n";
 	close(IGNORE);
 
-	$ignore{ lc($ignore) } = 1;
+	$ignores{ lc($ignore) } = true;
 }
 
 sub remove_ignore()
@@ -699,7 +736,7 @@ sub remove_ignore()
 	close(IGNORE);
 	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
 
-	undef $ignore{ lc($ignore) };
+	delete $ignores{ lc($ignore) };
 }
 
 sub reload_modules()
@@ -711,7 +748,7 @@ sub reload_modules()
 		&Modules::load_modules();
 	} else {
 		&Modules::unload_module($module);
-		&Modules::load_module($module, 0, 0);
+		&Modules::load_module($module, false, false);
 	}
 }
 
@@ -719,7 +756,7 @@ sub load_module()
 {
 	my $module = shift;
 
-	&Modules::load_module($module, 0, 0);
+	&Modules::load_module($module, false, false);
 }
 
 sub unload_module()
@@ -737,7 +774,7 @@ sub set_debug()
 
 	&status("Setting debug status to $debug");
 
-	my $state = ($debug eq 'on') ? 1 : 0;
+	my $state = ($debug eq 'on');
 
 	$config->{'debug'} = $state;
 	$connection->debug($state);
