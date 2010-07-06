@@ -284,9 +284,11 @@ sub message()
 {
 	my ($conn, $event) = @_;
 
-	my $nick = $event->{'nick'};
-	my $to   = $event->{'to'}[0];
-	my $text = $event->{'args'}[0];
+	my $message = new Message($event);
+
+	my $nick = $message->from();
+	my $to   = $message->where();
+	my $text = $message->raw();
 
 	if ($ignore{ lc($nick) }) {
 		if ($to && $to =~ /^\#/) {
@@ -296,12 +298,6 @@ sub message()
 		}
 		return;
 	}
-
-	my $message = new Message({
-		'nick'  => $nick,
-		'where' => ($to =~ /^\#/) ? $to : $nick,
-		'data'  => $text
-	});
 
 	if ($message->is_public()) {
 		&status("<$nick/$to> $text");

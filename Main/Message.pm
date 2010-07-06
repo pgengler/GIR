@@ -11,28 +11,24 @@ use constant {
 ## CONSTRUCTOR
 #######
 ## Parameters:
-##   Accepts a hashref ($values) with the following keys:
-##   'nick'
-##   - the nickname of the username originating the message
-##   'where'
-##   - the source of the messsage; either a channel name or nick
-##   'data'
-##   - the actual message text
+##   Accepts a Net::IRC::Event object for a public or private message.
 ##
 ## Return value:
 ##   Returns a new instance of the Message class.
 #######
 sub new()
 {
-	my ($class, $values) = @_;
+	my ($class, $event) = @_;
 
 	my $self = {
-		'_nick'      => $values->{'nick'},
-		'_where'     => $values->{'where'},
-		'_raw'       => $values->{'data'},
+		'_nick'      => $event->{'nick'},
+		'_where'     => ($event->{'type'} eq 'public') ? $event->{'to'}[0] : $event->{'nick'},
+		'_raw'       => $event->{'args'}[0],
+		'_host'      => $event->{'host'},
+		'_fullhost'  => $event->{'from'},
 		'_parsed'    => undef,
 		'_addressed' => false,
-		'_public'    => false,
+		'_public'    => ($event->{'type'} eq 'public'),
 	};
 
 	bless $self, $class;
@@ -88,6 +84,39 @@ sub from()
 	my $self = shift;
 
 	return $self->{'_nick'};
+}
+
+#######
+## GET MESSAGE SENDER HOST
+#######
+## Parameters:
+##   NONE
+##
+## Return value:
+##   Returns the host of the user who originated the message.
+#######
+sub host()
+{
+	my $self = shift;
+
+	return $self->{'_host'};
+}
+
+#######
+## GET MESSAGE SENDER INFORMATION
+#######
+## Parameters:
+##   NONE
+##
+## Return value:
+##   Returns the nickname, username, and host of the user who originated
+##   the message, in the form <nick>!<user>@<host>
+#######
+sub fullhost()
+{
+	my $self = shift;
+
+	return $self->{'_fullhost'};
 }
 
 #######
@@ -192,10 +221,6 @@ sub _parse()
 	} elsif ($self->{'_raw'} =~ /(.+?)(\,|\:|\s+)\s*$Bot::config->{'nick'}(\.|\?|\!)?\s*$/i) {
 		$self->{'_addressed'} = true;
 		$self->{'_parsed'}    = $1;
-	}
-
-	if ($self->{'_where'} =~ /^\#/) {
-		$self->{'_public'} = true;
 	}
 }
 
