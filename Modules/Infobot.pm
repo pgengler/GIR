@@ -443,10 +443,8 @@ sub reply($$)
 			return undef;
 		}
 
-		my $msg = new Message({
-			'nick'  => $message->from(),
-			'where' => $message->where(),
-			'data'  => $1,
+		my $msg = new Message($message, {
+			'message' => $1,
 		});
 		$sth->finish();
 		$db->close();
@@ -474,10 +472,8 @@ sub reply($$)
 
 		my $result;
 
-		my $msg = new Message({
-			'nick'  => $message->from(),
-			'where' => $message->where(),
-			'data'  => $data,
+		my $msg = new Message($message, {
+			'message' => $data,
 		});
 
 		if ($extra) {

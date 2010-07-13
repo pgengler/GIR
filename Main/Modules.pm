@@ -361,10 +361,8 @@ sub process()
 		foreach my $action (@{ $actions{ $priority } }) {
 			my $act = $action->{'action'};
 			if ($message->message() =~ /^$act(\!|\.|\?)*$/i || $message->message() =~ /^$act\s+(.+?)$/i) {
-				my $msg = new Message({
-					'nick'  => $message->from(),
-					'where' => $message->where(),
-					'data'  => $1,
+				my $msg = new Message($message, {
+					'message' => $1,
 				});
 				$result = $action->{'function'}->($msg);
 				return $result if $result;
@@ -382,10 +380,8 @@ sub process()
 	unless ($message->is_public()) {
 		foreach my $private (@private) {
 			if ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
-				my $msg = new Message({
-					'nick'  => $message->from(),
-					'where' => $message->where(),
-					'data'  => $1,
+				my $msg = new Message($message, {
+					'message'  => $1,
 				});
 				$result = $private{ $private }->($msg);
 				return $result if $result;

@@ -18,18 +18,38 @@ use constant {
 #######
 sub new()
 {
-	my ($class, $event) = @_;
+	my ($class, $obj, $params) = @_;
 
-	my $self = {
-		'_nick'      => $event->{'nick'},
-		'_where'     => ($event->{'type'} eq 'public') ? $event->{'to'}[0] : $event->{'nick'},
-		'_raw'       => $event->{'args'}[0],
-		'_host'      => $event->{'host'},
-		'_fullhost'  => $event->{'from'},
-		'_parsed'    => undef,
-		'_addressed' => false,
-		'_public'    => ($event->{'type'} eq 'public'),
-	};
+	my $self;
+
+	if ($obj->isa('Net::IRC::Event')) {
+		my $event = $obj;
+		$self = {
+			'_nick'      => $event->{'nick'},
+			'_where'     => ($event->{'type'} eq 'public') ? $event->{'to'}[0] : $event->{'nick'},
+			'_raw'       => $event->{'args'}[0],
+			'_host'      => $event->{'host'},
+			'_fullhost'  => $event->{'from'},
+			'_parsed'    => undef,
+			'_addressed' => false,
+			'_public'    => ($event->{'type'} eq 'public'),
+		};
+	} elsif ($obj->isa('Message')) {
+		my $message = $obj;
+		$params ||= { };
+		$self = {
+			'_nick'      => $params->{'nick'}     || $message->from(),
+			'_where'     => $params->{'where'}    || $message->where(),
+			'_raw'       => $params->{'message'}  || $message->raw(),
+			'_host'      => $params->{'host'}     || $message->host(),
+			'_fullhost'  => $params->{'fullhost'} || $message->fullhost(),
+			'_public'    => $params->{'public'}   || $message->is_public(),
+			'_parsed'    => undef,
+			'_addressed' => false,
+		};
+	} else {
+		die "Can't create new Message from a " . ref($obj);
+	}
 
 	bless $self, $class;
 
