@@ -388,7 +388,7 @@ sub reply($$)
 
 	# Determine if this was likely something explicitly requested.
 	# This means that either the message was private or the line ended with a question mark.
-	my $explicit = (!$message->is_public() || $data =~ /\?\s*$/) ? 1 : 0;
+	my $explicit = (!$message->is_explicit() || $data =~ /\?\s*$/) ? 1 : 0;
 
 	# Trim whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;
@@ -414,7 +414,7 @@ sub reply($$)
 	my $result = $sth->fetchrow_hashref();
 
 	unless ($result && $result->{'phrase'}) {
-		if ($explicit) {
+		if ($message->is_addressed()) {
 			return $dunno[int(rand(scalar(@dunno)))] . ', ' . $message->from();
 		} else {
 			return undef;
