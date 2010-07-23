@@ -54,6 +54,8 @@ sub process($)
 		return $cache{ $station }->{'weather'};
 	}
 
+	&Bot::status("Looking up weather for '$station'") if $Bot::config->{'debug'};
+
 	my $text = &get($base_url . $station . '.xml');
 
 	unless ($text) {
