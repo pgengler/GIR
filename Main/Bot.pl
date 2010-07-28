@@ -228,6 +228,8 @@ sub bot_shutdown()
 {
 	&status("Bot thread is shutting down...");
 
+	&Modules::shutdown();
+
 	# Look for a quit message
 	my $message = "Leaving";
 	foreach my $command (@commands) {

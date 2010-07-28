@@ -403,5 +403,15 @@ sub process()
 	}
 }
 
+sub shutdown()
+{
+	&Bot::status("Cleaning up modules...") if $Bot::config->{'debug'};
+
+	# Wait for threads to finish before exiting
+	if ($pool) {
+		$pool->join();
+	}
+}
+
 1;
 
