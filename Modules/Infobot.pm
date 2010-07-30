@@ -25,7 +25,7 @@ my $forget_expr         = qr/^forget\s+(.+)$/;
 my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
 my $what_reply_expr     = qr/^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/;
 my $question_reply_expr = qr/^(.+)\?$/;
-my $replace_expr        = qr/^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/;
+my $replace_expr        = qr/^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i;
 my $append_expr         = qr/^(.+)\s+(is|are)\s+also\s+(.+)$/;
 
 #######
@@ -62,7 +62,7 @@ sub register()
 
 sub process($)
 {
-	my $message  = shift;
+	my $message = shift;
 
 	my $data = $message->message();
 
@@ -70,10 +70,13 @@ sub process($)
 	if ($data =~ $force_learn_expr) {
 		return &learn($message, $1, $2, $3);
 	} elsif ($data =~ $replace_expr) {
+		my $msg;
 		if ($1) {
-			$message->addressed();
+			$msg = new Message($message, { 'addressed' => 1 });
+		} else {
+			$msg = $message;
 		}
-		return &replace($message, $2, $3, $4);
+		return &replace($msg, $2, $3, $4);
 	} elsif ($data =~ $what_reply_expr) {
 		return &reply($message, $2);
 	} elsif ($data =~ $question_reply_expr) {
@@ -378,6 +381,7 @@ sub replace($$$$)
 	if ($message->is_explicit()) {
 		return "OK, " . $message->from();
 	}
+	return 'NOREPLY';
 }
 
 sub reply_listener($)

@@ -38,14 +38,14 @@ sub new()
 		my $message = $obj;
 		$params ||= { };
 		$self = {
-			'_nick'      => $params->{'nick'}     || $message->from(),
-			'_where'     => $params->{'where'}    || $message->where(),
-			'_raw'       => $params->{'message'}  || $message->raw(),
-			'_host'      => $params->{'host'}     || $message->host(),
-			'_fullhost'  => $params->{'fullhost'} || $message->fullhost(),
-			'_public'    => $params->{'public'}   || $message->is_public(),
+			'_nick'      => $params->{'nick'}      || $message->from(),
+			'_where'     => $params->{'where'}     || $message->where(),
+			'_raw'       => $params->{'message'}   || $message->raw(),
+			'_host'      => $params->{'host'}      || $message->host(),
+			'_fullhost'  => $params->{'fullhost'}  || $message->fullhost(),
+			'_public'    => $params->{'public'}    || $message->is_public(),
+			'_addressed' => $params->{'addressed'} || false,
 			'_parsed'    => undef,
-			'_addressed' => false,
 		};
 	} else {
 		die "Can't create new Message from a " . ref($obj);
