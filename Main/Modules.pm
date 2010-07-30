@@ -360,7 +360,12 @@ sub process()
 	foreach my $priority (sort { $b <=> $a } keys %actions) {
 		foreach my $action (@{ $actions{ $priority } }) {
 			my $act = $action->{'action'};
-			if ($message->message() =~ /^$act(\!|\.|\?)*$/i || $message->message() =~ /^$act\s+(.+?)$/i) {
+			if (ref($act) eq 'Regexp') {
+				if ($message->message() =~ $act) {
+					$result = $action->{'function'}->($message);
+					return $result if $result;
+				}
+			} elsif ($message->message() =~ /^$act(\!|\.|\?)*$/i || $message->message() =~ /^$act\s+(.+?)$/i) {
 				my $msg = new Message($message, {
 					'message' => $1,
 				});
@@ -379,7 +384,12 @@ sub process()
 
 	unless ($message->is_public()) {
 		foreach my $private (@private) {
-			if ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
+			if (ref($private) eq 'Regexp') {
+				if ($message->message() =~ $private) {
+					$result = $private{ $private }->($message);
+					return $result if $result;
+				}
+			} elsif ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
 				my $msg = new Message($message, {
 					'message'  => $1,
 				});
