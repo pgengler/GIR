@@ -89,6 +89,8 @@ use strict;
 my %aliases;
 my %conversions;
 
+my $match_expr = qr/^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/;
+
 ##############
 sub new()
 {
@@ -216,7 +218,7 @@ sub register()
 		's|min'  => \&seconds_to_minutes
 	);	
 
-	&Modules::register_action('REGEXP:^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$', \&Modules::Convert::process);
+	&Modules::register_action($match_expr, \&Modules::Convert::process);
 }
 
 sub process($)
@@ -225,7 +227,7 @@ sub process($)
 
 	my ($value, $from, $to);
 
-	if ($message->message() =~ /^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/i) {
+	if ($message->message() =~ $match_expr) {
 		$value = $1;
 		$from  = lc($3);
 		$to    = lc($4);

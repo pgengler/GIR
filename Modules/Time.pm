@@ -29,7 +29,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('REGEXP:^\s*time\s*$', \&Modules::Time::select);
+	&Modules::register_action('time', \&Modules::Time::select);
 	&Modules::register_action('unixtime', \&Modules::Time::unix_time);
 	&Modules::register_action('localtime', \&Modules::Time::local_time);
 	&Modules::register_action('gmtime', \&Modules::Time::gm_time);

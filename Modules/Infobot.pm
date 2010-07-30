@@ -19,6 +19,15 @@ my @dunno = ("I don't know", 'Wish I knew', 'Beats me', 'I have no idea', "I thi
 
 my $feedbacked = 0;
 
+my $force_learn_expr    = qr/^(.+)\s+\=(is|are)\=\>\s+(.+)$/;
+my $learn_expr          = qr/^(.+)\s+(is|are)\s+(.+)$/;
+my $forget_expr         = qr/^forget\s+(.+)$/;
+my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
+my $what_reply_expr     = qr/^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/;
+my $question_reply_expr = qr/^(.+)\?$/;
+my $replace_expr        = qr/^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/;
+my $append_expr         = qr/^(.+)\s+(is|are)\s+also\s+(.+)$/;
+
 #######
 ## MAIN
 #######
@@ -34,14 +43,14 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('REGEXP:^(.+)\s+\=(is|are)\=\>\s+(.+)$', \&Modules::Infobot::process, 3); # learn() forcefully
-	&Modules::register_action('REGEXP:^(.+)\s+(is|are)\s+(.+)$', \&Modules::Infobot::process); # learn()
-	&Modules::register_action('REGEXP:^forget\s+(.+)$', \&Modules::Infobot::process); # forget()
-	&Modules::register_action('REGEXP:^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$', \&Modules::Infobot::process); # amend()
-	&Modules::register_action('REGEXP:^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$', \&Modules::Infobot::process); # reply()
-	&Modules::register_action('REGEXP:^(.+)\?$', \&Modules::Infobot::process); # reply
-	&Modules::register_action('REGEXP:^no\,?\s+(' . $Bot::config->{'nick'} . ')?\,?\s*(.+?)\s+(is|are)\s+(.+)$', \&Modules::Infobot::process); # replace()
-	&Modules::register_action('REGEXP:^(.+)\s+(is|are)\s+also\s+(.+)$', \&Modules::Infobot::process); # append()
+	&Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
+	&Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
+	&Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
+	&Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
+	&Modules::register_action($what_reply_expr, \&Modules::Infobot::process); # reply()
+	&Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
+	&Modules::register_action($replace_expr, \&Modules::Infobot::process); # replace()
+	&Modules::register_action($append_expr, \&Modules::Infobot::process); # append()
 	&Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
 	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
@@ -58,24 +67,24 @@ sub process($)
 	my $data = $message->message();
 
 	# Figure out what we're doing
-	if ($data =~ /^(.+)\s+\=(is|are)\=\>\s+(.+)$/i) {
+	if ($data =~ $force_learn_expr) {
 		return &learn($message, $1, $2, $3);
-	} elsif ($data =~ /^no\,?\s+($Bot::config->{'nick'})?\,?\s*(.+?)\s+(is|are)\s+(.+)$/i) {
+	} elsif ($data =~ $replace_expr) {
 		if ($1) {
 			$message->addressed();
 		}
 		return &replace($message, $2, $3, $4);
-	} elsif ($data =~ /^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/i) {
+	} elsif ($data =~ $what_reply_expr) {
 		return &reply($message, $2);
-	} elsif ($data =~ /^(.+)\?$/) {
+	} elsif ($data =~ $question_reply_expr) {
 		return &reply($message, $1);
-	} elsif ($data =~ /^(.+)\s+(is|are)\s+also\s+(.+)$/i) {
+	} elsif ($data =~ $append_expr) {
 		return &append($message, $1, $2, $3);
-	} elsif ($data =~ /^(.+)\s+(is|are)\s+(.+)$/i) {
+	} elsif ($data =~ $learn_expr) {
 		return &learn($message, $1, $2, $3);
-	} elsif ($data =~ /^forget\s+(.+)$/i) {
+	} elsif ($data =~ $forget_expr) {
 		return &forget($message, $1);
-	} elsif ($data =~ /^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/i) {
+	} elsif ($data =~ $amend_expr) {
 		return &amend($message, $1, $2, $3);
 	} else {
 		&Bot::status("Infobot::process fell through somehow: message == $data") if $Bot::config->{'debug'};
@@ -388,7 +397,7 @@ sub reply($$)
 
 	# Determine if this was likely something explicitly requested.
 	# This means that either the message was private or the line ended with a question mark.
-	my $explicit = (!$message->is_explicit() || $data =~ /\?\s*$/) ? 1 : 0;
+	my $explicit = (!$message->is_public() || $data =~ /\?\s*$/) ? 1 : 0;
 
 	# Trim whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;

@@ -13,13 +13,14 @@ sub new()
 	return $obj;
 }
 
+my $update_expr = qr/^(.+)(\+\+|\-\-)$/;
 
 sub register()
 {
 	my $this = shift;
 
 	&Modules::register_action('karma', \&Modules::Karma::get);
-	&Modules::register_action('REGEXP:^(.+)(\+\+|\-\-)$', \&Modules::Karma::update);
+	&Modules::register_action($update_expr, \&Modules::Karma::update);
 }
 
 sub get($)
@@ -69,7 +70,7 @@ sub update($)
 	# Parse message for name and direction
 	my $name;
 	my $direction;
-	if ($message->message() =~ /^(.+)(\+\+|\-\-)$/) {
+	if ($message->message() =~ $update_expr) {
 		$name      = $1;
 		$direction = $2;
 	} else {
