@@ -400,8 +400,8 @@ sub reply($$)
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
 
 	# Determine if this was likely something explicitly requested.
-	# This means that either the message was private or the line ended with a question mark.
-	my $explicit = (!$message->is_public() || $data =~ /\?\s*$/) ? 1 : 0;
+	# This means that it included the bot's name and ended in a question mark
+	my $explicit = ($message->is_addressed() && $data =~ /\?\s*$/);
 
 	# Trim whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;
