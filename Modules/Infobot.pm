@@ -427,7 +427,7 @@ sub reply($$)
 	my $result = $sth->fetchrow_hashref();
 
 	unless ($result && $result->{'phrase'}) {
-		if ($message->is_addressed()) {
+		if ($explicit) {
 			return $dunno[int(rand(scalar(@dunno)))] . ', ' . $message->from();
 		} else {
 			return undef;
