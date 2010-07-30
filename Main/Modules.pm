@@ -371,14 +371,7 @@ sub process()
 				});
 				$result = $action->{'function'}->($msg);
 				return $result if $result;
-			} elsif ($act =~ /REGEXP\:(.+)$/) {
-				my $match = $1;
-				if ($message->message() =~ /$match/i) {
-					$result = $action->{'function'}->($message);
-					return $result if $result;
-				}
 			}
-
 		}
 	}
 
@@ -395,12 +388,6 @@ sub process()
 				});
 				$result = $private{ $private }->($msg);
 				return $result if $result;
-			} elsif ($private =~ /^REGEXP\:(.+)$/) {
-				my $match = $1;
-				if ($message->message() =~ /$match/i) {
-					$result = $private{ $private }->($message);
-					return $result if $result;
-				}
 			}
 		}
 	}
