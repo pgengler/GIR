@@ -219,6 +219,27 @@ sub register_action()
 	}
 }
 
+sub unregister_action()
+{
+	my $action = shift;
+
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
+
+	&Bot::status("Unregistering handler for '$action' from '$module'") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }->{'actions'}) {
+		my @actions = ( );
+		foreach my $act (@{ $registered{ $module }->{'actions'} }) {
+			push @actions, $act unless ($act->{'action'} eq $action);
+		}
+		@{ $registered{ $module }->{'actions'} } = @actions;
+	}
+
+	&rebuild_registration_list();
+	&restart_thread_pool();
+}
+
 sub register_private()
 {
 	my ($action, $func) = @_;
