@@ -705,7 +705,11 @@ sub change_nick()
 
 	$connection->nick($nick);
 
+	my $oldnick = $config->{'nick'};
+
 	$config->{'nick'} = $nick;
+
+	&Modules::nick_changed({ old => $oldnick, new => $nick });
 }
 
 sub add_ignore()

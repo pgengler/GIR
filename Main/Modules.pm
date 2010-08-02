@@ -29,10 +29,11 @@ my @loaded_modules;
 # This has is structured as follows:
 # %registered = (
 #   '<module name>' => {
-#     'actions'   => [ list of { 'priority' => <priority>, 'action' => <text to handle>, 'function' => <handler function> } ],
-#     'private'   => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
-#     'listeners' => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
-#     'help'      => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ]
+#     'actions'    => [ list of { 'priority' => <priority>, 'action' => <text to handle>, 'function' => <handler function> } ],
+#     'private'    => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
+#     'listeners'  => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
+#     'help'       => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ],
+#     'nickchange' => <callback function>,
 #   },
 #   ...
 # }
@@ -42,6 +43,7 @@ my %registered;
 # Keep a single list of actions, private handlers, listeners, and help functions
 my (%actions, %private, %listeners);
 our %help;
+my @nickchange;
 
 #######
 ## NOTES
@@ -297,13 +299,30 @@ sub register_help()
 	}
 }
 
+sub register_nickchange()
+{
+	my $func = shift;
+
+	my @caller_info = caller;
+	my $module      = $caller_info[0];
+
+	&Bot::status("Registering nickchange handler from '$module' module") if $Bot::config->{'debug'};
+
+	if (exists $registered{ $module }) {
+		$registered{ $module }->{'nickchange'} = $func;
+	} else {
+		$registered{ $module } = { 'nickchange' => $func };
+	}
+}
+
 sub rebuild_registration_list()
 {
 	# Reset to empty states
-	%actions   = ( );
-	%private   = ( );
-	%help      = ( );
-	%listeners = ( );
+	%actions    = ( );
+	%private    = ( );
+	%help       = ( );
+	%listeners  = ( );
+	@nickchange = ( );
 
 	# Now, repopulate from registered items
 	foreach my $module (keys %registered) {
@@ -322,6 +341,18 @@ sub rebuild_registration_list()
 		foreach my $listener (@{ $registered{ $module }->{'listeners'} }) {
 			push @{ $listeners{ $listener->{'priority'} } }, $listener->{'function'};			
 		}
+		if (exists $registered{ $module }->{'nickchange'}) {
+			push @nickchange, $registered{ $module }->{'nickchange'};
+		}
+	}
+}
+
+sub nick_changed()
+{
+	my $params = shift;
+
+	foreach my $callback (@nickchange) {
+		$callback->($params);
 	}
 }
 
