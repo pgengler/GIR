@@ -39,11 +39,15 @@ my @loaded_modules;
 # }
 my %registered;
 
-
 # Keep a single list of actions, private handlers, listeners, and help functions
 my (%actions, %private, %listeners);
 our %help;
 my @nickchange;
+
+# When set to a true value, suppresses calls to rebuild_registration_list. This is used to avoid
+# calling that function multiple times during initialization without preventing it from being
+# called during normal execution.
+my $suppress_rebuild = 0;
 
 #######
 ## NOTES
@@ -128,7 +132,10 @@ sub load_module()
 
 	# If register() method returns -1, it means that it should not be loaded.
 	# We call unload_module() to make sure the module doesn't leave any handlers running while claiming it shouldn't load.
+
+	$suppress_rebuild = 1;
 	my $ret = $module->register($auto) || 0;
+	$suppress_rebuild = 0;
 
 	if ($ret == -1) {
 		&Bot::status("Module '$name' requested to not be loaded.");
@@ -156,6 +163,7 @@ sub unload_modules()
 	%private        = ( );	
 	%listeners      = ( );
 	%help           = ( );
+	@nickchange     = ( );
 
 	&restart_thread_pool();
 }
@@ -217,6 +225,8 @@ sub register_action()
 			]
 		};
 	}
+
+	&rebuild_registration_list() unless $suppress_rebuild;
 }
 
 sub unregister_action()
