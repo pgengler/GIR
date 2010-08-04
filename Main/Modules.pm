@@ -96,9 +96,9 @@ sub load_modules()
 
 	my $module_dir = $Bot::config->{'module_dir'};
 
-	opendir(DIR, $module_dir) or &Bot::error('Unable to open the modules directory: ' . $!);
-	my @files = readdir(DIR);
-	closedir(DIR);
+	opendir(my $dir, $module_dir) or &Bot::error('Unable to open the modules directory: ' . $!);
+	my @files = readdir($dir);
+	closedir($dir);
 
 	my @modules = grep(/pm$/, @files);
 	my %mod_info;

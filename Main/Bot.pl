@@ -123,16 +123,16 @@ sub bot()
 #######
 sub load_config()
 {
-	open(CONFIG, $config_file || "config") or die "Can't open config file! -- $!";
+	open(my $config, '<', $config_file || 'config') or die "Can't open config file! -- $!";
 	my %config_values;
 
-	while (my $line = <CONFIG>) {
+	while (my $line = <$config>) {
 		next if ($line =~ /^\#/);
 		my ($param, $value) = split(/\s+/, $line, 2);
 		chomp $value;
 		$config_values{ $param } = $value;
 	}
-	close(CONFIG);
+	close($config);
 
 	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
 	$config_values{'config_nick'} = $config_values{'nick'} unless $config_values{'config_nick'};
@@ -276,9 +276,9 @@ sub status()
 		print '[' . localtime() . '] ' . $message . "\n";
 	}
 
-	open(LOG, '>>' . $config->{'config_nick'} . '.log');
-	print LOG '[' . localtime() . '] ' . $message . "\n";
-	close(LOG);
+	open(my $log, '>>', $config->{'config_nick'} . '.log');
+	print $log '[' . localtime() . '] ' . $message . "\n";
+	close($log);
 }
 
 ##############
@@ -581,12 +581,12 @@ sub bot_command()
 ##############
 sub load_ignore()
 {
-	open(IGNORE, $config->{'ignore_list'}) || return;
-	while (my $ignore = <IGNORE>) {
-		chomp $ignore;
-		$ignores{ lc($ignore) } = true;
+	open(my $ignore, '<', $config->{'ignore_list'}) or return;
+	while (my $entry = <$ignore>) {
+		chomp $entry;
+		$ignores{ lc($entry) } = true;
 	}
-	close(IGNORE);
+	close($ignore);
 }
 
 #######
@@ -714,32 +714,32 @@ sub change_nick()
 
 sub add_ignore()
 {
-	my $ignore = shift;
+	my $entry = shift;
 
-	&status("Adding '$ignore' to the ignore list");
+	&status("Adding '$entry' to the ignore list");
 
-	open(IGNORE, '>>' . $config->{'ignore_list'});
-	print IGNORE $ignore . "\n";
-	close(IGNORE);
+	open(my $ignore, '>>', $config->{'ignore_list'}) or do { &status("Updating ignore list failed: $!"); return; };
+	print $ignore $entry . "\n";
+	close($ignore);
 
-	$ignores{ lc($ignore) } = true;
+	$ignores{ lc($entry) } = true;
 }
 
 sub remove_ignore()
 {
-	my $ignore = shift;
+	my $entry = shift;
 
-	&status("Removing '$ignore' from the ignore list");
+	&status("Removing '$entry' from the ignore list");
 
-	open(IGNORE, $config->{'ignore_list'});
-	open(NEWLIST, '>' . $config->{'ignore_list'} . '.tmp');
-	while (my $ign = <IGNORE>) {
-		if (lc($ignore) ne lc($ign)) {
-			print NEWLIST $ign . "\n";
+	open(my $ignore, '<', $config->{'ignore_list'}) or do { &status("Updating ignore list failed: $!"); return };
+	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { &status("Updating ignore list failed: $!"); return; };
+	while (my $ign = <$ignore>) {
+		if (lc($entry) ne lc($ign)) {
+			print $newlist $ign . "\n";
 		}
 	}
-	close(NEWLIST);
-	close(IGNORE);
+	close($newlist);
+	close($ignore);
 	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
 
 	delete $ignores{ lc($ignore) };

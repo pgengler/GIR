@@ -29,11 +29,12 @@ sub process($)
 	# Check if answers are loaded
 	unless (@answers) {
 		my $answer_file = $Bot::config->{'data_dir'} . '/8ball.txt';
-		open(ANSWERS, $answer_file);
-		while (<ANSWERS>) {
+		open(my $fh, '<', $answer_file) or do { &Bot::status("ERROR: Modules::Eightball can't read 8ball.txt: $!"); return undef };
+		while (<$fh>) {
 			chomp;
 			push @answers, $_;
 		}
+		close($fh);
 	}
 
 	if (@answers) {
