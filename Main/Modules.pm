@@ -411,11 +411,16 @@ sub process($;$)
 	$nests ||= 0;
 
 	if ($message->message() =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $Bot::config->{'max_nest'}) {
-		&Bot::status(sprintf("Nested: pre: %s\ncommand: %s\npost: %s", $1 || '', $2 || '', $3 || '')) if $Bot::config->{'debug'};
-		my $msg = new Message($message, { 'message' => $2 });
+		my $pre  = $1 || '';
+		my $nest = $2 || '';
+		my $post = $3 || '';
+		&Bot::status(sprintf("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post)) if $Bot::config->{'debug'};
+
+		my $msg = new Message($message, { 'message' => $nest });
 		my $result = &process($msg, $nests + 1) || '';
+
 		$result = '' if $result eq 'NOREPLY';
-		$result = sprintf('%s%s%s', $1 || '', $result, $3 || '');
+		$result = sprintf('%s%s%s', $pre, $result, $post);
 		$message = new Message($message, { 'message' => $result });
 	}
 

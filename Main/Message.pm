@@ -1,6 +1,7 @@
 package Message;
 
 use strict;
+use feature ':5.10';
 
 use constant {
 	false => 0,
@@ -38,13 +39,13 @@ sub new()
 		my $message = $obj;
 		$params ||= { };
 		$self = {
-			'_nick'      => $params->{'nick'}      || $message->from(),
-			'_where'     => $params->{'where'}     || $message->where(),
-			'_raw'       => $params->{'message'}   || $message->raw(),
-			'_host'      => $params->{'host'}      || $message->host(),
-			'_fullhost'  => $params->{'fullhost'}  || $message->fullhost(),
-			'_public'    => $params->{'public'}    || $message->is_public(),
-			'_addressed' => $params->{'addressed'} || false,
+			'_nick'      => $params->{'nick'}      // $message->from(),
+			'_where'     => $params->{'where'}     // $message->where(),
+			'_raw'       => $params->{'message'}   // $message->raw(),
+			'_host'      => $params->{'host'}      // $message->host(),
+			'_fullhost'  => $params->{'fullhost'}  // $message->fullhost(),
+			'_public'    => $params->{'public'}    // $message->is_public(),
+			'_addressed' => $params->{'addressed'} // $message->is_addressed(),
 			'_parsed'    => undef,
 		};
 	} else {
