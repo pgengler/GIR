@@ -405,9 +405,20 @@ sub dispatch_t()
 	}
 }
 
-sub process()
+sub process($;$)
 {
-	my $message = shift;
+	my ($message, $nests) = @_;
+	$nests ||= 0;
+
+	if ($message->message() =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $Bot::config->{'max_nest'}) {
+		&Bot::status(sprintf("Nested: pre: %s\ncommand: %s\npost: %s", $1 || '', $2 || '', $3 || '')) if $Bot::config->{'debug'};
+		my $msg = new Message($message, { 'message' => $2 });
+		my $result = &process($msg, $nests + 1) || '';
+		$result = '' if $result eq 'NOREPLY';
+		$result = sprintf('%s%s%s', $1 || '', $result, $3 || '');
+		$message = new Message($message, { 'message' => $result });
+	}
+
 
 	# Figure out if the message matches anything
 	## Sort by length to start with the longest
