@@ -526,6 +526,7 @@ sub find_match_aux($$@)
 	$db->prepare($query);
 	my $sth = $db->execute($data);
 	my $result = $sth->fetchrow_hashref();
+	$sth->finish();
 
 	if ($result) {
 		# Make sure there's a suitable match
@@ -538,7 +539,7 @@ sub find_match_aux($$@)
 				my $part = $_;
 				my $need_params = 0;
 				my $eat_extra   = 0;
-				for my $i ($have_params..9) {
+				for my $i (1..9) {
 					$need_params = $i if $part =~ /\$$i\$/;
 				}
 				$eat_extra = 1 if $part =~ /\$\@\$/;
@@ -561,6 +562,32 @@ sub find_match_aux($$@)
 				$result->{'value'} = $parts[int(rand(scalar(@parts)))];
 				&Bot::status("CHOSE: $result->{'value'}");
 			} else {
+				return undef;
+			}
+		} else {
+			# Figure out how many params are required and available
+			my $have_params = scalar(@params);
+			my $need_params = 0;
+			my $eat_extra   = 1 if $result->{'value'} =~ /\$\@\$/;
+
+			for my $i (1..9) {
+				$need_params = $i if $result->{'value'} =~ /\$$i\$/;
+			}
+
+			# Make sure string fits parameters
+			unless (
+				($need_params == 0 && $have_params == 0) # no parameters in part and none provided
+				||
+				(
+					$need_params > 0 # one or more parameters in part
+					&&
+					(
+						(!$eat_extra && $need_params == $have_params) # all parameters are explicit and the number required matches the number given
+						||
+						($eat_extra && $need_params < $have_params)   # catchall param included and number of explicit params is at least one less than number of given params
+					)
+				)
+			) {
 				return undef;
 			}
 		}
