@@ -417,18 +417,9 @@ sub reply($$)
 		return;
 	}
 
-	# Look for a match for the whole string
-	my $query = qq~
-		SELECT phrase, relates, value
-		FROM infobot
-		WHERE LOWER(phrase) = LOWER(?)
-		LIMIT 1
-	~;
-	$db->prepare($query);
-	my $sth = $db->execute($data);
-	my $result = $sth->fetchrow_hashref();
+	my ($phrase, $relates, $value, @params) = &find_match($db, $data);
 
-	unless ($result && $result->{'phrase'}) {
+	unless ($phrase) {
 		if ($explicit) {
 			return $dunno[int(rand(scalar(@dunno)))] . ', ' . $message->from();
 		} else {
@@ -436,37 +427,45 @@ sub reply($$)
 		}
 	}
 
-	&Bot::status("FOUND: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
+	&Bot::status("FOUND: $phrase =$relates=> $value");
 
-	# Parse if we need to
-	my @parts = split(/\|/, $result->{'value'});
-	if (scalar(@parts) > 1) {
-		$result->{'value'} = $parts[int(rand(scalar(@parts)))];
-		&Bot::status("CHOSE: $result->{'value'}");
+	# Replace param placeholders with values
+	my $max_param_used = 0;
+	for my $i (0..$#params) {
+		my $j = $i + 1;
+		my $param = $params[$i];
+		if ($value =~ s/\$($j)\$/$param/g) {
+			$max_param_used = $1;
+		}
+	}
+	if ($max_param_used < scalar(@params) && $value =~ /\$\@\$/) {
+		my $remainder = join(' ', @params[$max_param_used..$#params]);
+		$value =~ s/\$\@\$/$remainder/g;
 	}
 
-	if ($result->{'value'} =~ /^\s*\<reply\>\s*(.+)$/) {
+	# Parse if we need to
+	if ($value =~ /^\s*\<reply\>\s*(.+)$/) {
 		return &parse_special($1, $message->from());
-	} elsif ($result->{'value'} =~ /^\s*\<reply\>\s*$/) {
+	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^\s*\<action\>\s*(.+)$/) {
+	} elsif ($value =~ /^\s*\<action\>\s*(.+)$/) {
 		&Bot::enqueue_action($message->where(), &parse_special($1, $message->from()));
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^\s*\<feedback\>\s*(.+)$/) {
+	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
 			&Bot::status("Feedback limit reached!");
 			return undef;
 		}
 
+		$db->close();
+
 		my $msg = new Message($message, {
 			'message' => $1,
 		});
-		$sth->finish();
-		$db->close();
 		&Modules::dispatch_t($msg);
 		$feedbacked--;
 		return 'NOREPLY';
-	} elsif ($result->{'value'} =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
+	} elsif ($value =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
 
@@ -476,9 +475,6 @@ sub reply($$)
 			&Bot::status("Feedback limit reached!");
 			return undef;
 		}
-		# Don't need to the DB any more
-		$sth->finish();
-		$db->close();
 
 		my $data = $action;
 		if ($param) {
@@ -486,6 +482,8 @@ sub reply($$)
 		}
 
 		my $result;
+
+		$db->close();
 
 		my $msg = new Message($message, {
 			'message' => $data,
@@ -500,8 +498,85 @@ sub reply($$)
 
 		return $result;
 	} else {
-		return "$result->{'phrase'} $result->{'relates'} " . &parse_special($result->{'value'}, $message->from());
+		return "$phrase $relates " . &parse_special($value, $message->from());
 	}
+}
+
+sub find_match($$)
+{
+	my ($db, $data) = @_;
+
+	return &find_match_aux($db, $data, ( ));	
+}
+
+sub find_match_aux($$@)
+{
+	my ($db, $data, @params) = @_;
+
+	return undef unless $data;
+
+	# Look for entry for this phrase
+	&Bot::status("Looking for match for phrase '$data'") if $Bot::config->{'debug'};
+	my $query = qq~
+		SELECT phrase, relates, value
+		FROM infobot
+		WHERE LOWER(phrase) = LOWER(?)
+		LIMIT 1
+	~;
+	$db->prepare($query);
+	my $sth = $db->execute($data);
+	my $result = $sth->fetchrow_hashref();
+
+	if ($result) {
+		# Make sure there's a suitable match
+		my @parts = split(/\s*\|\s*/, $result->{'value'});
+		if (scalar(@parts) > 1) {
+			&Bot::status("Value '$result->{'value'}' has multiple parts") if $Bot::config->{'debug'};
+			my $have_params = scalar(@params);
+			# Keep only parts that don't require more parameters than are available
+			@parts = grep {
+				my $part = $_;
+				my $need_params = 0;
+				my $eat_extra   = 0;
+				for my $i (($have_params+1)..9) {
+					$need_params = $i if $part =~ /\$$i\$/;
+				}
+				$eat_extra = 1 if $part =~ /\$\@\$/;
+				(
+					($need_params == 0 && $have_params == 0) # no parameters in part and none provided
+					||
+					(
+						$need_params > 0 # one or more parameters in part
+						&&
+						(
+							(!$eat_extra && $need_params == $have_params) # all parameters are explicit and the number required matches the number given
+							||
+							($eat_extra && $need_params < $have_params)   # catchall param included and number of explicit params is at least one less than number of given params
+						)
+					)
+				);
+			} @parts;
+
+			if (scalar(@parts) > 0) {
+				$result->{'value'} = $parts[int(rand(scalar(@parts)))];
+				&Bot::status("CHOSE: $result->{'value'}");
+			} else {
+				return undef;
+			}
+		}
+
+		return ($result->{'phrase'}, $result->{'relates'}, $result->{'value'}, @params);
+	}
+
+	# Remove last word from phrase and add to head of @params
+	if ($data =~ /^(.+)\s+(.+?)$/) {
+		$data =~ s/^(.+)\s+(.+?)$/$1/;
+		unshift @params, $2;
+	} else {
+		return undef;
+	}
+
+	return &find_match_aux($db, $data, @params);
 }
 
 sub lock($)
@@ -605,6 +680,8 @@ sub literal($)
 	# Open database
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+
+	&Bot::status("Looking up literal value of '$phrase'") if $Bot::config->{'debug'};
 
 	# Look up this phrase
 	my $query = qq~
