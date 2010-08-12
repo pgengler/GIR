@@ -50,7 +50,7 @@ sub register()
 	&Modules::register_action($what_reply_expr, \&Modules::Infobot::process); # reply()
 	&Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
 	&Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
-	&Modules::register_action($append_expr, \&Modules::Infobot::process); # append()
+	&Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
 	&Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
 	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
 	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
@@ -79,6 +79,8 @@ sub process($)
 			$msg = $message;
 		}
 		return &replace($msg, $3, $4, $5);
+	} elsif ($data =~ $append_expr) {
+		return &append($message, $1, $2, $3);
 	} elsif ($data =~ $learn_expr) {
 		return &learn($message, $1, $2, $3);
 	} elsif ($data =~ $forget_expr) {
@@ -89,8 +91,6 @@ sub process($)
 		return &reply($message, $2);
 	} elsif ($data =~ $question_reply_expr) {
 		return &reply($message, $1);
-	} elsif ($data =~ $append_expr) {
-		return &append($message, $1, $2, $3);
 	} else {
 		&Bot::status("Infobot::process fell through somehow: message == $data") if $Bot::config->{'debug'};
 	}
