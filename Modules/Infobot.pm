@@ -538,7 +538,7 @@ sub find_match_aux($$@)
 				my $part = $_;
 				my $need_params = 0;
 				my $eat_extra   = 0;
-				for my $i (($have_params+1)..9) {
+				for my $i ($have_params..9) {
 					$need_params = $i if $part =~ /\$$i\$/;
 				}
 				$eat_extra = 1 if $part =~ /\$\@\$/;
