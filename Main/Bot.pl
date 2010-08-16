@@ -30,7 +30,7 @@ our $irc                = undef;
 our $connection         = undef; 
 our $no_console         = false;
 my  $nick_retries       = 0;
-my  %ignores;
+my  %ignores :shared;
 our @commands :shared;
 my %channels;
 
@@ -712,17 +712,25 @@ sub change_nick()
 	&Modules::nick_changed({ old => $oldnick, new => $nick });
 }
 
+sub save_ignore_list()
+{
+	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { &status("Updating ignore list failed: $!"); return; };
+	foreach my $entry (keys %ignores) {
+		print $newlist $entry . "\n";
+	}
+	close($newlist);
+	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
+}
+
 sub add_ignore()
 {
 	my $entry = shift;
 
 	&status("Adding '$entry' to the ignore list");
 
-	open(my $ignore, '>>', $config->{'ignore_list'}) or do { &status("Updating ignore list failed: $!"); return; };
-	print $ignore $entry . "\n";
-	close($ignore);
-
 	$ignores{ lc($entry) } = true;
+
+	save_ignore_list();
 }
 
 sub remove_ignore()
@@ -731,18 +739,9 @@ sub remove_ignore()
 
 	&status("Removing '$entry' from the ignore list");
 
-	open(my $ignore, '<', $config->{'ignore_list'}) or do { &status("Updating ignore list failed: $!"); return };
-	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { &status("Updating ignore list failed: $!"); return; };
-	while (my $ign = <$ignore>) {
-		if (lc($entry) ne lc($ign)) {
-			print $newlist $ign . "\n";
-		}
-	}
-	close($newlist);
-	close($ignore);
-	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
+	delete $ignores{ lc($entry) };
 
-	delete $ignores{ lc($ignore) };
+	save_ignore_list();
 }
 
 sub reload_modules()
