@@ -43,6 +43,8 @@ sub select($)
 {
 	my $message = shift;
 
+	return undef unless $message->message() =~ /^\s*time\s*$/;
+
 	my @times = ('unix', 'local', 'gmt', 'swatch', 'veggie');
 	my $time = $times[int(rand(scalar(@times)))];
 
