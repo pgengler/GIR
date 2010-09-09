@@ -31,6 +31,7 @@ sub replace($)
 	$data =~ s/sex/love/gi;
 	$data =~ s/cock/penis/gi;
 	$data =~ s/cunt/vagina/gi;
+	$data =~ s/twat/vuvla/gi;
 
 	return $data;
 }
