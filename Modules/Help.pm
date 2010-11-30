@@ -23,12 +23,13 @@ sub process($)
 
 	return unless $message->is_explicit();
 
-	if ($message->message()) {
-		my $target = $message->message();
-		if ($Modules::help{ $target }) {
-			return $Modules::help{ $target }->($message);
+	my $topic = $message->message();
+
+	if ($topic && $topic !~ /^\s*help\s*$/) {
+		if ($Modules::help{ $topic }) {
+			return $Modules::help{ $topic }->($message);
 		} else {
-			return "No help is available for '$target'";
+			return "No help is available for '$topic'";
 		}
 	} else {
 		my @topics = sort { $a cmp $b } keys %Modules::help;
