@@ -32,11 +32,13 @@ sub lookup($)
 {
 	my $message = shift;
 
-	my $packed_ip = gethostbyname($message->message());
+	my $hostname = $message->message();
+	my $packed_ip = gethostbyname($hostname);
 
 	if (defined($packed_ip)) {
-		return $message->message() . " resolves to " . inet_ntoa($packed_ip);
+		return "$hostname resolves to " . inet_ntoa($packed_ip);
 	} else {
+		&Bot::status("Host '$hostname' not found.");
 		return 'Host not found' if $message->is_addressed();
 	}
 }
