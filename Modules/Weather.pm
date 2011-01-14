@@ -97,7 +97,7 @@ sub process($)
 		}
 		my $value = $doc->{ $ref };
 		# Skip missing data
-		if ($value eq 'NA' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)') {
+		if (ref($value) || $value eq 'NA' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)' || $value eq ' in ( mb)' || $value eq ' F ( C)') {
 			next;
 		}
 
