@@ -43,7 +43,9 @@ sub process($)
 
 	my $station = $message->message();
 
-	if ($station && $station =~ /^(\w{4})\s*$/) {
+	return unless $station;
+
+	if ($station =~ /^(\w{4})\s*$/ || $station =~ /^(\w{4}\d)\s*$/) {
 		$station = $1;
 	} else {
 		return;
