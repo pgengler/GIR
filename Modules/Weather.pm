@@ -75,7 +75,7 @@ sub process($)
 		'3|Dewpoint'          => 'dewpoint_string',
 		'4|Heat index'        => 'heat_index_string',
 		'5|Wind chill'        => 'windchill_string',
-		'6|Relative humidity' => 'relative_humidity|%',
+		'6|Relative humidity' => 'relative_humidity',
 		'7|Pressure'          => 'pressure_string',
 		'8|Winds'             => 'wind_string',
 		'9|Visibility'        => 'visibility_mi| mile(s)'
