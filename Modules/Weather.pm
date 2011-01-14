@@ -65,7 +65,7 @@ sub process($)
 	my $xml = new XML::Simple;
 	my $doc = $xml->xml_in($text);
 
-	if (ref $doc->{'display_location'}->{'latitude'} eq 'HASH') {
+	if (ref $doc->{'display_location'}->{'latitude'} eq 'HASH' || ref $doc->{'observation_location'}->{'latitude'} eq 'HASH') {
 		return 'No weather information available for ' . $station;
 	}
 
