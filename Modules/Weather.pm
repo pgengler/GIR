@@ -92,6 +92,10 @@ sub process($)
 			$append = $2;
 		}
 		my $value = $doc->{ $ref };
+		# Skip missing data
+		if ($value eq 'NA' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)') {
+			next;
+		}
 
 		if ($value) {
 			$weather .= sprintf("%s: %s%s. ", $text, $value, $append);
