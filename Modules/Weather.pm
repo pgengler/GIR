@@ -16,7 +16,7 @@ use XML::Simple;
 #######
 my $CACHE_TIME = 15;	# time to cache (in minutes)
 
-my $base_url = 'http://www.weather.gov/data/current_obs/';
+my $urlTemplate = 'http://api.wunderground.com/auto/wui/geo/WXCurrentObXML/index.xml?query=%s';
 
 my %cache;
 
@@ -45,12 +45,6 @@ sub process($)
 
 	return unless $station;
 
-	if ($station =~ /^(\w{4})\s*$/ || $station =~ /^(\w{4}\d)\s*$/) {
-		$station = $1;
-	} else {
-		return;
-	}
-
 	# Check if we have cached data, and it's still valid
 	if ($cache{ $station } && $cache{ $station }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
 		return $cache{ $station }->{'weather'};
@@ -58,10 +52,10 @@ sub process($)
 
 	&Bot::status("Looking up weather for '$station'") if $Bot::config->{'debug'};
 
-	my $text = &get($base_url . $station . '.xml');
+	my $text = &get(sprintf($urlTemplate, $station));
 
 	unless ($text) {
-		return 'Something failed in contacting the NOAA server.';
+		return 'Something failed in contacting the weather server.';
 	}
 
 	if ($text !~ /\</) {
@@ -87,7 +81,7 @@ sub process($)
 		'9|Visibility'        => 'visibility_mi| mile(s)'
 	);
 
-	my $weather = "Current conditions for $doc->{'location'} ($doc->{'station_id'}). $doc->{'observation_time'}. ";
+	my $weather = "Current conditions for $doc->{'display_location'}->{'full'} ($doc->{'station_id'}). $doc->{'observation_time'}. ";
 
 	foreach my $text (sort { $a cmp $b } keys %components) {
 		my $ref    = $components{ $text };
@@ -116,7 +110,7 @@ sub help($)
 {
 	my $message = shift;
 
-	return "Usage: weather <airport code>\nReturns a formatted string with the latest weather observation for the given airport. Not all airports have weather reporting though most major ones do.";
+	return "Usage: weather <location>\nReturns a formatted string with the latest weather observation for the given location (airport code, ZIP code, etc.).";
 }
 
 1;
