@@ -65,6 +65,10 @@ sub process($)
 	my $xml = new XML::Simple;
 	my $doc = $xml->xml_in($text);
 
+	if (ref $doc->{'display_location'}->{'latitude'} eq 'HASH') {
+		return 'No weather information available for ' . $station;
+	}
+
 	# This maps the string to be included in the output to the name of the value in the XML document.
 	# The number before the pipe (|) in the 'text' string is its position in the result string.
 	# A trailing colon (:) after the string and a period after the whole item will be added automatically.
