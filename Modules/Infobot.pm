@@ -23,7 +23,7 @@ my $force_learn_expr    = qr/^(.+)\s+\=(is|are)\=\>\s+(.+)$/;
 my $learn_expr          = qr/^(.+)\s+(is|are)\s+(.+)$/;
 my $forget_expr         = qr/^forget\s+(.+)$/;
 my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
-my $what_reply_expr     = qr/^(what\s*[\'s|is|are]*\s+)(.+?)(\?)*$/;
+my $what_reply_expr     = qr/^(what\s*(\'s|is|are)*\s+)(.+?)\?*$/;
 my $question_reply_expr = qr/^(.+)\?$/;
 my $replace_expr        = qr/^no\,?\s+(($Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
 my $append_expr         = qr/^(.+)\s+(is|are)\s+also\s+(.+)$/;
@@ -47,7 +47,7 @@ sub register()
 	&Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
 	&Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
 	&Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
-	&Modules::register_action($what_reply_expr, \&Modules::Infobot::process); # reply()
+	&Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
 	&Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
 	&Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
 	&Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
@@ -81,14 +81,14 @@ sub process($)
 		return &replace($msg, $3, $4, $5);
 	} elsif ($data =~ $append_expr) {
 		return &append($message, $1, $2, $3);
+	} elsif ($data =~ $what_reply_expr) {
+		return &reply($message, $3);
 	} elsif ($data =~ $learn_expr) {
 		return &learn($message, $1, $2, $3);
 	} elsif ($data =~ $forget_expr) {
 		return &forget($message, $1);
 	} elsif ($data =~ $amend_expr) {
 		return &amend($message, $1, $2, $3);
-	} elsif ($data =~ $what_reply_expr) {
-		return &reply($message, $2);
 	} elsif ($data =~ $question_reply_expr) {
 		return &reply($message, $1);
 	} else {
