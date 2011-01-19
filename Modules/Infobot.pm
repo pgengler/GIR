@@ -444,7 +444,7 @@ sub reply($$)
 	}
 
 	# Parse if we need to
-	if ($value =~ /^\s*\<reply\>\s*(.+)$/) {
+	if ($value =~ /^\s*\<reply\>\s*(\S.*)$/) {
 		return &parse_special($1, $message->from());
 	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
