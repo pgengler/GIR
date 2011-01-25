@@ -122,7 +122,7 @@ sub learn($$$$)
 
 	$sth->finish();
 
-	if ($result && $result->{'phrase'}) {
+	if ($result) {
 		if ($message->is_explicit()) {
 			return "... but $phrase $relates $result->{'value'}...";
 		} else {
@@ -169,7 +169,7 @@ sub append($$$$)
 
 	$sth->finish();
 
-	if ($result && $result->{'phrase'}) {
+	if ($result) {
 		# Make sure the item isn't locked
 		if ($result->{'locked'}) {
 			if ($message->is_explicit()) {
@@ -283,7 +283,7 @@ sub amend($$$$)
 	my $sth = $db->execute($what);
 	my $result = $sth->fetchrow_hashref();
 
-	unless ($result && $result->{'phrase'}) {
+	unless ($result) {
 		if ($message->is_explicit()) {
 			return "I don't have anything matching '$what', " . $message->from();
 		} else {
@@ -349,7 +349,7 @@ sub replace($$$$)
 	my $sth = $db->execute($what);
 	my $result = $sth->fetchrow_hashref();
 
-	unless ($result && $result->{'phrase'}) {
+	unless ($result) {
 		if ($message->is_explicit()) {
 			return "I don't have anything matching '$what', " . $message->from();
 		} else {
@@ -635,7 +635,7 @@ sub lock($)
 	my $sth = $db->execute($phrase);
 
 	my $entry = $sth->fetchrow_hashref();
-	unless ($entry && $entry->{'phrase'}) {
+	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
 	}
 
@@ -680,7 +680,7 @@ sub unlock($)
 	my $sth = $db->execute($phrase);
 
 	my $entry = $sth->fetchrow_hashref();
-	unless ($entry && $entry->{'phrase'}) {
+	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
 	}
 
@@ -720,7 +720,7 @@ sub literal($)
 	my $sth = $db->execute($phrase);
 	my $result = $sth->fetchrow_hashref();
 
-	if ($result && $result->{'phrase'}) {
+	if ($result) {
 		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 	} else {
 		# Not found; only reply if explicitly addressed publicly or privately
@@ -738,7 +738,7 @@ sub parse_special($$)
 {
 	my ($str, $user) = @_;
 
-	return unless $str;
+	return unless defined $str;
 
 	$str =~ s/\$who/$user/ig;
 
