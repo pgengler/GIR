@@ -443,12 +443,19 @@ sub process($;$)
 					$result = $action->{'function'}->($message);
 					return $result if $result;
 				}
-			} elsif ($message->message() =~ /^$act(\!|\.|\?)*$/i || $message->message() =~ /^$act\s+(.+?)$/i) {
-				my $msg = new Message($message, {
-					'message' => $1,
-				});
-				$result = $action->{'function'}->($msg);
-				return $result if $result;
+			} else {
+				my $msg;
+				if ($message->message() =~ /^$act(\!|\.|\?)*$/i) {
+					$msg = new Message($message, { 'message' => '' });
+				} elsif ($message->message() =~ /^$act\s+(.+?)$/i) {
+					$msg = new Message($message, {
+						'message' => $1,
+					});
+				}
+				if ($msg) {
+					$result = $action->{'function'}->($msg);
+					return $result if $result;
+				}
 			}
 		}
 	}
