@@ -1,3 +1,4 @@
+#!/usr/bin/perl
 #!/opt/perl-thread/bin/perl -w
 
 use strict;
