@@ -401,8 +401,8 @@ sub learn($)
 	my $message = shift;
 	my $data    = $message->message();
 
-	# Skip 'lrrr' and 'tumblr'
-	return if ($message->from() eq 'lrrr' || $message->from() eq 'tumblr');
+	# Skip 'lrrr' and 'douglbutt'
+	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt');
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
