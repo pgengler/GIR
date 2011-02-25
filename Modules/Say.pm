@@ -31,6 +31,8 @@ sub say($)
 
 	my ($target, $msg) = split(/\s+/, $message->message(), 2);
 
+	return undef unless $target && $msg;
+
 	if ($message->is_explicit()) {
 		&Bot::enqueue_say($target, $msg);
 		return "OK, " . $message->from();
@@ -42,6 +44,8 @@ sub action($)
 	my $message = shift;
 
 	my ($target, $msg) = split(/\s+/, $message->message(), 2);
+
+	return undef unless $target && $msg;
 
 	if ($message->is_explicit()) {
 		&Bot::enqueue_action($target, $msg);
