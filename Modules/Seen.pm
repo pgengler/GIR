@@ -30,7 +30,7 @@ sub seen($)
 	my $nick    = $message->message();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Remove leading/trailing whitespace
 	$nick =~ s/^\s*(.+?)\s*$/$1/;
@@ -112,7 +112,7 @@ sub update($)
 	}
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Check to see if we have an entry for this user
 	my $query = qq~

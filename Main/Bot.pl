@@ -9,6 +9,7 @@ use File::Copy;
 use Getopt::Long;
 use Net::IRC;
 use POSIX;
+use YAML;
 
 use Console;
 use Modules;
@@ -28,7 +29,7 @@ our $running :shared    = true;
 our $config_file        = 'config';
 our $config             = undef;
 our $irc                = undef;
-our $connection         = undef; 
+our $connection         = undef;
 our $no_console         = false;
 my  $nick_retries       = 0;
 my  %ignores :shared;
@@ -46,7 +47,7 @@ Getopt::Long::GetOptions(
 );
 
 # Load configuration
-$config = &load_config();
+$config = &load_config($config_file);
 
 # Perform pre-loading initialization for module stuff
 &Modules::init();
@@ -122,23 +123,19 @@ sub bot()
 #######
 ## LOAD CONFIG
 #######
-sub load_config()
+sub load_config($)
 {
-	open(my $config, '<', $config_file || 'config') or die "Can't open config file! -- $!";
-	my %config_values;
+	my $config_file = shift;
+	$config_file ||= 'config';
 
-	while (my $line = <$config>) {
-		next if ($line =~ /^\#/);
-		my ($param, $value) = split(/\s+/, $line, 2);
-		chomp $value;
-		$config_values{ $param } = $value;
-	}
-	close($config);
+	open(my $file, '<', $config_file || 'config') or die "Can't open config file '$config_file' - $!";
+	my $config = YAML::LoadFile($file);
+	close($file);
 
 	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
-	$config_values{'config_nick'} = $config_values{'nick'} unless $config_values{'config_nick'};
+	$config->{'config_nick'} ||= $config->{'nick'};
 
-	return \%config_values;
+	return $config;
 }
 
 #######
@@ -159,15 +156,15 @@ sub on_error()
 #######
 sub connect()
 {
-	&status("Connecting to port $config->{'server_port'} of server $config->{'server_name'}...");
+	&status("Connecting to port $config->{'server'}->{'port'} of server $config->{'server'}->{'host'}...");
 
 	$irc = new Net::IRC;
 	$irc->debug($config->{'debug'} ? true : false);
 	$irc->timeout(5);
 	$connection = $irc->newconn(
 		Nick     => $config->{'nick'},
-		Server   => $config->{'server_name'},
-		Port     => $config->{'server_port'},
+		Server   => $config->{'server'}->{'host'},
+		Port     => $config->{'server'}->{'port'},
 		Ircname  => $config->{'name'} || $config->{'nick'},
 		Username => $config->{'username'} || $config->{'nick'}
 	);
@@ -204,9 +201,7 @@ sub on_connect()
 
 	&status("Joining channels");
 
-	my @channels = split(/\s+/, $config->{'channels'});
-
-	foreach my $chan (@channels) {
+	foreach my $chan (@{ $config->{'channels'}->{'join'} }) {
 		&join_chan($conn, $chan);
 	}
 }
@@ -487,7 +482,7 @@ sub on_invite()
 		&status("$inviter invited invitee to $channel");
 	} else {
 		&status("$inviter invited me to $channel");
-		my %allowed_channels = map { $_ => true } split(/\s+/, $config->{'allowed_channels'});
+		my %allowed_channels = map { $_ => true } @{ $config->{'channels'}->{'allowed'} };
 		if ($allowed_channels{ $channel }) {
 			&join_chan($conn, $channel);
 		} else {

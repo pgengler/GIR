@@ -41,7 +41,7 @@ sub show_access($)
 	return if $message->is_public();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});;
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Look up access for this user
 	my $query = qq~
@@ -75,7 +75,7 @@ sub check_access($$$)
 	my ($user, $password, $access) = @_;
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Look up user
 	my $query = qq~
@@ -118,7 +118,7 @@ sub add_access($)
 	return if $message->is_public();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Get the parts; syntax is <password> <user> <access>
 	my $user = $message->from();
@@ -206,7 +206,7 @@ sub remove_access($)
 	return if $message->is_public();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Get the parts; syntax is <password> <user> <access>
 	my $user = $message->from();
