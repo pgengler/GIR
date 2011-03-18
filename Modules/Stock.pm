@@ -2,7 +2,7 @@ package Modules::Stock;
 
 use strict;
 
-use Finance::Quote;
+use Modules::StockQuote::Google;
 
 sub new()
 {
@@ -45,16 +45,19 @@ sub quote($)
 
 	$symbol = uc($symbol);
 
-	my $finance = new Finance::Quote;
+	my $finance = new StockQuote::Google($symbol);
 
-	my %info = $finance->fetch('usa', $symbol);
+	my $info = $finance->fetch();
 
-	if ($info{$symbol,'last'}  eq '0.00') {
-		&Bot::status("Quote fetch failed for '$symbol'");
-		return;
+	unless ($info) {
+		&Bot::status("Quote lookup failed for '$symbol'");
+		if ($message->addressed()) {
+			return "Unable to get quote for '$symbol'";
+		}
+		return undef;
 	}
 
-	return $info{$symbol,'name'} . ': Last: ' . $info{$symbol,'last'} . ' Change: ' . $info{$symbol,'net'} . '(' . $info{$symbol,'p_change'} . '%) Open: ' . $info{$symbol,'open'} . ' Close: ' . $info{$symbol,'close'} . ' Day Range: ' . $info{$symbol,'day_range'} . ' Year Range: ' . $info{$symbol,'year_range'} . ' Volume: ' . $info{$symbol,'volume'};
+	return sprintf('%s: Last: %s Change: %s %s Open: %s Day Range: %s Year Range: %s', $info->{'name'}, $info->{'price'}, $info->{'change'}, $info->{'pctChange'}, $info->{'open'}, $info->{'dayRange'}, $info->{'yearRange'});
 }
 
 sub short_quote($)
@@ -75,16 +78,19 @@ sub short_quote($)
 
 	$symbol = uc($symbol);
 
-	my $finance = new Finance::Quote;
+	my $quote = new StockQuote::Google($symbol);
 
-	my %info = $finance->fetch('usa', $symbol);
+	my $info = $quote->fetch();
 
-	if ($info{$symbol,'last'}  eq '0.00') {
-		&Bot::status("Quote fetch failed for '$symbol'");
-		return;
+	unless ($info) {
+		&Bot::status("Quote lookup failed for '$symbol'");
+		if ($message->addressed()) {
+			return "Unable to get quote for '$symbol'";
+		}
+		return undef;
 	}
 
-	return "$symbol: $info{$symbol,'last'}, $info{$symbol,'net'} ($info{$symbol,'p_change'}%)";
+	return sprintf('%s: %s, %s %s', $info->{'name'}, $info->{'price'}, $info->{'change'}, $info->{'pctChange'});
 }
 
 sub help($)
