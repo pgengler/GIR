@@ -35,7 +35,7 @@ sub get($)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	my $query = qq~
 		SELECT name, karma
@@ -83,7 +83,7 @@ sub update($)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Check if entry already exists
 	my $query = qq~

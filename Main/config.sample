@@ -1,16 +1,25 @@
-#debug 1
-server_name      <your IRC server>
-server_port      6667
-nick             GIR
-nickserv_pass    <nickserv pass
-channels         #GIR #chat
-module_dir       /home/gir/Modules/
-data_dir         /home/gir/Modules/data
-8ball            /home/git/Modules/data/8ball.txt
-allowed_channels #GIR #chat #another
-ignore_list      /home/gir/Modules/data/ignore.txt
-db_user          ircbot
-db_pass          <db password>
-db_name          ircbot
-max_nest         3
+---
+8ball: /home/ircbot/Modules/data/8ball.txt
+channels:
+  allowed:
+    - '#yourchan'
+    - '#anotherchan'
+  join:
+    - '#yourchan'
+data_dir: /home/ircbot/Modules/data
+database:
+  name: ircbot
+  password: <your db password>
+  user: ircbot
+debug: 0
+ignore_list: /home/ircbot/Modules/data/ignore.txt
+infobot_min_length: 2
+max_nest: 4
+module_dir: /home/ircbot/Modules/
+name: InfoBot
+nick: InfoBot
+server:
+  host: irc.slashnet.org
+  port: 6667
+username: ircbot
 

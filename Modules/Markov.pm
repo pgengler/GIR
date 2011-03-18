@@ -62,7 +62,7 @@ sub gen_output(;$$)
 	my ($first, $second) = @_;
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 	my $word;
 
 	my $phrase = '';
@@ -176,7 +176,7 @@ sub gen_output_multi(;$$)
 	my ($first, $second) = @_;
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 	my $word;
 
 	my $phrase = '';
@@ -309,7 +309,7 @@ sub gen_output_from_end(;$$)
 	my $phrase = '';
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	my $query;
 
@@ -405,7 +405,7 @@ sub learn($)
 	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt');
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	my @parts = split(/\s+/, $data);
 
@@ -449,7 +449,7 @@ sub user_learn($)
 	my $data    = $message->message();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	my @parts = split(/\s+/, $data);
 

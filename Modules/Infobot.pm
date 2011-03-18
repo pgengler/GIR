@@ -107,7 +107,7 @@ sub learn($$$$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Check to see if we already have something matching this
 	my $query = qq~
@@ -154,7 +154,7 @@ sub append($$$$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Get current info
 	my $query = qq~
@@ -212,7 +212,7 @@ sub forget($$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# cut off final punctuation
 	$what =~ s/[.!?]+$//;
@@ -270,7 +270,7 @@ sub amend($$$$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Look for initial value
 	my $query = qq~
@@ -337,7 +337,7 @@ sub replace($$$$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Look up current value
 	my $query = qq~
@@ -399,7 +399,7 @@ sub reply($$)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Determine if this was likely something explicitly requested.
 	# This means that it included the bot's name and ended in a question mark
@@ -623,7 +623,7 @@ sub lock($)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Make sure phrase exists
 	my $query = qq~
@@ -668,7 +668,7 @@ sub unlock($)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	# Make sure phrase exists
 	my $query = qq~
@@ -706,7 +706,7 @@ sub literal($)
 
 	# Open database
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	&Bot::status("Looking up literal value of '$phrase'") if $Bot::config->{'debug'};
 

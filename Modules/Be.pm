@@ -37,7 +37,7 @@ sub output()
 	return unless $message->is_addressed();
 
 	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'db_user'}, $Bot::config->{'db_pass'}, $Bot::config->{'db_name'});
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
 	my $query = qq~
 		SELECT this, next
