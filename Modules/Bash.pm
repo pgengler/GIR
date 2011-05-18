@@ -8,9 +8,6 @@ use strict;
 #######
 ## INCLUDES
 #######
-BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File) }
-use AnyDBM_File;
-use Fcntl;
 use HTML::Entities;
 use LWP::UserAgent;
 
@@ -42,16 +39,23 @@ sub process($)
 		return;
 	}
 
-	my $result;
+	# Look for quote in DB cache
+	my $db = new Database::MySQL();
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
-	my %quotes;
-	tie(%quotes, 'AnyDBM_File', $Bot::config->{'data_dir'} . '/bashquotes', O_RDWR|O_CREAT);
+	my $sql = qq(
+		SELECT quote
+		FROM bashquotes
+		WHERE id = ?
+	);
+	$db->prepare($sql);
+	my $sth = $db->execute($data);
+	my $row = $sth->fetchrow_hashref();
 
-	# Check if we have this one cached
-	if ($quotes{ $data }) {
-		my $result = $quotes{ $data };
-		untie %quotes;
-		return $result;
+	my $quote = $row ? $row->{'quote'} : undef;
+
+	if ($quote) {
+		return $quote;
 	}
 
 	# Fetch from bash.org
@@ -65,26 +69,32 @@ sub process($)
 	my $response = $ua->request($request); 
 
 	if (!$response->is_success) {
-		untie %quotes;
 		return "Something failed in connecting to bash.org. Try again later.";
 	}
 
-	my $content = $response->content;
+	my $content = $response->content();
 
 	if ($content =~ /Quote #$data was rejected/ || $content =~ /Quote #$data does not exist/ || $content =~ /Quote #$data is pending moderation/) {
-		untie %quotes;
 		return "Couldn't get quote $data. It probably doesn't exist";
 	}
 
 	if ($content =~ /\<p class=\"qt\"\>(.+?)\<\/p\>/s) {
-		$result = &HTML::Entities::decode_entities($1);
-		$result =~ s/\<br \/\>/\n/g;
-		$quotes{ $data } = $result;
+		my $quote = &HTML::Entities::decode_entities($1);
+		$quote =~ s/\<br \/\>/\n/g;
+
+		$sql = qq(
+			INSERT INTO bashquotes
+			(id, quote)
+			VALUES
+			(?, ?)
+		);
+		$db->prepare($sql);
+		$db->execute($data, $quote);
+
+		return $quote;
 	} else {
-		$result = "Couldn't get quote $data. It probably doesn't exist.";
+		return "Couldn't get quote $data. It probably doesn't exist.";
 	}
-	untie %quotes;
-	return $result;
 }
 
 sub help($)
