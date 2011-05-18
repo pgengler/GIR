@@ -8,8 +8,6 @@ use strict;
 #######
 ## INCLUDES
 #######
-use AnyDBM_File;
-use Fcntl;
 use HTML::Entities;
 use LWP::UserAgent;
 
@@ -43,16 +41,23 @@ sub process($)
 		return;
 	}
 
-	my $result;
+	# Look for quote in DB cache
+	my $db = new Database::MySQL();
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
-	my %quotes;
-	tie(%quotes, 'AnyDBM_File', $Bot::config->{'data_dir'} . '/qdbquotes', O_RDWR|O_CREAT);
+	my $sql = qq(
+		SELECT quote
+		FROM qdbquotes
+		WHERE id = ?
+	);
+	$db->prepare($sql);
+	my $sth = $db->execute($data);
+	my $row = $sth->fetchrow_hashref();
 
-	# Check if we have this one cached
-	if ($quotes{ $data }) {
-		my $result = $quotes{ $data };
-		untie %quotes;
-		return $result;
+	my $quote = $row ? $row->{'quote'} : undef;
+
+	if ($quote) {
+		return $quote;
 	}
 
 	# Fetch from qdb.us
@@ -66,25 +71,22 @@ sub process($)
 	my $response = $ua->request($request); 
 
 	if (!$response->is_success) {
-		untie %quotes;
 		return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
 	}
 
 	my $content = $response->content;
 
 	if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
-		$result = &HTML::Entities::decode_entities($1);
-		$result =~ s/\<br \/\>/\n/g;
-		$quotes{ $data } = $result;
+		my $quote = _process($1);
+		_saveQuote($data, $quote);
+		return $quote;
 	} elsif ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
-		$result = &HTML::Entities::decode_entities($1);
-		$result =~ s/\<br \/\>/\n/g;
-		$quotes{ $data } = $result;
+		my $quote = _process($1);
+		_saveQuote($data, $quote);
+		return $quote;
 	} else {
-		$result = "Couldn't get quote $data. It probably doesn't exist.";
+		return "Couldn't get quote $data. It probably doesn't exist.";
 	}
-	untie %quotes;
-	return $result;
 }
 
 sub help($)
@@ -92,6 +94,33 @@ sub help($)
 	my $message = shift;
 
 	return "'qdb <id>': retrieves quote <id> from qdb.us and displays it.";
+}
+
+sub _process($)
+{
+	my ($quote) = @_;
+
+	$quote = HTML::Entities::decode_entities($quote);
+	$quote =~ s/\<br \/\>/\n/g;
+
+	return $quote;
+}
+
+sub _saveQuote($$)
+{
+	my ($id, $quote) = @_;
+
+	my $db = new Database::MySQL();
+	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
+
+	my $sql = q(
+		INSERT INTO qdbquotes
+		(id, quote)
+		VALUES
+		(?, ?)
+	);
+	$db->prepare($sql);
+	$db->execute($id, $quote);
 }
 
 1;
