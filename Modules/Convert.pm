@@ -1,18 +1,5 @@
 package Modules::Convert;
 
-## * Speed
-##   * miles/hour
-##   * miles/minute
-##   * miles/second
-##   * feet/hour
-##   * feet/minute
-##   * feet/second
-##   * km/hour
-##   * km/minute
-##   * km/second
-##   * m/hour
-##   * m/minute
-##   * m/second
 #######
 ## PERL SETUP
 #######
@@ -26,6 +13,9 @@ my $match_expr = qr/^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/;
 
 my $conversions = {
 	# Distance conversions
+	'au' => {
+		'km' => \&astronomical_units_to_kilometers,
+	},
 	'cm' => {
 		'in' => \&centimeters_to_inches,
 		'm'  => \&centimeters_to_meters,
@@ -41,6 +31,7 @@ my $conversions = {
 		'ft' => \&inches_to_feet,
 	},
 	'km' => {
+		'au' => \&kilometers_to_astronomical_units,
 		'm'  => \&kilometers_to_meters,
 	},
 	'm'  => {
@@ -133,6 +124,7 @@ sub register()
 		'second'      => 's',
 		'seconds'     => 's',
 		'sm'          => 'mi',
+		'ua'          => 'au',
 		'yard'        => 'yd',
 		'yards'       => 'yd'
 	);
@@ -268,6 +260,13 @@ sub kelvin_to_celcius($)
 ## DISTANCE CONVERSION FUNCTIONS
 ##############
 
+sub astronomical_units_to_kilometers($)
+{
+	my ($au) = @_;
+
+	return $au * 149_597_870.7;
+}
+
 sub centimeters_to_inches($)
 {
 	my ($centimeters) = @_;
@@ -322,6 +321,13 @@ sub inches_to_feet($)
 	my ($inches) = @_;
 
 	return $inches / 12.0;
+}
+
+sub kilometers_to_astronomical_units($)
+{
+	my ($kilometers) = @_;
+
+	return $kilometers / 149,597,870.7;
 }
 
 sub kilometers_to_meters($)
