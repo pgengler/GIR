@@ -43,6 +43,14 @@ sub show_access($)
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
+	my $user = $message->from();
+	my $isSelf = 1;
+
+	if ($message->message()) {
+		$user = $message->message();
+		$isSelf = 0;
+	}
+
 	# Look up access for this user
 	my $query = qq~
 		SELECT name
@@ -51,17 +59,19 @@ sub show_access($)
 		WHERE up.user_id = (SELECT id FROM access_users WHERE nick = ?)
 	~;
 	$db->prepare($query);
-	my $sth = $db->execute($message->from());
+	my $sth = $db->execute($user);
 
 	my @permissions;
 	while (my $permission = $sth->fetchrow_hashref()) {
 		push @permissions, $permission->{'name'};
 	}
 
+	$user = $isSelf ? 'You' : $user;
+
 	if (scalar(@permissions) > 0) {
-		return 'You have the following permissions: ' . join(', ', @permissions);
+		return sprintf('%s %s the following permissions: %s', $user, $isSelf ? 'have' : 'has', join(', ', @permissions));
 	} else {
-		return 'You do not have any special permissions.';
+		return sprintf('%s do%s not have any special permissions.', $user, $isSelf ? '' : 'es');
 	}
 }
 
