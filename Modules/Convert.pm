@@ -41,6 +41,7 @@ my $conversions = {
 	'ly' => {
 		'ls' => \&light_years_to_light_seconds,
 		'km' => \&light_years_to_kilometers,
+		'pc' => \&light_years_to_parsecs,
 	},
 	'm'  => {
 		'cm' => \&meters_to_centimeters,
@@ -55,6 +56,9 @@ my $conversions = {
 	},
 	'nm' => {
 		'mi' => \&nautical_miles_to_miles,
+	},
+	'pc' => {
+		'ly' => \&parsecs_to_light_years,
 	},
 	'yd' => {
 		'ft' => \&yards_to_feet,
@@ -373,6 +377,13 @@ sub light_years_to_kilometers($)
 	return $lightYears * 9_460_730_472_580.8;
 }
 
+sub light_years_to_parsecs($)
+{
+	my ($lightYears) = @_;
+
+	return $lightYears / 3.26156;
+}
+
 sub meters_to_centimeters($)
 {
 	my ($meters) = @_;
@@ -413,6 +424,13 @@ sub nautical_miles_to_miles($)
 	my ($nauticalMiles) = @_;
 
 	return $nauticalMiles / 0.868976242;
+}
+
+sub parsecs_to_light_years($)
+{
+	my ($parsecs) = @_;
+
+	return $parsecs * 3.26156;
 }
 
 sub yards_to_feet($)
