@@ -32,7 +32,15 @@ my $conversions = {
 	},
 	'km' => {
 		'au' => \&kilometers_to_astronomical_units,
+		'ly' => \&kilometers_to_light_years,
 		'm'  => \&kilometers_to_meters,
+	},
+	'ls' => {
+		'ly' => \&light_seconds_to_light_years,
+	},
+	'ly' => {
+		'ls' => \&light_years_to_light_seconds,
+		'km' => \&light_years_to_kilometers,
 	},
 	'm'  => {
 		'cm' => \&meters_to_centimeters,
@@ -327,7 +335,14 @@ sub kilometers_to_astronomical_units($)
 {
 	my ($kilometers) = @_;
 
-	return $kilometers / 149,597,870.7;
+	return $kilometers / 149_597_870.7;
+}
+
+sub kilometers_to_light_years($)
+{
+	my ($kilometers) = @_;
+
+	return $kilometers / 9_460_730_472_580.8;
 }
 
 sub kilometers_to_meters($)
@@ -335,6 +350,27 @@ sub kilometers_to_meters($)
 	my ($kilometers) = @_;
 
 	return $kilometers * 1000;
+}
+
+sub light_seconds_to_light_years($)
+{
+	my ($lightSeconds) = @_;
+
+	return $lightSeconds / 31_557_600.0;
+}
+
+sub light_years_to_light_seconds($)
+{
+	my ($lightYears) = @_;
+
+	return $lightYears * 31_557_600;
+}
+
+sub light_years_to_kilometers($)
+{
+	my ($lightYears) = @_;
+
+	return $lightYears * 9_460_730_472_580.8;
 }
 
 sub meters_to_centimeters($)
