@@ -104,15 +104,28 @@ sub gen_output(;$$)
 		}
 	} else {
 		# Pick random starting word
+		## First, get count of rows
 		my $query = qq~
-			SELECT this, next
+			SELECT COUNT(*) AS count
 			FROM words
 			WHERE prev = '__BEGIN__'
-			ORDER BY RAND()
-			LIMIT 1
 		~;
 		$db->prepare($query);
 		my $sth = $db->execute();
+		my $count = $sth->fetchrow_hashref()->{'count'};
+
+		## Now pick a random number between 0 and $count - 1
+		my $row = int(rand($count));
+
+		## Now get the $row-th row
+		$query = qq~
+			SELECT this, next
+			FROM words
+			WHERE prev = '__BEGIN__'
+			LIMIT $row, 1
+		~;
+		$db->prepare($query);
+		$sth = $db->execute();
 		$word = $sth->fetchrow_hashref();
 		$sth->finish();
 	}
@@ -350,15 +363,28 @@ sub gen_output_from_end(;$$)
 		}
 	} else {
 		# Pick random starting word
+		## First, get count of rows
+		my $query = qq~
+			SELECT COUNT(*) AS count
+			FROM words
+			WHERE next = '__END__'
+		~;
+		$db->prepare($query);
+		my $sth = $db->execute();
+		my $count = $sth->fetchrow_hashref()->{'count'};
+
+		## Now pick a random number between 0 and $count - 1
+		my $row = int(rand($count));
+
+		## Now get the $row-th row
 		$query = qq~
 			SELECT prev, this
 			FROM words
 			WHERE next = '__END__'
-			ORDER BY RAND()
-			LIMIT 1
+			LIMIT $row, 1
 		~;
 		$db->prepare($query);
-		my $sth = $db->execute();
+		$sth = $db->execute();
 		$word = $sth->fetchrow_hashref();
 		$sth->finish();
 	}
@@ -401,8 +427,8 @@ sub learn($)
 	my $message = shift;
 	my $data    = $message->message();
 
-	# Skip 'lrrr' and 'douglbutt'
-	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt');
+	# Skip #mefi bots (TODO: generalize this)
+	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt' || $message->from() eq 'shake');
 
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
