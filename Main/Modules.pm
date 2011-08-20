@@ -128,8 +128,6 @@ sub load_module()
 		return;
 	}
 
-	&Bot::status("Loaded module $name");
-
 	# If register() method returns -1, it means that it should not be loaded.
 	# We call unload_module() to make sure the module doesn't leave any handlers running while claiming it shouldn't load.
 
@@ -144,6 +142,8 @@ sub load_module()
 	}
 
 	push @loaded_modules, $class;
+
+	&Bot::status("Loaded module $name");
 
 	&rebuild_registration_list();
 	# Only restart the thread pool when we load a specific module; when we're loading everything, don't restart the thread pool when each module is loaded
