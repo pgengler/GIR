@@ -101,7 +101,7 @@ my $conversions = {
 		'oz' => \&pounds_to_ounces,
 	},
 	'oz' => {
-		'lb' => \&ounches_to_pounds,
+		'lb' => \&ounces_to_pounds,
 	},
 };
 
