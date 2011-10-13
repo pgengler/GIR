@@ -87,6 +87,22 @@ my $conversions = {
 	's'   => {
 		'min' => \&seconds_to_minutes,
 	},
+
+	# Weight/mass conversions
+	'g' => {
+		'kg' => \&grams_to_kilograms,
+	},
+	'kg' => {
+		'lb' => \&kilograms_to_pounds,
+		'g'  => \&kilograms_to_grams,
+	},
+	'lb' => {
+		'kg' => \&pounds_to_kilograms,
+		'oz' => \&pounds_to_ounces,
+	},
+	'oz' => {
+		'lb' => \&ounches_to_pounds,
+	},
 };
 
 ##############
@@ -114,11 +130,15 @@ sub register()
 		'feet'          => 'ft',
 		'foot'          => 'ft',
 		'fps'           => 'ft/s',
+		'gram'          => 'g',
+		'grams'         => 'g',
 		'hour'          => 'hr',
 		'hours'         => 'hr',
 		'inch'          => 'in',
 		'inches'        => 'in',
 		'kelvin'        => 'k',
+		'kilogram'      => 'kg',
+		'kilograms'     => 'kg',
 		'kilometer'     => 'km',
 		'kilometers'    => 'km',
 		'kilometre'     => 'km',
@@ -140,8 +160,12 @@ sub register()
 		'minute'        => 'min',
 		'minutes'       => 'min',
 		'mph'           => 'mi/hr',
+		'ounce'         => 'oz',
+		'ounces'        => 'oz',
 		'parsec'        => 'pc',
 		'parsecs'       => 'pc',
+		'pound'         => 'lb',
+		'pounds'        => 'lb',
 		'second'        => 's',
 		'seconds'       => 's',
 		'sm'            => 'mi',
@@ -478,6 +502,55 @@ sub seconds_to_minutes($)
 	my ($seconds) = @_;
 
 	return $seconds / 60.0;
+}
+
+##############
+## WEIGHT/MASS CONVERSION FUNCTIONS
+##
+## Assume standard earth gravity (9.8m/s^2)
+## when converting between mass and weight.
+##############
+
+sub grams_to_kilgrams($)
+{
+	my ($grams) = @_;
+
+	return $grams / 1000.0;
+}
+
+sub kilograms_to_grams($)
+{
+	my ($kilograms) = @_;
+
+	return $kilograms * 1000.0;
+}
+
+sub kilograms_to_pounds($)
+{
+	my ($kilograms) = @_;
+
+	return $kilograms * 2.20462262;
+}
+
+sub ounces_to_pounds($)
+{
+	my ($ounces) = @_;
+
+	return $ounces / 16.0;
+}
+
+sub pounds_to_kilograms($)
+{
+	my ($pounds) = @_;
+
+	return $pounds / 2.20462262;
+}
+
+sub pounds_to_ounces($)
+{
+	my ($pounds) = @_;
+
+	return $pounds * 16.0;
 }
 
 1;
