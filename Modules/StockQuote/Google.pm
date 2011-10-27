@@ -63,9 +63,9 @@ sub fetch()
 		'price'     => $tree->findvalue('/html/body//span[@class="pr"]/span'),
 		'change'    => $tree->findvalue('/html/body//span[@class="chg"][1]') || $tree->findvalue('/html/body//span[@class="chr"][1]'),
 		'pctChange' => $tree->findvalue('/html/body//span[@class="chg"][2]') || $tree->findvalue('/html/body//span[@class="chr"][2]'),
-		'open'      => $tree->findvalue('/html/body//span[@data-snapfield="open"]/following-sibling::span'),
-		'dayRange'  => $tree->findvalue('/html/body//span[@data-snapfield="range"]/following-sibling::span'),
-		'yearRange' => $tree->findvalue('/html/body//span[@data-snapfield="range_52week"]/following-sibling::span'),
+		'open'      => $tree->findvalue('/html/body//td[@data-snapfield="open"]/following-sibling::td'),
+		'dayRange'  => $tree->findvalue('/html/body//td[@data-snapfield="range"]/following-sibling::td'),
+		'yearRange' => $tree->findvalue('/html/body//td[@data-snapfield="range_52week"]/following-sibling::td'),
 	};
 
 	return $info;
