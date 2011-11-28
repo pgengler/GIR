@@ -37,6 +37,9 @@ sub process($)
 		$nick = $message->from();
 	}
 
+	# Remove leading and trailing whitespace
+	$nick =~ s/^\s*(.+?)\s*$/$1/;
+
 	my $percentage = &nickometer($nick);
 
 	if ($percentage =~ /NaN/) {
