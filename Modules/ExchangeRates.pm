@@ -14,7 +14,7 @@ sub new()
 	return $obj;
 }
 
-my $handleRE = qr/\s*exchange\s+(\w{3})\s+(for|to)\s+(\w{3})\s*/;
+my $handleRE = qr/\s*exchange\s+(\d*(\.\d+)?)?\s*(\w{3})\s+(for|to)\s+(\w{3})\s*/;
 my $urlFormat = 'http://themoneyconverter.com/%s/rss.xml';
 
 sub register()
@@ -31,7 +31,7 @@ sub convert($)
 	my $message = shift;
 
 	$message =~ /$handleRE/;
-	my ($from, $to) = (uc($1), uc($3));
+	my ($amount, $from, $to) = ($1, uc($3), uc($5));
 
 	&Bot::status("Mdules::ExchangeRates: Exchanging $from to $to") if $Bot::config->{'debug'};
 
@@ -44,7 +44,17 @@ sub convert($)
 		my $conversions = _parse($content);
 
 		if (exists $conversions->{ $to }) {
-			return $conversions->{ $to };
+			my $conversion = $conversions->{ $to };
+
+			if ($amount) {
+				$conversion =~ /= (\d+\.\d+)/;
+				my $rate = $1;
+				my $result = $amount * $rate;
+				$conversion =~ s/^1/$amount/;
+				$conversion =~ s/$rate/$result/;
+			}
+
+			return $conversion;
 		} else {
 			return "Can't convert between '$from' and '$to'";
 		}
