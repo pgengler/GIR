@@ -22,6 +22,7 @@ sub register()
 		&Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {
 		&Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
+		return -1;
 	}
 }
 
