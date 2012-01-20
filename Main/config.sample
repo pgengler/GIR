@@ -1,25 +1,61 @@
+# Sample configuration file for the bot. 
+# If you rename this file as 'config' (no file extension) then it
+# will be loaded automatically when you start the bot.
 ---
+# Full path to a text file containing responses for the Eightball module
 8ball: /home/ircbot/Modules/data/8ball.txt
+
 channels:
+  # list of channels the bot will join if invited or told
   allowed:
     - '#yourchan'
     - '#anotherchan'
+  # list of channels the bot will join after connecting to the server
   join:
     - '#yourchan'
+
+# Full path to the directory where data files can be stored
 data_dir: /home/ircbot/Modules/data
+
+# Connection information for the MySQL database used by the bot
 database:
   name: ircbot
   password: <your db password>
   user: ircbot
+
+# Debugging flag; 0 is disabled, which is good
+# Module developers might want to set to 1 (or use 'debug on' at the console)
+# to get extra information
 debug: 0
+
+# Full path to where the ignore list should be stored
 ignore_list: /home/ircbot/Modules/data/ignore.txt
+
+# Anything shorter than this value will be ignored by the Infobot module
 infobot_min_length: 2
-max_nest: 4
+
+# Full path to the directory where modules are located
 module_dir: /home/ircbot/Modules/
+
+# IRC 'name' value for the bot;  you probably actually want to change the 'nick' value below
 name: InfoBot
+
+# Nickname the bot should have; this is probably the value you most want to change
 nick: InfoBot
+
+# Information about what IRC server to connect to
 server:
   host: irc.slashnet.org
   port: 6667
+
+# IRC 'username' value for the bot
 username: ircbot
 
+# Module-specific configuration options
+modules:
+  # configuration options for the ShortenURL module
+  ShortenURL:
+    # bit.ly login
+    login:
+    # bit.ly API key
+    api_key: 
