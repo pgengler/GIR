@@ -34,6 +34,9 @@ ignore_list: /home/ircbot/Modules/data/ignore.txt
 # Anything shorter than this value will be ignored by the Infobot module
 infobot_min_length: 2
 
+# Automatically break/wrap lines longer than this (default: 350 characters)
+line_length: 350
+
 # Full path to the directory where modules are located
 module_dir: /home/ircbot/Modules/
 

@@ -9,6 +9,7 @@ use File::Copy;
 use Getopt::Long;
 use Net::IRC;
 use POSIX;
+use Text::Wrap;
 use YAML;
 
 use Console;
@@ -520,7 +521,10 @@ sub say()
 
 	return unless $message;
 
-	foreach my $line (split(/\r*\n/, $message)) {
+	local $Text::Wrap::columns = ($config->{'line_length'} || 350);
+	my @lines = split(/\n/, Text::Wrap::wrap('', '', $message));
+
+	foreach my $line (@lines) {
 		next unless $line;
 		&status("</$where> $line");
 		$connection->privmsg($where, $line);
