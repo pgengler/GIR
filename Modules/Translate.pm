@@ -8,6 +8,7 @@ use strict;
 #######
 ## INCLUDES
 #######
+use Encode;
 use HTTP::Request;
 use LWP::UserAgent;
 use URI::Escape qw/ uri_escape /;
@@ -40,7 +41,7 @@ sub register()
 
 	&Modules::register_action('translate', \&Modules::Translate::translate);
 
-	&Modules::register_help('bash', \&Modules::Translate::help);
+	&Modules::register_help('translate', \&Modules::Translate::help);
 }
 
 sub translate($)
@@ -49,7 +50,7 @@ sub translate($)
 
 	# Check for valid format (two-character language code plus some text)
 	my $data = $message->message();
-	unless ($data =~ /^\s*(\w{2})\s+(.+)/) {
+	unless ($data =~ /^\s*\[?(\w{2})\]?\s+(.+)/) {
 		return;
 	}
 	my ($code, $text) = ($1, $2);
@@ -59,6 +60,7 @@ sub translate($)
 	if ($translation) {
 		return $translation;
 	}
+	return undef;
 }
 
 sub _getTranslation($$$)
@@ -78,7 +80,7 @@ sub _getTranslation($$$)
 	if ($response->is_success()) {
 		my $content = $response->content();
 		my $doc = XMLin($content);
-		return $doc->{'content'};
+		return Encode::encode('UTF-8', $doc->{'content'});
 	}
 }
 
