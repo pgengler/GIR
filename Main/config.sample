@@ -62,8 +62,16 @@ modules:
     login:
     # bit.ly API key
     api_key: 
+
   # configuration options for the Translate module.
   # The module uses the Bing Translate API, and you'll need to register a Bing App ID for it.
 	# See http://www.bing.com/developers/appids.aspx
   Translate:
     app_id: 
+
+  # configuration options for the Weather module
+  # This module uses the Weather Underground API and you'll need to sign and and generate
+  # an API key to use it.
+  # See http://www.wunderground.com/weather/api
+  Weather:
+    api_key: 

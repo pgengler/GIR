@@ -16,7 +16,7 @@ use XML::Simple;
 #######
 my $CACHE_TIME = 15;	# time to cache (in minutes)
 
-my $urlTemplate = 'http://api.wunderground.com/auto/wui/geo/WXCurrentObXML/index.xml?query=%s';
+use constant URL_FORMAT => 'http://api.wunderground.com/api/%s/conditions/q/%s.xml'; # 1: API key, 2: location
 
 my %cache;
 
@@ -32,6 +32,18 @@ sub new()
 sub register()
 {
 	my $this = shift;
+
+	my $moduleConfig = $Bot::config->{'modules'}->{'Weather'};
+
+	if (not defined $moduleConfig) {
+		&Bot::status("Modules::Weather: no configuration information present; skipping initialization");
+		return -1;
+	}
+
+	unless ($moduleConfig->{'api_key'}) {
+		&Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
+		return -1;
+	}
 
 	&Modules::register_action('weather', \&Modules::Weather::process);
 	&Modules::register_help('weather', \&Modules::Weather::help);
@@ -52,7 +64,7 @@ sub process($)
 
 	&Bot::status("Looking up weather for '$station'") if $Bot::config->{'debug'};
 
-	my $text = &get(sprintf($urlTemplate, $station));
+	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, $station));
 
 	unless ($text) {
 		return 'Something failed in contacting the weather server.';
@@ -64,6 +76,12 @@ sub process($)
 
 	my $xml = new XML::Simple;
 	my $doc = $xml->xml_in($text);
+
+	if ($doc->{'error'}) {
+		return "Unable to get weather for ${station}: $doc->{'error'}->{'description'}";
+	}
+
+	$doc = $doc->{'current_observation'};
 
 	if (ref $doc->{'display_location'}->{'latitude'} eq 'HASH' || ref $doc->{'observation_location'}->{'latitude'} eq 'HASH') {
 		return 'No weather information available for ' . $station;
