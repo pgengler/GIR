@@ -532,7 +532,7 @@ sub find_match_aux($$@)
 		# Make sure there's a suitable match
 		my @parts = split(/\s*\|\s*/, $result->{'value'});
 		if (scalar(@parts) > 1) {
-			Bot::debug("Modules::Infobot::find_match_aux: Value '%s' has multiple parts", $result->{'value'});
+			Bot::status("FOUND: %s [splitting into parts]", $result->{'value'});
 			my $have_params = scalar(@params);
 			# Keep only parts that don't require more parameters than are available
 			@parts = grep {
