@@ -98,7 +98,7 @@ sub check_access($$$)
 	my $user_info = $sth->fetchrow_hashref();
 
 	unless ($user_info && $user_info->{'id'}) {
-Bot::status("DEBUG: User not found.") if $Bot::config->{'debug'};
+		Bot::debug("Modules::Access::check_access: User '%s' not found.", $user);
 		return 0;
 	}
 
@@ -116,7 +116,7 @@ Bot::status("DEBUG: User not found.") if $Bot::config->{'debug'};
 	if ($access && $access->{'permission_id'}) {
 		return 1;
 	}
-Bot::status("DEBUG: User %s doesn't have '%s' permission", $user_info->{'id'}, $access) if $Bot::config->{'debug'};
+	Bot::debug("Modules::Access::check_access: User %s doesn't have '%s' permission", $user_info->{'id'}, $access);
 	return 0;
 }
 

@@ -62,7 +62,7 @@ sub process($)
 		return $cache{ $station }->{'weather'};
 	}
 
-	Bot::status("Looking up weather for '%s'", $station) if $Bot::config->{'debug'};
+	Bot::debug("Looking up weather for '%s'", $station);
 
 	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, $station));
 

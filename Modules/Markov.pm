@@ -49,10 +49,10 @@ sub output($)
 	if ($data && $data =~ /^(.+?)\s+(.+?)$/) {
 		$first  = $1;
 		$second = $2;
-		Bot::status("Markov output with '%s' and '%s'", $first, $second) if $Bot::config->{'debug'};
+		Bot::debug("Modules::Markov::output: using '%s' and '%s'", $first, $second);
 	} elsif ($data && $data =~ /^(.+)$/) {
 		$first = $1;
-		Bot::status("Markov output with '%s'", $first) if $Bot::config->{'debug'};
+		Bot::debug("Modules::Markov::output: using '%s'", $first);
 	}
 	return &gen_output($first, $second);
 }
@@ -545,26 +545,26 @@ sub respond_if_addressed($)
 			# Now figure out which word(s) to use
 			$r = rand();
 			if ($r < .2) {
-				Bot::status("Generating markov response from '%s' and '%s'", $words[0], $words[1]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[0], $words[1]);
 				# Use first two words
 				$msg = &gen_output($words[0], $words[1]);
 			} elsif ($r < .4) {
 				# Pick random word and its follower
 				$r = int(rand(scalar(@words) - 1));
-				Bot::status("Generating markov response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
 				$msg = &gen_output($words[$r], $words[$r + 1]);
 			} elsif ($r < .6) {
 				# Pick first word
-				Bot::status("Generating markov response from '%s'", $words[0]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
 				$msg = &gen_output($words[0]);
 			} elsif ($r < .8) {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::status("Generating markov response from '%s'", $words[ $r ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[ $r ]);
 				$msg = &gen_output($words[$r]);
 			} else {
 				# No word
-				Bot::status("Generating markov response from random word") if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
 				$msg = &gen_output();
 			}
 		} elsif ($r < .8) { # bidirectional markov
@@ -572,21 +572,21 @@ sub respond_if_addressed($)
 			$r = rand();
 			if ($r < .25) {
 				# Use first two words
-				Bot::status("Generating markov2 response from '%s' and '%s'", $words[0], $words[1]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[0], $words[1]);
 				$msg = &gen_output_multi($words[0], $words[1]);
 			} elsif ($r < .5) {
 				# Pick random word and its follower
 				$r = int(rand(scalar(@words) - 1));
-				Bot::status("Generating markov2 response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
 				$msg = &gen_output_multi($words[$r], $words[$r + 1]);
 			} elsif ($r < .75) {
 				# Use first word
-				Bot::status("Generating markov2 response from '%s'", $words[0]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
 				$msg = &gen_output_multi($words[0]);
 			} else {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::status("Generating markov2 response from '%s'", $words[ $r ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[ $r ]);
 				$msg = &gen_output_multi($words[$r]);
 			}
 		} else { # reverse markov
@@ -595,31 +595,31 @@ sub respond_if_addressed($)
 			if ($r < .3333) {
 				# Use last two words
 				my $n = scalar(@words) - 1;
-				Bot::status("Generating vokram response from '%s' and '%s'", $words[ $n - 1 ], $words[ $n ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s' and '%s'", $words[ $n - 1 ], $words[ $n ]);
 				$msg = &gen_output_from_end($words[$n - 1], $words[$n]);
 			} elsif ($r < .66666) {
 				# Use last word
 				my $n = scalar(@words) - 1;
-				Bot::status("Generating vokram response from '%s'", $words[ $n ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $n ]);
 				$msg = &gen_output_from_end($words[$n]);
 			} else {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::status("Generating vokram response from '%s'", $words[ $r ]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $r ]);
 				$msg = &gen_output_from_end($words[$r]);
 			}
 		}
 	} else {
 		if (rand() < .5) {
 			if (rand() < .5) {
-				Bot::status("Generating markov response from '%s'", $words[0]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
 				$msg = &gen_output($words[0]);
 			} else {
-				Bot::status("Generating markov2 response from '%s'", $words[0]) if $Bot::config->{'debug'};
+				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
 				$msg = &gen_output_multi($words[0]);
 			}
 		} else {
-			Bot::status("Generating markov response from random word") if $Bot::config->{'debug'};
+			Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
 			$msg = &gen_output();
 		}
 	}

@@ -260,11 +260,30 @@ sub fatal_error($;@)
 	Bot::shutdown();
 }
 
+#######
+## ERROR
+#######
+## Display the given error message (ERROR: is prepended)
+#######
 sub error($;@)
 {
 	my ($message, @parameters) = @_;
 
 	Bot::log('ERROR: ' . $message, @parameters);
+}
+
+#######
+## DEBUG LOGGING
+#######
+## Display the given message if debugging is enabled (DEBUG: is prepended)
+#######
+sub debug($;@)
+{
+	my ($message, @parameters) = @_;
+
+	return unless $Bot::config->{'debug'};
+
+	Bot::log('DEBUG: ' . $message, @parameters);
 }
 
 #######

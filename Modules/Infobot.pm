@@ -92,7 +92,7 @@ sub process($)
 	} elsif ($data =~ $question_reply_expr) {
 		return &reply($message, $1);
 	} else {
-		Bot::status("Infobot::process fell through somehow: message == %s", $data) if $Bot::config->{'debug'};
+		Bot::debug("Infobot::process fell through somehow: message == %s", $data);
 	}
 }
 
@@ -469,7 +469,7 @@ sub reply($$)
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
 
-		Bot::status("Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra) if $Bot::config->{'debug'};
+		Bot::debug("Modules::Infobot::reply: Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra);
 
 		if (++$feedbacked > 2) {
 			Bot::status('Feedback limit reached!');
@@ -516,7 +516,7 @@ sub find_match_aux($$@)
 	return undef unless $data;
 
 	# Look for entry for this phrase
-	Bot::status("Looking for match for phrase '%s'", $data) if $Bot::config->{'debug'};
+	Bot::debug("Modules::Infobot::find_match_aux: Looking for match for phrase '%s'", $data);
 	my $query = qq~
 		SELECT phrase, relates, value
 		FROM infobot
@@ -532,7 +532,7 @@ sub find_match_aux($$@)
 		# Make sure there's a suitable match
 		my @parts = split(/\s*\|\s*/, $result->{'value'});
 		if (scalar(@parts) > 1) {
-			Bot::status("Value '%s' has multiple parts", $result->{'value'}) if $Bot::config->{'debug'};
+			Bot::debug("Modules::Infobot::find_match_aux: Value '%s' has multiple parts", $result->{'value'});
 			my $have_params = scalar(@params);
 			# Keep only parts that don't require more parameters than are available
 			@parts = grep {
@@ -708,7 +708,7 @@ sub literal($)
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
-	Bot::status("Looking up literal value of '%s'", $phrase) if $Bot::config->{'debug'};
+	Bot::debug("Modules::Infobot::literal: Looking up literal value of '%s'", $phrase);
 
 	# Look up this phrase
 	my $query = qq~

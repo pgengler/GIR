@@ -37,11 +37,11 @@ sub shorten()
 
 	# Check for reasonably URL-like thing
 	unless ($url =~ m[^(ftp|http|https)://]) {
-		Bot::status("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url);# if $Bot::config->{'debug'};
+		Bot::debug("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url);
 		return;
 	}
 
-	Bot::status("Modules::ShortenURL: shortening URL '%s'", $url);# if $Bot::config->{'debug'};
+	Bot::debug("Modules::ShortenURL: shortening URL '%s'", $url);
 
 	# URL-encode value
 	$url = URI::Escape::uri_escape($url);

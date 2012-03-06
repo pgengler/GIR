@@ -206,7 +206,7 @@ sub register_action()
 
 	$priority ||= 1;
 
-	Bot::status("Registering handler for '%s' from '%s' module with priority %d", $action, $module, $priority) if $Bot::config->{'debug'};
+	Bot::debug("Registering handler for '%s' from '%s' module with priority %d", $action, $module, $priority);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'actions'} }, {
@@ -236,7 +236,7 @@ sub unregister_action()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::status("Unregistering handler for '%s' from '%s'", $action, $module) if $Bot::config->{'debug'};
+	Bot::debug("Unregistering handler for '%s' from '%s'", $action, $module);
 
 	if (exists $registered{ $module }->{'actions'}) {
 		my @actions = ( );
@@ -257,7 +257,7 @@ sub register_private()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::status("Registering private handler for '%s' from '%s' module", $action, $module) if $Bot::config->{'debug'};
+	Bot::debug("Registering private handler for '%s' from '%s' module", $action, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'private'} }, {
@@ -283,7 +283,7 @@ sub register_listener()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::status("Registering listener (priority %d) from '%s' module", $priority, $module) if $Bot::config->{'debug'};
+	Bot::debug("Registering listener (priority %d) from '%s' module", $priority, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'listeners'} }, {
@@ -311,7 +311,7 @@ sub register_help()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::status("Registering help for '%s' from '%s' module", $command, $module) if $Bot::config->{'debug'};
+	Bot::debug("Registering help for '%s' from '%s' module", $command, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'help'} }, {
@@ -337,7 +337,7 @@ sub register_nickchange()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::status("Registering nickchange handler from '%s' module", $module) if $Bot::config->{'debug'};
+	Bot::debug("Registering nickchange handler from '%s' module", $module);
 
 	if (exists $registered{ $module }) {
 		$registered{ $module }->{'nickchange'} = $func;
@@ -414,7 +414,7 @@ sub process($;$)
 		my $pre  = $1 || '';
 		my $nest = $2 || '';
 		my $post = $3 || '';
-		Bot::status("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post) if $Bot::config->{'debug'};
+		Bot::debug("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post);
 
 		my $msg = new Message($message, { 'message' => $nest });
 		my $result = &process($msg, $nests + 1) || '';
@@ -487,7 +487,7 @@ sub process($;$)
 
 sub shutdown()
 {
-	Bot::status('Cleaning up modules...') if $Bot::config->{'debug'};
+	Bot::debug('Cleaning up modules...');
 
 	# Wait for threads to finish before exiting
 	if ($pool) {
