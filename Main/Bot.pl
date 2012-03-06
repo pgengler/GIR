@@ -129,9 +129,16 @@ sub load_config($)
 	my $config_file = shift;
 	$config_file ||= 'config';
 
-	open(my $file, '<', $config_file || 'config') or Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
-	my $config = YAML::LoadFile($file);
-	close($file);
+	my $config;
+
+	eval {
+		open(my $file, '<', $config_file || 'config') or Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
+		$config = YAML::LoadFile($file);
+		close($file);
+	};
+	if ($@) {
+		Bot::fatal_error("Failed to read config file; you probably have an error in your YAML syntax (did you use tabs instead of spaces?)");
+	}
 
 	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
 	$config->{'config_nick'} ||= $config->{'nick'};
