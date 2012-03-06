@@ -30,12 +30,12 @@ sub register()
 	# Check for necessary configuration parameters
 	my $moduleConfig = $Bot::config->{'modules'}->{'Translate'};
 	if (not defined $moduleConfig) {
-		&Bot::status("Modules::Translate: no configuration information present, skipping initialization");
+		Bot::status("Modules::Translate: no configuration information present, skipping initialization");
 		return -1;
 	}
 
 	unless ($moduleConfig->{'app_id'}) {
-		&Bot::status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
+		Bot::status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
 		return -1;
 	}
 

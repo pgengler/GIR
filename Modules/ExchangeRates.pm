@@ -33,10 +33,10 @@ sub convert($)
 	$message =~ /$handleRE/;
 	my ($amount, $from, $to) = ($1, uc($3), uc($5));
 
-	&Bot::status("Mdules::ExchangeRates: Exchanging $from to $to") if $Bot::config->{'debug'};
+	Bot::status('Modules::ExchangeRates: Exchanging %s to %s', $from, $to) if $Bot::config->{'debug'};
 
 	my $url = sprintf($urlFormat, $from);
-	&Bot::status("Modules::ExchangeRates: Fetching URL $url") if $Bot::config->{'debug'};
+	Bot::status('Modules::ExchangeRates: Fetching URL %s', $url) if $Bot::config->{'debug'};
 	my $content = _fetch($url);
 
 	if ($content) {

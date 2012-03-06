@@ -38,7 +38,7 @@ sub lookup($)
 	if (defined($packed_ip)) {
 		return "$hostname resolves to " . inet_ntoa($packed_ip);
 	} else {
-		&Bot::status("Host '$hostname' not found.");
+		Bot::status("Host '%s' not found.", $hostname);
 		return 'Host not found' if $message->is_addressed();
 	}
 }

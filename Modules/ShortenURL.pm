@@ -21,7 +21,7 @@ sub register()
 	if ($moduleConfig->{'login'} && $moduleConfig->{'api_key'}) {
 		&Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {
-		&Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
+		Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
 		return -1;
 	}
 }
@@ -37,11 +37,11 @@ sub shorten()
 
 	# Check for reasonably URL-like thing
 	unless ($url =~ m[^(ftp|http|https)://]) {
-		&Bot::status(sprintf("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url));# if $Bot::config->{'debug'};
+		Bot::status("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url);# if $Bot::config->{'debug'};
 		return;
 	}
 
-	&Bot::status(sprintf("Modules::ShortenURL: shortening URL '%s'", $url));# if $Bot::config->{'debug'};
+	Bot::status("Modules::ShortenURL: shortening URL '%s'", $url);# if $Bot::config->{'debug'};
 
 	# URL-encode value
 	$url = URI::Escape::uri_escape($url);
@@ -63,7 +63,7 @@ sub shorten()
 		$data = JSON::decode_json($response);
 	};
 	if ($@ || ref($data) ne 'HASH') {
-		&Bot::status("Modules::ShortenURL: JSON parsing failed");
+		Bot::status("Modules::ShortenURL: JSON parsing failed: %s", $@);
 		return _error($message);
 	}
 
@@ -80,7 +80,7 @@ sub _getData($)
 	my $request  = new HTTP::Request('GET', $url);
 	my $response = $ua->request($request);
 	unless ($response->is_success()) {
-		&Bot::status(sprintf("Modules::ShortenURL: Error getting URL '%s': %s", $url, $response->status_line()));
+		Bot::status("Modules::ShortenURL: Error getting URL '%s': %s", $url, $response->status_line());
 		return undef;
 	}
 

@@ -20,7 +20,7 @@ sub zippy($)
 {
 	my $message = shift;
 
-	open(my $zippy, '-|', '/usr/games/fortune zippy') or do { &Bot::status("ERROR: Modules::Zippy couldn't launch fortune: $!"); return undef; };
+	open(my $zippy, '-|', '/usr/games/fortune zippy') or do { Bot::status("ERROR: Modules::Zippy couldn't launch fortune: ", $!); return undef; };
 	my $yow;
 	while (<$zippy>) {
 		$yow .= $_;

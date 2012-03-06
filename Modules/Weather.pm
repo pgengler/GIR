@@ -36,12 +36,12 @@ sub register()
 	my $moduleConfig = $Bot::config->{'modules'}->{'Weather'};
 
 	if (not defined $moduleConfig) {
-		&Bot::status("Modules::Weather: no configuration information present; skipping initialization");
+		Bot::status("Modules::Weather: no configuration information present; skipping initialization");
 		return -1;
 	}
 
 	unless ($moduleConfig->{'api_key'}) {
-		&Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
+		Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
 		return -1;
 	}
 
@@ -62,7 +62,7 @@ sub process($)
 		return $cache{ $station }->{'weather'};
 	}
 
-	&Bot::status("Looking up weather for '$station'") if $Bot::config->{'debug'};
+	Bot::status("Looking up weather for '%s'", $station) if $Bot::config->{'debug'};
 
 	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, $station));
 

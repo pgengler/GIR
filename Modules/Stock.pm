@@ -41,7 +41,7 @@ sub quote($)
 
 	return unless $symbol;
 
-	&Bot::status("Looking up stock quote for '$symbol'");
+	Bot::status("Looking up stock quote for '%s'", $symbol);
 
 	$symbol = uc($symbol);
 
@@ -50,7 +50,7 @@ sub quote($)
 	my $info = $finance->fetch();
 
 	unless ($info) {
-		&Bot::status("Quote lookup failed for '$symbol'");
+		Bot::status("Quote lookup failed for '%s'", $symbol);
 		if ($message->addressed()) {
 			return "Unable to get quote for '$symbol'";
 		}
@@ -66,7 +66,7 @@ sub short_quote($)
 
 	my $symbol = $message->message();
 
-	&Bot::status("Looking up stock quote for '$symbol'");
+	Bot::status("Looking up stock quote for '%s'", $symbol);
 
 	# Remove leading and trailing whitespace
 	$symbol =~ s/^\s*(.+)\s*$/$1/;
@@ -83,7 +83,7 @@ sub short_quote($)
 	my $info = $quote->fetch();
 
 	unless ($info) {
-		&Bot::status("Quote lookup failed for '$symbol'");
+		Bot::status("Quote lookup failed for '%s'", $symbol);
 		if ($message->addressed()) {
 			return "Unable to get quote for '$symbol'";
 		}

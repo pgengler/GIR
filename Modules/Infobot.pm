@@ -92,7 +92,7 @@ sub process($)
 	} elsif ($data =~ $question_reply_expr) {
 		return &reply($message, $1);
 	} else {
-		&Bot::status("Infobot::process fell through somehow: message == $data") if $Bot::config->{'debug'};
+		Bot::status("Infobot::process fell through somehow: message == %s", $data) if $Bot::config->{'debug'};
 	}
 }
 
@@ -138,7 +138,7 @@ sub learn($$$$)
 		$db->prepare($query);
 		$db->execute($phrase, $relates, $value);	
 
-		&Bot::status("LEARN: $phrase =$relates=> $value");
+		Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
 	}
 
 	if ($message->is_explicit()) {
@@ -173,7 +173,7 @@ sub append($$$$)
 		# Make sure the item isn't locked
 		if ($result->{'locked'}) {
 			if ($message->is_explicit()) {
-				&Bot::status("LOCKED: $result->{'phrase'}");
+				Bot::status('LOCKED: %s', $result->{'phrase'});
 				return "I can't update that, " . $message->from();
 			} else {
 				return 'NOREPLY';
@@ -231,7 +231,7 @@ sub forget($$)
 	while (my $result = $sth->fetchrow_hashref()) {
 		if ($result->{'locked'}) {
 			$locked = 1;
-			&Bot::status("LOCKED: $result->{'phrase'}");
+			Bot::status('LOCKED: %s', $result->{'phrase'});
 		} else {
 			$found = 1;
 
@@ -243,7 +243,7 @@ sub forget($$)
 			$db->prepare($query);
 			$db->execute($what);
 
-			&Bot::status("FORGET: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
+			Bot::status('FORGET: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 		}
 	}
 
@@ -294,7 +294,7 @@ sub amend($$$$)
 	# Check if it's locked
 	if ($result->{'locked'}) {
 		if ($message->is_explicit()) {
-			&Bot::status("LOCKED: $result->{'phrase'}");
+			Bot::status('LOCKED: %s', $result->{'phrase'});
 			return "I can't update that, " . $message->from();
 		} else {
 			return 'NOREPLY';
@@ -310,12 +310,12 @@ sub amend($$$$)
 		}
 	}
 
-	&Bot::status("OLD: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
+	Bot::status('OLD: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
 	# Replace
 	$result->{'value'} =~ s/$rep_part/$with/i;
 
-	&Bot::status("NEW: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
+	Bot::status('NEW: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
 	# Update
 	$query = qq~
@@ -360,15 +360,15 @@ sub replace($$$$)
 	# Check if the item is locked
 	if ($result->{'locked'}) {
 		if ($message->is_explicit()) {
-			&Bot::status("LOCKED: $result->{'phrase'}");
+			Bot::status('LOCKED: %s', $result->{'phrase'});
 			return "I can't update that, " . $message->from();
 		} else {
 			return 'NOREPLY';
 		}
 	}
 
-	&Bot::status("WAS: $result->{'phrase'} =$result->{'relates'}=> $result->{'value'}");
-	&Bot::status("IS:  $result->{'phrase'} =$relates=> $value");
+	Bot::status('WAS: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+	Bot::status('IS:  %s =%s=> %s', $result->{'phrase'}, $relates, $value);
 
 	# Update
 	$query = qq~
@@ -413,7 +413,7 @@ sub reply($$)
 
 	# Ignore anything that wasn't explicitly requested and is too short
 	if (exists($Bot::config->{'infobot_min_length'}) && !$explicit && length($data) < $Bot::config->{'infobot_min_length'}) {
-		&Bot::status("Skipping '$data' because it's too short");
+		Bot::status("Skipping '%s' because it's too short", $data);
 		return;
 	}
 
@@ -427,7 +427,7 @@ sub reply($$)
 		}
 	}
 
-	&Bot::status("FOUND: $phrase =$relates=> $value");
+	Bot::status('FOUND: %s =%s=> %s', $phrase, $relates, $value);
 
 	# Replace param placeholders with values
 	my $max_param_used = 0;
@@ -453,7 +453,7 @@ sub reply($$)
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
-			&Bot::status("Feedback limit reached!");
+			Bot::status('Feedback limit reached!');
 			return undef;
 		}
 
@@ -469,10 +469,10 @@ sub reply($$)
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
 
-		&Bot::status(sprintf("Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra)) if $Bot::config->{'debug'};
+		Bot::status("Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra) if $Bot::config->{'debug'};
 
 		if (++$feedbacked > 2) {
-			&Bot::status("Feedback limit reached!");
+			Bot::status('Feedback limit reached!');
 			return undef;
 		}
 
@@ -516,7 +516,7 @@ sub find_match_aux($$@)
 	return undef unless $data;
 
 	# Look for entry for this phrase
-	&Bot::status("Looking for match for phrase '$data'") if $Bot::config->{'debug'};
+	Bot::status("Looking for match for phrase '%s'", $data) if $Bot::config->{'debug'};
 	my $query = qq~
 		SELECT phrase, relates, value
 		FROM infobot
@@ -532,7 +532,7 @@ sub find_match_aux($$@)
 		# Make sure there's a suitable match
 		my @parts = split(/\s*\|\s*/, $result->{'value'});
 		if (scalar(@parts) > 1) {
-			&Bot::status("Value '$result->{'value'}' has multiple parts") if $Bot::config->{'debug'};
+			Bot::status("Value '%s' has multiple parts", $result->{'value'}) if $Bot::config->{'debug'};
 			my $have_params = scalar(@params);
 			# Keep only parts that don't require more parameters than are available
 			@parts = grep {
@@ -560,7 +560,7 @@ sub find_match_aux($$@)
 
 			if (scalar(@parts) > 0) {
 				$result->{'value'} = $parts[int(rand(scalar(@parts)))];
-				&Bot::status("CHOSE: $result->{'value'}");
+				Bot::status('CHOSE: %s', $result->{'value'});
 			} else {
 				return undef;
 			}
@@ -708,7 +708,7 @@ sub literal($)
 	my $db = new Database::MySQL;
 	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 
-	&Bot::status("Looking up literal value of '$phrase'") if $Bot::config->{'debug'};
+	Bot::status("Looking up literal value of '%s'", $phrase) if $Bot::config->{'debug'};
 
 	# Look up this phrase
 	my $query = qq~
