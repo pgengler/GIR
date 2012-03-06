@@ -123,7 +123,7 @@ sub load_module()
 	my $module = $class->load();
 
 	unless ($module) {
-		&Bot::status("Failed to load module '$name': $@");
+		Bot::status("Failed to load module '%s': %s", $name, $@);
 		$class->unload();
 		return;
 	}
@@ -136,14 +136,14 @@ sub load_module()
 	$suppress_rebuild = 0;
 
 	if ($ret == -1) {
-		&Bot::status("Module '$name' requested to not be loaded.");
+		Bot::status("Module '%s' requested to not be loaded", $name);
 		&unload_module($name, 1);
 		return;
 	}
 
 	push @loaded_modules, $class;
 
-	&Bot::status("Loaded module $name");
+	Bot::status('Loaded module %s', $name);
 
 	&rebuild_registration_list();
 	# Only restart the thread pool when we load a specific module; when we're loading everything, don't restart the thread pool when each module is loaded
@@ -177,7 +177,7 @@ sub unload_module()
 	for (my $i = 0; $i < scalar(@loaded_modules); $i++) {
 		my $class = $loaded_modules[$i];
 		if ($class->name() eq $mod_name) {
-			&Bot::status("Unloading module '$name'");
+			Bot::status("Unloading module '%s'", $name);
 
 			# Remove from list of modules
 			splice(@loaded_modules, $i, 1);
@@ -194,7 +194,7 @@ sub unload_module()
 		}
 	}
 
-	&Bot::status("Module '$name' is not loaded!") unless $silent;
+	Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
 }
 
 sub register_action()
@@ -206,7 +206,7 @@ sub register_action()
 
 	$priority ||= 1;
 
-	&Bot::status("Registering handler for '$action' from '$module' module with priority $priority") if $Bot::config->{'debug'};
+	Bot::status("Registering handler for '%s' from '%s' module with priority %d", $action, $module, $priority) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'actions'} }, {
@@ -236,7 +236,7 @@ sub unregister_action()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Unregistering handler for '$action' from '$module'") if $Bot::config->{'debug'};
+	Bot::status("Unregistering handler for '%s' from '%s'", $action, $module) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }->{'actions'}) {
 		my @actions = ( );
@@ -257,7 +257,7 @@ sub register_private()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Registering private handler for '$action' from '$module' module") if $Bot::config->{'debug'};
+	Bot::status("Registering private handler for '%s' from '%s' module", $action, $module) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'private'} }, {
@@ -283,7 +283,7 @@ sub register_listener()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Registering listener (priority $priority) from '$module' module") if $Bot::config->{'debug'};
+	Bot::status("Registering listener (priority %d) from '%s' module", $priority, $module) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'listeners'} }, {
@@ -311,7 +311,7 @@ sub register_help()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Registering help for '$command' from '$module' module") if $Bot::config->{'debug'};
+	Bot::status("Registering help for '%s' from '%s' module", $command, $module) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'help'} }, {
@@ -337,7 +337,7 @@ sub register_nickchange()
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	&Bot::status("Registering nickchange handler from '$module' module") if $Bot::config->{'debug'};
+	Bot::status("Registering nickchange handler from '%s' module", $module) if $Bot::config->{'debug'};
 
 	if (exists $registered{ $module }) {
 		$registered{ $module }->{'nickchange'} = $func;
@@ -414,7 +414,7 @@ sub process($;$)
 		my $pre  = $1 || '';
 		my $nest = $2 || '';
 		my $post = $3 || '';
-		&Bot::status(sprintf("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post)) if $Bot::config->{'debug'};
+		Bot::status("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post) if $Bot::config->{'debug'};
 
 		my $msg = new Message($message, { 'message' => $nest });
 		my $result = &process($msg, $nests + 1) || '';
@@ -487,7 +487,7 @@ sub process($;$)
 
 sub shutdown()
 {
-	&Bot::status("Cleaning up modules...") if $Bot::config->{'debug'};
+	Bot::status('Cleaning up modules...') if $Bot::config->{'debug'};
 
 	# Wait for threads to finish before exiting
 	if ($pool) {
