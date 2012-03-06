@@ -157,7 +157,7 @@ sub on_error()
 #######
 sub connect()
 {
-	&status("Connecting to port $config->{'server'}->{'port'} of server $config->{'server'}->{'host'}...");
+	status('Connecting to port %d of server %s...', $config->{'server'}->{'port'}, $config->{'server'}->{'host'});
 
 	$irc = new Net::IRC;
 	$irc->debug($config->{'debug'} ? true : false);
@@ -171,7 +171,7 @@ sub connect()
 	);
 
 	if (!$connection) {
-		&status("Unable to connect to server.");
+		status('Unable to connect to server.');
 		&shutdown();
 	}
 }
@@ -181,16 +181,16 @@ sub connect()
 #######
 sub join_chan()
 {
-	my ($conn, $chan) = @_;
+	my ($conn, $channel) = @_;
 
-	if (exists $channels{ $chan }) {
-		&status("Already in $chan");
+	if (exists $channels{ $channel }) {
+		status("I'm already in %s!", $channel);
 		return;
 	}
 
-	&status("Joining $chan");
+	status('Joining %s...', $channel);
 
-	$conn->join($chan);
+	$conn->join($channel);
 }
 
 #######
@@ -200,10 +200,10 @@ sub on_connect()
 {
 	my ($conn, $event) = @_;
 
-	&status("Joining channels");
+	status('Joining channels...');
 
-	foreach my $chan (@{ $config->{'channels'}->{'join'} }) {
-		&join_chan($conn, $chan);
+	foreach my $channel (@{ $config->{'channels'}->{'join'} }) {
+		&join_chan($conn, $channel);
 	}
 }
 
@@ -212,7 +212,7 @@ sub on_connect()
 #######
 sub shutdown()
 {
-	&status("Shutting down...");
+	status('Shutting down...');
 
 	$bot->kill('SIGTERM');
 	$console->kill('SIGTERM');
@@ -223,7 +223,7 @@ sub shutdown()
 
 sub bot_shutdown()
 {
-	&status("Bot thread is shutting down...");
+	status('Bot thread is shutting down...');
 
 	&Modules::shutdown();
 
@@ -262,19 +262,20 @@ sub error()
 #######
 ## STATUS LOGGING
 #######
-sub status()
+sub status($;@)
 {
-	my $message = shift;
+	my ($message, @parameters) = @_;
 
-	# Strip trailing \n, if any
-	$message =~ s/\n$//;
+	chomp $message;
+
+	my $outputMessage = '[' . localtime() . '] ' . sprintf($message, @parameters);
 
 	unless ($no_console) {
-		print '[' . localtime() . '] ' . $message . "\n";
+		print $outputMessage, "\n";
 	}
 
 	open(my $log, '>>', $config->{'config_nick'} . '.log');
-	print $log '[' . localtime() . '] ' . $message . "\n";
+	print $log $outputMessage, "\n";
 	close($log);
 }
 
@@ -296,17 +297,17 @@ sub message()
 
 	if (&should_ignore($message)) {
 		if ($message->is_public()) {
-			&status("IGNORED <$nick/$to> $text");
+			status('IGNORED <%s/%s> %s', $nick, $to, $text);
 		} else {
-			&status("IGNORED >$nick< $text");
+			status('IGNORED >%s< %s', $nick, $text);
 		}
 		return;
 	}
 
 	if ($message->is_public()) {
-		&status("<$nick/$to> $text");
+		status('<%s/%s> %s', $nick, $to, $text);
 	} else {
-		&status(">$nick< $text");
+		status('>%s< %s', $nick, $text);
 	}
 	&Modules::dispatch($message);
 }
@@ -322,7 +323,7 @@ sub handle_action()
 	my $to      = $event->{'to'}[0];
 	my $message = $event->{'args'}[0];
 
-	&status("* $from/$to $message");
+	status('* %s/%s %s', $from, $to, $message);
 }
 
 ###############
@@ -344,14 +345,14 @@ sub on_nick_change()
 	my $old_nick = $event->{'nick'};
 	my $new_nick = $event->{'args'}[0];
 
-	&status("$old_nick is now known as $new_nick");
+	status('%s is now known as %s', $old_nick, $new_nick);
 }
 
 sub nick_in_use()
 {
 	my ($conn, $event) = @_;
 
-	&status("Nickname is in use! Trying some alternatives.");
+	status('Nickname is in use! Trying some alternatives.');
 
 	$nick_retries++;
 
@@ -370,7 +371,7 @@ sub on_quit()
 	my $who     = $event->{'nick'};
 	my $message = $event->{'args'}[0];
 
-	&status("$who has quit IRC ($message)");
+	status('%s has quit IRC (%s)', $who, $message);
 }
 
 sub on_join()
@@ -381,10 +382,10 @@ sub on_join()
 	my $nick    = $event->{'nick'};
 
 	if ($config->{'nick'} eq $nick) {
-		&status("Joined channel $channel");
+		status('Joined channel %s', $channel);
 		$channels{ $channel } = true;
 	} else {
-		&status("$nick has joined $channel");
+		status('%s has joined %s', $nick, $channel);
 	}
 }
 
@@ -394,7 +395,7 @@ sub banned_from_channel()
 
 	my $channel = $event->{'args'}[1];
 
-	&status("Can't join $channel - I've been banned!");
+	status("Can't join %s - I've been banned!", $channel);
 }
 
 sub on_part()
@@ -405,15 +406,15 @@ sub on_part()
 	my $user    = $event->{'nick'};
 	my $message = $event->{'args'}[0];
 
-	&status("$user has left $channel ($message)");
+	status('%s has left %s (%s)', $user, $channel, $message);
 }
 
 sub on_mode()
 {
 	my ($conn, $event) = @_;
 
-	my $chan  = $event->{'to'}[0];
-	my $giver = $event->{'nick'};
+	my $channel = $event->{'to'}[0];
+	my $giver   = $event->{'nick'};
 
 	# args has the mode changes in [0] and [n - 1] is an empty string
 	my $num_changes = scalar($event->{'args'}) - 2;
@@ -429,9 +430,9 @@ sub on_mode()
 		}
 
 		if ($event->{'args'}[$i + 1]) {
-			&status("$giver/$chan sets mode ${modifier}$modes[$i] " . $event->{'args'}[$i + 1]);
+			status('%s/%s sets mode %s%s %s', $giver, $channel, $modifier, $modes[ $i ], $event->{'args'}->[ $i + 1 ]);
 		} else {
-			&status("$giver/$chan sets mode ${modifier}$modes[$i]");
+			status('%s/%s sets mode %s%s', $giver, $channel, $modifier, $modes[ $i ]);
 		}
 	}
 }
@@ -443,13 +444,13 @@ sub on_topic()
 	if ($event->{'format'} eq 'server') {
 		my $channel = $event->{'args'}[1];
 		my $topic   = $event->{'args'}[2];
-		&status("Topic for $channel is '$topic'");
+		status("Topic for %s is '%s'", $channel, $topic);
 	} else {
 		my $channel = $event->{'to'}[0];
 		my $topic   = $event->{'args'}[0];
 		my $who     = $event->{'nick'};
 
-		&status("$who has changed the topic for $channel to '$topic'");
+		status("%s has changed the topic for %s to '%s'", $who, $channel, $topic);
 	}
 }
 
@@ -463,9 +464,9 @@ sub on_kick()
 	my $reason  = $event->{'args'}[1] || '';
 
 	if ($kicked ne $config->{'nick'}) {
-		&status("$kicker has kicked $kicked from $channel ($reason)");
+		status('%s has kicked %s from %s ($s)', $kicker, $kicked, $channel, $reason);
 	} else {
-		&status("$kicker has kicked me from $channel! ($reason)");
+		status('%s has kicked me from %s (%s)', $kicker, $channel, $reason);
 		delete $channels{ $channel };
 		&join_chan($conn, $channel);
 	}
@@ -480,14 +481,14 @@ sub on_invite()
 	my $channel = $event->{'args'}[0];
 
 	if ($invitee ne $config->{'nick'}) {
-		&status("$inviter invited invitee to $channel");
+		status('%s invited %s to %s', $inviter, $invitee, $channel);
 	} else {
-		&status("$inviter invited me to $channel");
+		status('%s invited me to %s', $inviter, $channel);
 		my %allowed_channels = map { $_ => true } @{ $config->{'channels'}->{'allowed'} };
 		if ($allowed_channels{ $channel }) {
 			&join_chan($conn, $channel);
 		} else {
-			&status("$channel isn't on the allowed channel list.");
+			status("%s isn't on the allowed channel list, not joining", $channel);
 		}
 	}
 }
@@ -496,7 +497,7 @@ sub on_notice()
 {
 	my ($conn, $event) = @_;
 
-	&status('-' . $event->{'from'} . '- ' . $event->{'args'}[0]);
+	status('-%s- %s', $event->{'from'}, $event->{'args'}[0]);
 
 	if ($event->{'nick'} eq 'NickServ' && $event->{'args'}[0] =~ /This nickname is registered and protected/i && $config->{'nickserv_pass'}) {
 		&say('NickServ', 'identify ' . $config->{'nickserv_pass'});
@@ -507,7 +508,7 @@ sub on_server_notice()
 {
 	my ($conn, $event) = @_;
 
-	&status('-' . $event->{'args'}[0]);
+	status('-%s', $event->{'args'}[0]);
 }
 
 ##############
@@ -526,7 +527,7 @@ sub say()
 
 	foreach my $line (@lines) {
 		next unless $line;
-		&status("</$where> $line");
+		status('</%s> %s', $where, $line);
 		$connection->privmsg($where, $line);
 	}
 }
@@ -646,7 +647,7 @@ sub part()
 
 	$reason = $reason || '';
 
-	&status("Leaving channel $channel ($reason)");
+	status('Leaving channel %s (%s)', $channel, $reason);
 
 	$connection->part($channel, $reason);
 
@@ -692,7 +693,7 @@ sub action()
 {
 	my ($where, $what) = @_;
 
-	&status("* $config->{'nick'}/$where $what");
+	status('* %s/%s %s', $config->{'nick'}, $where, $what);
 
 	$connection->me($where, $what);
 }
@@ -701,7 +702,7 @@ sub change_nick()
 {
 	my $nick = shift;
 
-	&status("Changing nick to '$nick'");
+	status("Changing nick to '%s'", $nick);
 
 	$connection->nick($nick);
 
@@ -714,7 +715,7 @@ sub change_nick()
 
 sub save_ignore_list()
 {
-	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { &status("Updating ignore list failed: $!"); return; };
+	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { status("Updating ignore list failed: $!"); return; };
 	foreach my $entry (keys %ignores) {
 		print $newlist $entry . "\n";
 	}
@@ -726,7 +727,7 @@ sub add_ignore()
 {
 	my $entry = shift;
 
-	&status("Adding '$entry' to the ignore list");
+	status("Adding '%s' to the ignore list", $entry);
 
 	$ignores{ lc($entry) } = true;
 
@@ -737,7 +738,7 @@ sub remove_ignore()
 {
 	my $entry = shift;
 
-	&status("Removing '$entry' from the ignore list");
+	status("Removing '%s' from the ignore list", $entry);
 
 	delete $ignores{ lc($entry) };
 
@@ -749,7 +750,7 @@ sub reload_modules()
 	my $module = shift;
 
 	unless ($module) {
-		&status("Reloading modules");
+		status('Reloading modules');
 		&Modules::load_modules();
 	} else {
 		&Modules::unload_module($module);
@@ -777,7 +778,7 @@ sub set_debug()
 
 	return unless ($debug eq 'on' || $debug eq 'off');
 
-	&status("Setting debug status to $debug");
+	status('Setting debug status to %s', $debug);
 
 	my $state = ($debug eq 'on');
 
