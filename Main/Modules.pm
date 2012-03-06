@@ -96,7 +96,7 @@ sub load_modules()
 
 	my $module_dir = $Bot::config->{'module_dir'};
 
-	opendir(my $dir, $module_dir) or &Bot::error('Unable to open the modules directory: ' . $!);
+	opendir(my $dir, $module_dir) or Bot::fatal_error('Unable to open the modules directory: %s', $!);
 	my @files = readdir($dir);
 	closedir($dir);
 

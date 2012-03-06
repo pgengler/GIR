@@ -63,7 +63,7 @@ sub shorten()
 		$data = JSON::decode_json($response);
 	};
 	if ($@ || ref($data) ne 'HASH') {
-		Bot::status("Modules::ShortenURL: JSON parsing failed: %s", $@);
+		Bot::error("Modules::ShortenURL: JSON parsing failed: %s", $@);
 		return _error($message);
 	}
 
@@ -80,7 +80,7 @@ sub _getData($)
 	my $request  = new HTTP::Request('GET', $url);
 	my $response = $ua->request($request);
 	unless ($response->is_success()) {
-		Bot::status("Modules::ShortenURL: Error getting URL '%s': %s", $url, $response->status_line());
+		Bot::error("Modules::ShortenURL: Error getting URL '%s': %s", $url, $response->status_line());
 		return undef;
 	}
 

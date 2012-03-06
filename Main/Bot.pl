@@ -129,7 +129,7 @@ sub load_config($)
 	my $config_file = shift;
 	$config_file ||= 'config';
 
-	open(my $file, '<', $config_file || 'config') or die "Can't open config file '$config_file' - $!";
+	open(my $file, '<', $config_file || 'config') or Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
 	my $config = YAML::LoadFile($file);
 	close($file);
 
@@ -171,8 +171,7 @@ sub connect()
 	);
 
 	if (!$connection) {
-		status('Unable to connect to server.');
-		&shutdown();
+		fatal_error('Unable to connect to server.');
 	}
 }
 
@@ -214,8 +213,8 @@ sub shutdown()
 {
 	status('Shutting down...');
 
-	$bot->kill('SIGTERM');
-	$console->kill('SIGTERM');
+	$bot->kill('SIGTERM') if $bot;
+	$console->kill('SIGTERM') if $console;
 
 	# End threads
 	threads->exit();
@@ -248,21 +247,37 @@ sub bot_shutdown()
 }
 
 #######
-## ERROR
+## FATAL ERROR
 #######
-sub error()
+## Display the given error message and shut down the bot.
+#######
+sub fatal_error($;@)
 {
-	my $message = shift;
+	my ($message, @parameters) = @_;
 
-	print STDERR "ERROR: $message\n";
+	Bot::error($message, @parameters);
 
-	&shutdown();
+	Bot::shutdown();
+}
+
+sub error($;@)
+{
+	my ($message, @parameters) = @_;
+
+	Bot::log('ERROR: ' . $message, @parameters);
 }
 
 #######
 ## STATUS LOGGING
 #######
 sub status($;@)
+{
+	my ($message, @parameters) = @_;
+
+	Bot::log($message, @parameters);
+}
+
+sub log($;@)
 {
 	my ($message, @parameters) = @_;
 
@@ -274,9 +289,11 @@ sub status($;@)
 		print $outputMessage, "\n";
 	}
 
-	open(my $log, '>>', $config->{'config_nick'} . '.log');
-	print $log $outputMessage, "\n";
-	close($log);
+	if ($config->{'config_nick'}) {
+		open(my $log, '>>', $config->{'config_nick'} . '.log');
+		print $log $outputMessage, "\n";
+		close($log);
+	}
 }
 
 ##############
@@ -715,7 +732,7 @@ sub change_nick()
 
 sub save_ignore_list()
 {
-	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { status("Updating ignore list failed: $!"); return; };
+	open(my $newlist, '>', $config->{'ignore_list'} . '.tmp') or do { error("Updating ignore list failed: %s", $!); return; };
 	foreach my $entry (keys %ignores) {
 		print $newlist $entry . "\n";
 	}
