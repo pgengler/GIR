@@ -102,6 +102,7 @@ sub _process($)
 
 	$quote = HTML::Entities::decode_entities($quote);
 	$quote =~ s/\<br \/\>/\n/g;
+	$quote =~ s/\t/ /g;
 
 	return $quote;
 }
