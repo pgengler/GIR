@@ -6,15 +6,10 @@ package Modules::Time;
 use strict;
 
 #######
-## INCLUDES
-#######
-use Acme::Time::Asparagus;
-use Time::Beat;
-
-#######
 ## GLOBALS
 #######
-
+our $_useSwatch = 0;
+our $_useVeggie = 0;
 
 ##############
 sub new()
@@ -29,12 +24,21 @@ sub register()
 {
 	my $this = shift;
 
+	eval {
+		require Time::Beat;
+	};
+	$_useSwatch = 1 unless $@;
+	eval {
+		require Acme::Time::Asparagus;
+	};
+	$_useVeggie = 1 unless $@;
+
 	&Modules::register_action('time', \&Modules::Time::select);
 	&Modules::register_action('unixtime', \&Modules::Time::unix_time);
 	&Modules::register_action('localtime', \&Modules::Time::local_time);
 	&Modules::register_action('gmtime', \&Modules::Time::gm_time);
-	&Modules::register_action('swatch', \&Modules::Time::swatch);
-	&Modules::register_action('veggietime', \&Modules::Time::veggie);
+	&Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
+	&Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
 
 	&Modules::register_help('time', \&Modules::Time::help);
 }
@@ -45,7 +49,10 @@ sub select($)
 
 	return undef unless $message->message() =~ /^\s*time\s*$/;
 
-	my @times = ('unix', 'local', 'gmt', 'swatch', 'veggie');
+	my @times = qw/ unix local gmt /;
+	push @times, 'swatch' if $_useSwatch;
+	push @times, 'veggie' if $_useVeggie;
+
 	my $time = $times[int(rand(scalar(@times)))];
 
 	if ($time eq 'unix') {
@@ -54,9 +61,9 @@ sub select($)
 		return &local_time($message);
 	} elsif ($time eq 'gmt') {
 		return &gm_time($message);
-	} elsif ($time eq 'swatch') {
+	} elsif ($_useSwatch && $time eq 'swatch') {
 		return &swatch($message);
-	} elsif ($time eq 'veggie') {
+	} elsif ($_useVeggie && $time eq 'veggie') {
 		return &veggie($message);
 	}
 }
@@ -88,12 +95,16 @@ sub swatch($)
 {
 	my $message = shift;
 
+	return undef unless $_useSwatch;
+
 	return '@' . &Time::Beat::beats(time());
 }
 
 sub veggie($)
 {
 	my $message = shift;
+
+	return undef unless $_useVeggie;
 
 	return &Acme::Time::Asparagus::veggietime();
 }
@@ -102,10 +113,17 @@ sub help($)
 {
 	my $message = shift;
 
-	my $str = "time: Returns the current time in one of several possible formats.\n";
-	$str .= "'time' chooses one of the following formats randomly; they can also be accessed individually:\n";
-	$str .= "'unixtime' displays the current UNIX timestamp. 'localtime' displays a human-formatted string of the current local time for my timezone.\n";
-	$str .= "'gmtime' is like 'localtime' but uses UTC/GMT. 'swatch' displays Swatch time. 'veggietime' displays the time using vegetables.";
+	my $str = q(time: Returns the current time in one of several possible formats.
+'time' chooses one of the following formats randomly; they can also be accessed individually:
+'unixtime' displays the current UNIX timestamp. 'localtime' displays a human-formatted string of the current local time for my timezone.
+'gmtime' is like 'localtime' but uses UTC/GMT.);
+
+	if ($_useSwatch) {
+		$str .= q( 'swatch' displays Swatch (beat) time.);
+	}
+	if ($_useVeggie) {
+		$str .= q( 'veggietime' displays the time using vegetables.);
+	}
 
 	return $str;
 }
