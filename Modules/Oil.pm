@@ -23,7 +23,7 @@ sub fetch($)
 {
 	my $message = shift;
 
-	my $url = 'http://www.howmuchisoil.com/csv.cgi';
+	my $url = 'http://www.howmuchisoil.com/price.cgi?format=csv';
 
 	my $result = get($url);
 
