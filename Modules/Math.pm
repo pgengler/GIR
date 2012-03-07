@@ -33,7 +33,7 @@ sub process()
 		# Handle exp
 		while ($expr =~ /(exp ([\w\d]+))/) {
 			my $exp = $1;
-			my $val = exp($2); 
+			my $val = exp($2);
 			$expr =~ s/$exp/+$val/g;
 		}
 
@@ -105,7 +105,7 @@ sub process()
 
 			if ($result =~ /^[-+\de\.]+$/) {
 				$result =~ s/\.0+$//;
-				$result =~ s/(\.\d+)000\d+/$1/; 
+				$result =~ s/(\.\d+)000\d+/$1/;
 				if (length($result) > 30) {
 					$result = "a number with quite a few digits...";
 				}
