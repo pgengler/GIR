@@ -53,9 +53,17 @@ sub translate($)
 	unless ($data =~ /^\s*\[?(\w{2})\]?\s+(.+)/) {
 		return;
 	}
-	my ($code, $text) = ($1, $2);
 
-	my $translation = _getTranslation('en', $code, $text);
+	my ($toCode, $text) = ($1, $2);
+
+	my $fromCode = 'en'; # default to translating from English
+	if ($data =~ /\s*\[?(\w{2})\]?\s+\[(\w{2})\]\s+(.+)/) {
+		$fromCode = $1;
+		$toCode   = $2;
+		$text     = $3;
+	}
+
+	my $translation = _getTranslation($fromCode, $toCode, $text);
 
 	if ($translation) {
 		return $translation;
@@ -88,7 +96,8 @@ sub help($)
 {
 	my $message = shift;
 
-	return "'translate <lang> <message>': translates <message> from English to the given language.";
+	return qq('translate [ <from lang> ] <to lang> <message>': translates the message between languages.
+The 'from' language defaults to English if not provided; if specifying both languages, put the 'to' language in square brackes (e.g., [it]).);
 }
 
 1;
