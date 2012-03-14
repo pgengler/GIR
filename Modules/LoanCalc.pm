@@ -9,8 +9,8 @@ sub new()
 
 sub register()
 {
-	&Modules::register_action('loancalc', \&Modules::LoanCalc::calculate);
-	&Modules::register_help('loancalc', \&Modules::LoanCalc::help);
+	Modules::register_action('loancalc', \&Modules::LoanCalc::calculate);
+	Modules::register_help('loancalc', \&Modules::LoanCalc::help);
 }
 
 sub calculate()

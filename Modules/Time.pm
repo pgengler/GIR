@@ -33,14 +33,14 @@ sub register()
 	};
 	$_useVeggie = 1 unless $@;
 
-	&Modules::register_action('time', \&Modules::Time::select);
-	&Modules::register_action('unixtime', \&Modules::Time::unix_time);
-	&Modules::register_action('localtime', \&Modules::Time::local_time);
-	&Modules::register_action('gmtime', \&Modules::Time::gm_time);
-	&Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
-	&Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
+	Modules::register_action('time', \&Modules::Time::select);
+	Modules::register_action('unixtime', \&Modules::Time::unix_time);
+	Modules::register_action('localtime', \&Modules::Time::local_time);
+	Modules::register_action('gmtime', \&Modules::Time::gm_time);
+	Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
+	Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
 
-	&Modules::register_help('time', \&Modules::Time::help);
+	Modules::register_help('time', \&Modules::Time::help);
 }
 
 sub select($)
@@ -56,15 +56,15 @@ sub select($)
 	my $time = $times[int(rand(scalar(@times)))];
 
 	if ($time eq 'unix') {
-		return &unix_time($message);
+		return unix_time($message);
 	} elsif ($time eq 'local') {
-		return &local_time($message);
+		return local_time($message);
 	} elsif ($time eq 'gmt') {
-		return &gm_time($message);
+		return gm_time($message);
 	} elsif ($_useSwatch && $time eq 'swatch') {
-		return &swatch($message);
+		return swatch($message);
 	} elsif ($_useVeggie && $time eq 'veggie') {
-		return &veggie($message);
+		return veggie($message);
 	}
 }
 
@@ -97,7 +97,7 @@ sub swatch($)
 
 	return undef unless $_useSwatch;
 
-	return '@' . &Time::Beat::beats(time());
+	return '@' . Time::Beat::beats(time());
 }
 
 sub veggie($)
@@ -106,7 +106,7 @@ sub veggie($)
 
 	return undef unless $_useVeggie;
 
-	return &Acme::Time::Asparagus::veggietime();
+	return Acme::Time::Asparagus::veggietime();
 }
 
 sub help($)

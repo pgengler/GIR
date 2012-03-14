@@ -19,8 +19,8 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('karma', \&Modules::Karma::get);
-	&Modules::register_action($update_expr, \&Modules::Karma::update);
+	Modules::register_action('karma', \&Modules::Karma::get);
+	Modules::register_action($update_expr, \&Modules::Karma::update);
 }
 
 sub get($)

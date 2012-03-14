@@ -16,11 +16,11 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('quote', \&Modules::Stock::quote);
-	&Modules::register_action('squote', \&Modules::Stock::short_quote);
+	Modules::register_action('quote', \&Modules::Stock::quote);
+	Modules::register_action('squote', \&Modules::Stock::short_quote);
 
-	&Modules::register_help('quote', \&Modules::Stock::help);
-	&Modules::register_help('squote', \&Modules::Stock::help);
+	Modules::register_help('quote', \&Modules::Stock::help);
+	Modules::register_help('squote', \&Modules::Stock::help);
 }
 
 sub quote($)

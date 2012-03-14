@@ -14,7 +14,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('help', \&Modules::Help::process);
+	Modules::register_action('help', \&Modules::Help::process);
 }
 
 sub process($)

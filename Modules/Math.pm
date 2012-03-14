@@ -18,7 +18,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_listener(\&Modules::Math::process, 3);
+	Modules::register_listener(\&Modules::Math::process, 3);
 }
 
 sub process()

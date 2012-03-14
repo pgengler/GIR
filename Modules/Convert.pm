@@ -174,7 +174,7 @@ sub register()
 		'yards'         => 'yd'
 	);
 
-	&Modules::register_action($match_expr, \&Modules::Convert::process);
+	Modules::register_action($match_expr, \&Modules::Convert::process);
 }
 
 sub process($)

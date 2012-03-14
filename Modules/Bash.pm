@@ -24,9 +24,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('bash', \&Modules::Bash::process);
+	Modules::register_action('bash', \&Modules::Bash::process);
 
-	&Modules::register_help('bash', \&Modules::Bash::help);
+	Modules::register_help('bash', \&Modules::Bash::help);
 }
 
 sub process($)
@@ -79,7 +79,7 @@ sub process($)
 	}
 
 	if ($content =~ /\<p class=\"qt\"\>(.+?)\<\/p\>/s) {
-		my $quote = &HTML::Entities::decode_entities($1);
+		my $quote = HTML::Entities::decode_entities($1);
 		$quote =~ s/\<br \/\>/\n/g;
 
 		$sql = qq(

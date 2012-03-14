@@ -12,8 +12,8 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('yow', \&Modules::Zippy::zippy);
-	&Modules::register_help('yow', \&Modules::Zippy::help);
+	Modules::register_action('yow', \&Modules::Zippy::zippy);
+	Modules::register_help('yow', \&Modules::Zippy::help);
 }
 
 sub zippy($)

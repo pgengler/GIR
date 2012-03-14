@@ -16,7 +16,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('how much is oil', \&Modules::Oil::fetch);
+	Modules::register_action('how much is oil', \&Modules::Oil::fetch);
 }
 
 sub fetch($)

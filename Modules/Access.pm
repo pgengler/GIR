@@ -28,9 +28,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('show access', \&Modules::Access::show_access);
-	&Modules::register_action('add access', \&Modules::Access::add_access);
-	&Modules::register_action('remove access', \&Modules::Access::remove_access);
+	Modules::register_action('show access', \&Modules::Access::show_access);
+	Modules::register_action('add access', \&Modules::Access::add_access);
+	Modules::register_action('remove access', \&Modules::Access::remove_access);
 }
 
 sub show_access($)
@@ -134,7 +134,7 @@ sub add_access($)
 	my $user = $message->from();
 	my ($password, $target_user, $to_add) = split(/\s+/, $message->message(), 3);
 
-	my $allowed = &check_access($user, $password, 'add_access');
+	my $allowed = check_access($user, $password, 'add_access');
 
 	unless ($allowed) {
 		return "You don't have permission to do that, $user!";
@@ -222,7 +222,7 @@ sub remove_access($)
 	my $user = $message->from();
 	my ($password, $target_user, $to_remove) = split(/\s+/, $message->message(), 3);
 
-	my $allowed = &check_access($user, $password, 'remove_access');
+	my $allowed = check_access($user, $password, 'remove_access');
 
 	unless ($allowed) {
 		return "You don't have permission to do that, $user!";

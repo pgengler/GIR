@@ -24,9 +24,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('qdb', \&Modules::QDB::process);
+	Modules::register_action('qdb', \&Modules::QDB::process);
 
-	&Modules::register_help('qdb', \&Modules::QDB::help);
+	Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
 sub process($)

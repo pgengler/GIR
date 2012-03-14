@@ -19,7 +19,7 @@ sub register()
 	# Check that both a login and API key are provided in the configuration
 	my $moduleConfig = $Bot::config->{'modules'}->{'ShortenURL'};
 	if ($moduleConfig->{'login'} && $moduleConfig->{'api_key'}) {
-		&Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
+		Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {
 		Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
 		return -1;

@@ -33,11 +33,11 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('metar', \&Modules::Aviation::metar);
-	&Modules::register_action('taf', \&Modules::Aviation::taf);
+	Modules::register_action('metar', \&Modules::Aviation::metar);
+	Modules::register_action('taf', \&Modules::Aviation::taf);
 
-	&Modules::register_help('metar', \&Modules::Aviation::help);
-	&Modules::register_help('taf', \&Modules::Aviation::help);
+	Modules::register_help('metar', \&Modules::Aviation::help);
+	Modules::register_help('taf', \&Modules::Aviation::help);
 }
 
 sub metar($)

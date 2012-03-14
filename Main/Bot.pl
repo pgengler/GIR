@@ -48,10 +48,10 @@ Getopt::Long::GetOptions(
 );
 
 # Load configuration
-$config = &load_config($config_file);
+$config = load_config($config_file);
 
 # Perform pre-loading initialization for module stuff
-&Modules::init();
+Modules::init();
 
 # Unbuffer standard output
 select(STDOUT);
@@ -61,10 +61,10 @@ $| = 1;
 $SIG{'INT'} = \&shutdown;
 
 # Load ignore list
-&load_ignore();
+load_ignore();
 
 # Load extras
-&Modules::load_modules();
+Modules::load_modules();
 
 #######
 ## START IRCING
@@ -81,14 +81,14 @@ sub bot()
 {
 	$SIG{'USR1'} = \&bot_command;
 	$SIG{'TERM'} = \&bot_shutdown;
-	$SIG{'INT'}  = sub { &bot_shutdown(); $console->kill('SIGINT'); threads->exit(); };
+	$SIG{'INT'}  = sub { bot_shutdown(); $console->kill('SIGINT'); threads->exit(); };
 
 	while (1) {
 		# Reset list of joined channels
 		%channels = ();
 
 		# Connect to the server
-		&connect();
+		Bot::connect();
 
 		# Set up event handlers
 		$connection->add_global_handler('001', \&on_connect);
@@ -115,7 +115,7 @@ sub bot()
 		while ($connection->connected()) {
 			$irc->do_one_loop();
 			if (scalar(@commands) > 0) {
-				&bot_command();
+				bot_command();
 			}
 		}
 	}
@@ -149,7 +149,7 @@ sub load_config($)
 #######
 ## ERROR HANDLER
 #######
-sub on_error()
+sub on_error($$)
 {
 	my ($conn, $event) = @_;
 
@@ -185,7 +185,7 @@ sub connect()
 #######
 ## JOIN CHANNEL
 #######
-sub join_chan()
+sub join_chan($$)
 {
 	my ($conn, $channel) = @_;
 
@@ -202,14 +202,14 @@ sub join_chan()
 #######
 ## ON CONNECT
 #######
-sub on_connect()
+sub on_connect($$)
 {
 	my ($conn, $event) = @_;
 
 	status('Joining channels...');
 
 	foreach my $channel (@{ $config->{'channels'}->{'join'} }) {
-		&join_chan($conn, $channel);
+		join_chan($conn, $channel);
 	}
 }
 
@@ -231,7 +231,7 @@ sub bot_shutdown()
 {
 	status('Bot thread is shutting down...');
 
-	&Modules::shutdown();
+	Modules::shutdown();
 
 	# Look for a quit message
 	my $message = "Leaving";
@@ -328,7 +328,7 @@ sub log($;@)
 ## MESSAGE TO CHANNEL OR THE BOT
 ## $to is undefined when message is private to bot
 #######
-sub message()
+sub message($$)
 {
 	my ($conn, $event) = @_;
 
@@ -338,7 +338,7 @@ sub message()
 	my $to   = $message->where();
 	my $text = $message->raw();
 
-	if (&should_ignore($message)) {
+	if (should_ignore($message)) {
 		if ($message->is_public()) {
 			status('IGNORED <%s/%s> %s', $nick, $to, $text);
 		} else {
@@ -352,13 +352,13 @@ sub message()
 	} else {
 		status('>%s< %s', $nick, $text);
 	}
-	&Modules::dispatch($message);
+	Modules::dispatch($message);
 }
 
 #######
 ## ACTION
 #######
-sub handle_action()
+sub handle_action($$)
 {
 	my ($conn, $event) = @_;
 
@@ -374,14 +374,14 @@ sub handle_action()
 #######
 ## EVENT HANDLERS
 #######
-sub on_disconnect()
+sub on_disconnect($$)
 {
 	my ($conn, $event) = @_;
 
 	$connected = false;
 }
 
-sub on_nick_change()
+sub on_nick_change($$)
 {
 	my ($conn, $event) = @_;
 
@@ -391,7 +391,7 @@ sub on_nick_change()
 	status('%s is now known as %s', $old_nick, $new_nick);
 }
 
-sub nick_in_use()
+sub nick_in_use($$)
 {
 	my ($conn, $event) = @_;
 
@@ -404,10 +404,10 @@ sub nick_in_use()
 	} elsif ($nick_retries == 2) {
 		$config->{'nick'} = $config->{'config_nick'};
 	}
-	&change_nick($config->{'nick'});
+	change_nick($config->{'nick'});
 }
 
-sub on_quit()
+sub on_quit($$)
 {
 	my ($conn, $event) = @_;
 
@@ -417,7 +417,7 @@ sub on_quit()
 	status('%s has quit IRC (%s)', $who, $message);
 }
 
-sub on_join()
+sub on_join($$)
 {
 	my ($conn, $event) = @_;
 
@@ -432,7 +432,7 @@ sub on_join()
 	}
 }
 
-sub banned_from_channel()
+sub banned_from_channel($$)
 {
 	my ($conn, $event) = @_;
 
@@ -441,7 +441,7 @@ sub banned_from_channel()
 	status("Can't join %s - I've been banned!", $channel);
 }
 
-sub on_part()
+sub on_part($$)
 {
 	my ($conn, $event) = @_;
 
@@ -452,7 +452,7 @@ sub on_part()
 	status('%s has left %s (%s)', $user, $channel, $message);
 }
 
-sub on_mode()
+sub on_mode($$)
 {
 	my ($conn, $event) = @_;
 
@@ -480,7 +480,7 @@ sub on_mode()
 	}
 }
 
-sub on_topic()
+sub on_topic($$)
 {
 	my ($conn, $event) = @_;
 
@@ -497,7 +497,7 @@ sub on_topic()
 	}
 }
 
-sub on_kick()
+sub on_kick($$)
 {
 	my ($conn, $event) = @_;
 
@@ -511,11 +511,11 @@ sub on_kick()
 	} else {
 		status('%s has kicked me from %s (%s)', $kicker, $channel, $reason);
 		delete $channels{ $channel };
-		&join_chan($conn, $channel);
+		join_chan($conn, $channel);
 	}
 }
 
-sub on_invite()
+sub on_invite($$)
 {
 	my ($conn, $event) = @_;
 
@@ -529,25 +529,25 @@ sub on_invite()
 		status('%s invited me to %s', $inviter, $channel);
 		my %allowed_channels = map { $_ => true } @{ $config->{'channels'}->{'allowed'} };
 		if ($allowed_channels{ $channel }) {
-			&join_chan($conn, $channel);
+			join_chan($conn, $channel);
 		} else {
 			status("%s isn't on the allowed channel list, not joining", $channel);
 		}
 	}
 }
 
-sub on_notice()
+sub on_notice($$)
 {
 	my ($conn, $event) = @_;
 
 	status('-%s- %s', $event->{'from'}, $event->{'args'}[0]);
 
 	if ($event->{'nick'} eq 'NickServ' && $event->{'args'}[0] =~ /This nickname is registered and protected/i && $config->{'nickserv_pass'}) {
-		&say('NickServ', 'identify ' . $config->{'nickserv_pass'});
+		Bot::say('NickServ', 'identify ' . $config->{'nickserv_pass'});
 	}
 }
 
-sub on_server_notice()
+sub on_server_notice($$)
 {
 	my ($conn, $event) = @_;
 
@@ -559,7 +559,7 @@ sub on_server_notice()
 #######
 ## SEND MESSAGE TO USER/CHANNEL
 #######
-sub say()
+sub say($$)
 {
 	my ($where, $message) = @_;
 
@@ -575,9 +575,9 @@ sub say()
 	}
 }
 
-sub enqueue_say()
+sub enqueue_say($$)
 {
-	my ($where, $message, $bot) = @_;
+	my ($where, $message) = @_;
 
 	return unless $message;
 
@@ -585,9 +585,9 @@ sub enqueue_say()
 	push @commands, "say||$where||$message";
 }
 
-sub enqueue_action()
+sub enqueue_action($$)
 {
-	my ($where, $message, $bot) = @_;
+	my ($where, $message) = @_;
 
 	return unless $message;
 
@@ -669,7 +669,7 @@ sub should_ignore($)
 ## USEFUL IRC FUNCTIONS
 ## These are primarily for modules to use
 ##############
-sub quit()
+sub quit($)
 {
 	my $message = shift;
 
@@ -677,14 +677,14 @@ sub quit()
 #	$connection->shutdown();
 }
 
-sub join()
+sub join($)
 {
 	my $channel = shift;
 
-	&join_chan($connection, $channel);	
+	join_chan($connection, $channel);	
 }
 
-sub part()
+sub part($$)
 {
 	my ($channel, $reason) = @_;
 
@@ -697,42 +697,42 @@ sub part()
 	delete $channels{ $channel };
 }
 
-sub give_op()
+sub give_op($$)
 {
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '+o', $user);
 }
 
-sub take_op()
+sub take_op($$)
 {
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '-o', $user);
 }
 
-sub give_voice()
+sub give_voice($$)
 {
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '+v', $user);
 }
 
-sub take_voice()
+sub take_voice($$)
 {
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '-v', $user);
 }
 
-sub kick()
+sub kick($$$)
 {
 	my ($channel, $user, $reason) = @_;
 
 	$connection->kick($channel, $user, $reason);
 }
 
-sub action()
+sub action($$)
 {
 	my ($where, $what) = @_;
 
@@ -741,7 +741,7 @@ sub action()
 	$connection->me($where, $what);
 }
 
-sub change_nick()
+sub change_nick($)
 {
 	my $nick = shift;
 
@@ -753,7 +753,7 @@ sub change_nick()
 
 	$config->{'nick'} = $nick;
 
-	&Modules::nick_changed({ old => $oldnick, new => $nick });
+	Modules::nick_changed({ old => $oldnick, new => $nick });
 }
 
 sub save_ignore_list()
@@ -763,10 +763,10 @@ sub save_ignore_list()
 		print $newlist $entry . "\n";
 	}
 	close($newlist);
-	&File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
+	File::Copy::move($config->{'ignore_list'} . '.tmp', $config->{'ignore_list'});
 }
 
-sub add_ignore()
+sub add_ignore($)
 {
 	my $entry = shift;
 
@@ -777,7 +777,7 @@ sub add_ignore()
 	save_ignore_list();
 }
 
-sub remove_ignore()
+sub remove_ignore($)
 {
 	my $entry = shift;
 
@@ -788,34 +788,34 @@ sub remove_ignore()
 	save_ignore_list();
 }
 
-sub reload_modules()
+sub reload_modules(;$)
 {
 	my $module = shift;
 
 	unless ($module) {
 		status('Reloading modules');
-		&Modules::load_modules();
+		Modules::load_modules();
 	} else {
-		&Modules::unload_module($module);
-		&Modules::load_module($module, false, false);
+		Modules::unload_module($module);
+		Modules::load_module($module, false, false);
 	}
 }
 
-sub load_module()
+sub load_module($)
 {
 	my $module = shift;
 
-	&Modules::load_module($module, false, false);
+	Modules::load_module($module, false, false);
 }
 
-sub unload_module()
+sub unload_module($)
 {
 	my $module = shift;
 
-	&Modules::unload_module($module);
+	Modules::unload_module($module);
 }
 
-sub set_debug()
+sub set_debug($)
 {
 	my $debug = shift;
 

@@ -14,15 +14,15 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('op', \&Modules::IrcFuncs::op);
-	&Modules::register_action('deop', \&Modules::IrcFuncs::deop);
-	&Modules::register_action('kick', \&Modules::IrcFuncs::kick);
-	&Modules::register_action('nick', \&Modules::IrcFuncs::change_nick);
+	Modules::register_action('op', \&Modules::IrcFuncs::op);
+	Modules::register_action('deop', \&Modules::IrcFuncs::deop);
+	Modules::register_action('kick', \&Modules::IrcFuncs::kick);
+	Modules::register_action('nick', \&Modules::IrcFuncs::change_nick);
 
-	&Modules::register_help('op', \&Modules::IrcFuncs::help);
-	&Modules::register_help('deop', \&Modules::IrcFuncs::help);
-	&Modules::register_help('kick', \&Modules::IrcFuncs::help);
-	&Modules::register_help('nick', \&Modules::IrcFuncs::help);
+	Modules::register_help('op', \&Modules::IrcFuncs::help);
+	Modules::register_help('deop', \&Modules::IrcFuncs::help);
+	Modules::register_help('kick', \&Modules::IrcFuncs::help);
+	Modules::register_help('nick', \&Modules::IrcFuncs::help);
 }
 
 
@@ -35,7 +35,7 @@ sub op($)
 	my ($password, $channel, $target) = split(/\s+/, $message->message());
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'op')) {
+	unless (Modules::Access::check_access($user, $password, 'op')) {
 		if ($message->is_explicit()) {
 			return "You don't have permission to do that, $user!";
 		} else {
@@ -43,7 +43,7 @@ sub op($)
 		}
 	}
 
-	&Bot::give_op($channel, $target || $user);
+	Bot::give_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
@@ -57,7 +57,7 @@ sub deop($)
 	my ($password, $channel, $target) = split(/\s+/, $message->message());
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'deop')) {
+	unless (Modules::Access::check_access($user, $password, 'deop')) {
 		if ($message->is_explicit()) {
 			return "You don't have permission to do that, $user!";
 		} else {
@@ -65,7 +65,7 @@ sub deop($)
 		}
 	}
 
-	&Bot::take_op($channel, $target || $user);
+	Bot::take_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
@@ -79,7 +79,7 @@ sub kick($)
 	my ($password, $channel, $target, $reason) = split(/\s+/, $message->message(), 4);
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'kick')) {
+	unless (Modules::Access::check_access($user, $password, 'kick')) {
 		if ($message->is_explicit()) {
 			return "You don't have permission to do that, $user!";
 		} else {
@@ -87,7 +87,7 @@ sub kick($)
 		}
 	}
 
-	&Bot::kick($channel, $target, $reason);
+	Bot::kick($channel, $target, $reason);
 
 	return 'NOREPLY';
 }
@@ -101,7 +101,7 @@ sub change_nick($)
 	my ($password, $nick) = split(/\s+/, $message->message(), 2);
 
 	# Check for access
-	unless (&Modules::Access::check_access($user, $password, 'nick')) {
+	unless (Modules::Access::check_access($user, $password, 'nick')) {
 		if ($message->is_explicit()) {
 			return "You don't have permission to do that, $user!";
 		} else {
@@ -110,7 +110,7 @@ sub change_nick($)
 	}
 
 	# Change nickname
-	&Bot::change_nick($nick);
+	Bot::change_nick($nick);
 
 	return 'NOREPLY';
 }

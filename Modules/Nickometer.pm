@@ -22,9 +22,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('nickometer', \&Modules::Nickometer::process);
+	Modules::register_action('nickometer', \&Modules::Nickometer::process);
 
-	&Modules::register_help('nickometer', \&Modules::Nickometer::help);
+	Modules::register_help('nickometer', \&Modules::Nickometer::help);
 }
 
 sub process($)
@@ -40,7 +40,7 @@ sub process($)
 	# Remove leading and trailing whitespace
 	$nick =~ s/^\s*(.+?)\s*$/$1/;
 
-	my $percentage = &nickometer($nick);
+	my $percentage = nickometer($nick);
 
 	if ($percentage =~ /NaN/) {
 		$percentage = "off the scale";
@@ -102,7 +102,7 @@ sub nickometer($)
 		/my $consecutive = length($1);
 		if ($consecutive) {
 #			$this->punish(&slow_pow(10, $consecutive), "$consecutive total consecutive non-alphas");
-			$score += &slow_pow(10, $consecutive);
+			$score += slow_pow(10, $consecutive);
 		}
 		$1
 	/egx;
@@ -115,7 +115,7 @@ sub nickometer($)
 	my $parentheses = ($nick =~ tr/(){}[]/(){}[]/);
 	if ($parentheses) {
 #		$this->punish(&slow_pow(10, $parentheses), "$parentheses unmatched " . ($parentheses == 1 ? 'parenthesis' : 'parentheses'));
-		$score += &slow_pow(10, $parentheses);
+		$score += slow_pow(10, $parentheses);
 	}
 
 	# An alpha caps is not lame in middle or at end, provided the first alpha is caps.
@@ -126,10 +126,10 @@ sub nickometer($)
 	$nick =~ s/^([^A-Za-z]*)([A-Z])([a-z])/$1\l$2$3/;
 
 	# Punish uppercase to lowercase shifts and vice-versa, modulo exceptions above
-	my $case_shifts = &case_shifts($orig_case);
+	my $case_shifts = case_shifts($orig_case);
 	if ($case_shifts > 1 && $orig_case =~ /[A-Z]/) {
 #		$this->punish(&slow_pow(9, $case_shifts), $case_shifts . ' case ' . (($case_shifts == 1) ? 'shift' : 'shifts'));
-		$score += &slow_pow(0, $case_shifts);
+		$score += slow_pow(0, $case_shifts);
 	}
 
 	# Punish lame endings
@@ -139,17 +139,17 @@ sub nickometer($)
 	}
 
 	# Punish letter to numeric shifts and vice-versa
-	my $number_shifts = &number_shifts($nick);
+	my $number_shifts = number_shifts($nick);
 	if ($number_shifts > 1) {
 #		$this->punish(&slow_pow(9, $number_shifts), $number_shifts . ' letter/number ' . (($number_shifts == 1) ? 'shift' : 'shifts'));
-		$score += &slow_pow(9, $number_shifts);
+		$score += slow_pow(9, $number_shifts);
 	}
 
 	# Punish extraneous caps
 	my $caps = ($nick =~ tr/A-Z/A-Z/);
 	if ($caps) {
 #		$this->punish(&slow_pow(7, $caps), "$caps extraneous caps");
-		$score += &slow_pow(7, $caps);
+		$score += slow_pow(7, $caps);
 	}
 
 	# Now punish anything that's left
@@ -159,7 +159,7 @@ sub nickometer($)
 
 	if ($remains) {
 #		$this->punish(50 * $remains_length + &slow_pow(9, $remains_length), $remains_length . ' extraneous ' . (($remains_length == 1) ? 'symbol' : 'symbols'));
-		$score += ((50 * $remains_length) + &slow_pow(9, $remains_length));
+		$score += ((50 * $remains_length) + slow_pow(9, $remains_length));
 	}
 
 	# Use an appropriate function to map [0, +inf) to [0, 100)
@@ -197,7 +197,7 @@ sub slow_pow($$)
 {
 	my ($x, $y) = @_;
 
-	return $x ** &slow_exponent($y);
+	return $x ** slow_exponent($y);
 }
 
 sub slow_exponent($)

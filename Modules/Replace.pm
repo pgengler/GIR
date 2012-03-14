@@ -17,7 +17,7 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('buttbuttinate', \&Modules::Replace::replace);
+	Modules::register_action('buttbuttinate', \&Modules::Replace::replace);
 }
 
 sub replace($)

@@ -39,9 +39,9 @@ sub register()
 		return -1;
 	}
 
-	&Modules::register_action('translate', \&Modules::Translate::translate);
+	Modules::register_action('translate', \&Modules::Translate::translate);
 
-	&Modules::register_help('translate', \&Modules::Translate::help);
+	Modules::register_help('translate', \&Modules::Translate::help);
 }
 
 sub translate($)

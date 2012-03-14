@@ -70,7 +70,7 @@ my $suppress_rebuild = 0;
 #######
 sub init()
 {
-	&restart_thread_pool();
+	restart_thread_pool();
 }
 
 sub restart_thread_pool()
@@ -85,14 +85,14 @@ sub restart_thread_pool()
 	$pool = new Thread::Pool::Simple(
 		min => 5,
 		max => 10,
-		do  => [\&dispatch_t]
+		do  => [ \&dispatch_t ]
 	);
 }
 
 sub load_modules()
 {
 	# Unload any existing modules
-	&unload_modules();
+	unload_modules();
 
 	my $module_dir = $Bot::config->{'module_dir'};
 
@@ -107,12 +107,12 @@ sub load_modules()
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
 
-		&load_module($module_name, 1, 1);
+		load_module($module_name, 1, 1);
 	}
-	&restart_thread_pool();
+	restart_thread_pool();
 }
 
-sub load_module()
+sub load_module($$$)
 {
 	my ($name, $suppress_restart, $auto) = @_;
 
@@ -137,7 +137,7 @@ sub load_module()
 
 	if ($ret == -1) {
 		Bot::status("Module '%s' requested to not be loaded", $name);
-		&unload_module($name, 1);
+		unload_module($name, 1);
 		return;
 	}
 
@@ -145,9 +145,9 @@ sub load_module()
 
 	Bot::status('Loaded module %s', $name);
 
-	&rebuild_registration_list();
+	rebuild_registration_list();
 	# Only restart the thread pool when we load a specific module; when we're loading everything, don't restart the thread pool when each module is loaded
-	&restart_thread_pool() unless $suppress_restart;
+	restart_thread_pool() unless $suppress_restart;
 }
 
 sub unload_modules()
@@ -165,10 +165,10 @@ sub unload_modules()
 	%help           = ( );
 	@nickchange     = ( );
 
-	&restart_thread_pool();
+	restart_thread_pool();
 }
 
-sub unload_module()
+sub unload_module($;$)
 {
 	my ($name, $silent) = @_;
 
@@ -184,8 +184,8 @@ sub unload_module()
 
 			# Remove handlers from this module
 			delete $registered{ $mod_name };
-			&rebuild_registration_list();
-			&restart_thread_pool();
+			rebuild_registration_list();
+			restart_thread_pool();
 
 			# Unload
 			$class->unload();
@@ -197,7 +197,7 @@ sub unload_module()
 	Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
 }
 
-sub register_action()
+sub register_action($$;$)
 {
 	my ($action, $func, $priority) = @_;
 
@@ -226,10 +226,10 @@ sub register_action()
 		};
 	}
 
-	&rebuild_registration_list() unless $suppress_rebuild;
+	rebuild_registration_list() unless $suppress_rebuild;
 }
 
-sub unregister_action()
+sub unregister_action($)
 {
 	my $action = shift;
 
@@ -246,11 +246,11 @@ sub unregister_action()
 		@{ $registered{ $module }->{'actions'} } = @actions;
 	}
 
-	&rebuild_registration_list();
-	&restart_thread_pool();
+	rebuild_registration_list();
+	restart_thread_pool();
 }
 
-sub register_private()
+sub register_private($$)
 {
 	my ($action, $func) = @_;
 
@@ -276,7 +276,7 @@ sub register_private()
 	}
 }
 
-sub register_listener()
+sub register_listener($$)
 {
 	my ($func, $priority) = @_;
 
@@ -302,7 +302,7 @@ sub register_listener()
 	}
 }
 
-sub register_help()
+sub register_help($$)
 {
 	my ($command, $func) = @_;
 
@@ -330,7 +330,7 @@ sub register_help()
 	}
 }
 
-sub register_nickchange()
+sub register_nickchange($)
 {
 	my $func = shift;
 
@@ -378,7 +378,7 @@ sub rebuild_registration_list()
 	}
 }
 
-sub nick_changed()
+sub nick_changed($)
 {
 	my $params = shift;
 
@@ -387,21 +387,21 @@ sub nick_changed()
 	}
 }
 
-sub dispatch()
+sub dispatch($)
 {
 	my $message = shift;
 
 	$pool->add($message);
 }
 
-sub dispatch_t()
+sub dispatch_t($)
 {
 	my $message = shift;
 
-	my $result = &process($message);
+	my $result = process($message);
 
 	if ($result && $result ne 'NOREPLY') {
-		&Bot::enqueue_say($message->where(), $result);
+		Bot::enqueue_say($message->where(), $result);
 	}
 }
 
@@ -417,7 +417,7 @@ sub process($;$)
 		Bot::debug("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post);
 
 		my $msg = new Message($message, { 'message' => $nest });
-		my $result = &process($msg, $nests + 1) || '';
+		my $result = process($msg, $nests + 1) || '';
 
 		$result = '' if $result eq 'NOREPLY';
 		$result = sprintf('%s%s%s', $pre, $result, $post);

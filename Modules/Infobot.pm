@@ -43,23 +43,23 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
-	&Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
-	&Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
-	&Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
-	&Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
-	&Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
-	&Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
-	&Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
-	&Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
-	&Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
-	&Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
+	Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
+	Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
+	Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
+	Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
+	Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
+	Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
+	Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
+	Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
+	Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
+	Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
+	Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
 
-	&Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
+	Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
-	&Modules::register_nickchange(\&Modules::Infobot::nick_changed);
+	Modules::register_nickchange(\&Modules::Infobot::nick_changed);
 
-	&Modules::register_help('infobot', \&Modules::Infobot::help);
+	Modules::register_help('infobot', \&Modules::Infobot::help);
 }
 
 sub process($)
@@ -70,7 +70,7 @@ sub process($)
 
 	# Figure out what we're doing
 	if ($data =~ $force_learn_expr) {
-		return &learn($message, $1, $2, $3);
+		return learn($message, $1, $2, $3);
 	} elsif ($data =~ /^no\,?\s+(($Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i) {
 		my $msg;
 		if ($1) {
@@ -78,19 +78,19 @@ sub process($)
 		} else {
 			$msg = $message;
 		}
-		return &replace($msg, $3, $4, $5);
+		return replace($msg, $3, $4, $5);
 	} elsif ($data =~ $append_expr) {
-		return &append($message, $1, $2, $3);
+		return append($message, $1, $2, $3);
 	} elsif ($data =~ $what_reply_expr) {
-		return &reply($message, $3);
+		return reply($message, $3);
 	} elsif ($data =~ $learn_expr) {
-		return &learn($message, $1, $2, $3);
+		return learn($message, $1, $2, $3);
 	} elsif ($data =~ $forget_expr) {
-		return &forget($message, $1);
+		return forget($message, $1);
 	} elsif ($data =~ $amend_expr) {
-		return &amend($message, $1, $2, $3);
+		return amend($message, $1, $2, $3);
 	} elsif ($data =~ $question_reply_expr) {
-		return &reply($message, $1);
+		return reply($message, $1);
 	} else {
 		Bot::debug("Infobot::process fell through somehow: message == %s", $data);
 	}
@@ -390,7 +390,7 @@ sub reply_listener($)
 {
 	my $message = shift;
 
-	return &reply($message, $message->message());
+	return reply($message, $message->message());
 }
 
 sub reply($$)
@@ -417,7 +417,7 @@ sub reply($$)
 		return;
 	}
 
-	my ($phrase, $relates, $value, @params) = &find_match($db, $data);
+	my ($phrase, $relates, $value, @params) = find_match($db, $data);
 
 	unless ($phrase) {
 		if ($explicit) {
@@ -445,11 +445,11 @@ sub reply($$)
 
 	# Parse if we need to
 	if ($value =~ /^\s*\<reply\>\s*(\S.*)$/) {
-		return &parse_special($1, $message->from());
+		return parse_special($1, $message->from());
 	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<action\>\s*(.+)$/) {
-		&Bot::enqueue_action($message->where(), &parse_special($1, $message->from()));
+		Bot::enqueue_action($message->where(), parse_special($1, $message->from()));
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
@@ -462,7 +462,7 @@ sub reply($$)
 		my $msg = new Message($message, {
 			'message' => $1,
 		});
-		&Modules::dispatch_t($msg);
+		Modules::dispatch_t($msg);
 		$feedbacked--;
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
@@ -490,15 +490,15 @@ sub reply($$)
 		});
 
 		if ($extra) {
-			$result = $extra . ' ' . &Modules::process($msg);
+			$result = $extra . ' ' . Modules::process($msg);
 		} else {
-			$result = &Modules::process($msg);
+			$result = Modules::process($msg);
 		}
 		$feedbacked--;
 
 		return $result;
 	} else {
-		return "$phrase $relates " . &parse_special($value, $message->from());
+		return "$phrase $relates " . parse_special($value, $message->from());
 	}
 }
 
@@ -506,7 +506,7 @@ sub find_match($$)
 {
 	my ($db, $data) = @_;
 
-	return &find_match_aux($db, $data, ( ));	
+	return find_match_aux($db, $data, ( ));	
 }
 
 sub find_match_aux($$@)
@@ -603,7 +603,7 @@ sub find_match_aux($$@)
 		return undef;
 	}
 
-	return &find_match_aux($db, $data, @params);
+	return find_match_aux($db, $data, @params);
 }
 
 sub lock($)
@@ -617,7 +617,7 @@ sub lock($)
 	return 'NOREPLY' if $message->is_public();
 
 	# Make sure the user can do that
-	unless (&Modules::Access::check_access($message->from(), $password, 'lock')) {
+	unless (Modules::Access::check_access($message->from(), $password, 'lock')) {
 		return "You don't have permission to do that, " . $message->from() . '!';
 	}
 
@@ -662,7 +662,7 @@ sub unlock($)
 	my ($password, $phrase) = split(/\s+/, $message->message(), 2);
 
 	# Make sure the user can do that
-	unless (&Modules::Access::check_access($message->from(), $password, 'unlock')) {
+	unless (Modules::Access::check_access($message->from(), $password, 'unlock')) {
 		return "You don't have permission to do that, " . $message->from() . '!';
 	}
 
@@ -762,9 +762,9 @@ sub nick_changed($)
 	my $params = shift;
 
 	# Rebuild regexp for replace handler to incorporate new nick
-	&Modules::unregister_action($replace_expr);
+	Modules::unregister_action($replace_expr);
 	$replace_expr = qr/^no\,?\s+(($params->{'new'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
-	&Modules::register_action($replace_expr, \&Modules::Infobot::process, 2);
+	Modules::register_action($replace_expr, \&Modules::Infobot::process, 2);
 }
 
 sub help($)

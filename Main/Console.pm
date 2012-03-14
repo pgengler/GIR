@@ -12,7 +12,7 @@ sub console()
 
 	unless ($Bot::no_console) {
 		while (<>) {
-			&console_parse($_);
+			console_parse($_);
 			threads->self()->yield();
 		}
 	} else {
@@ -22,7 +22,7 @@ sub console()
 	}
 }
 
-sub console_parse()
+sub console_parse($)
 {
 	my $str = shift;
 
@@ -30,7 +30,7 @@ sub console_parse()
 
 	# For now, nothing fancy, just some simple string matches
 	if ($str =~ /^quit(\s+(.+))?$/) {
-		&Bot::status("Shutting down");
+		Bot::status("Shutting down");
 		if ($2) {
 			push @Bot::commands, "quit||$2";
 		}
@@ -60,7 +60,7 @@ sub console_parse()
 	} elsif ($str =~ /^\s*debug\s+(on|off)\s*$/) {
 		push @Bot::commands, "debug||$1";
 	} else {
-		&Bot::status("Unrecognized command");
+		Bot::status("Unrecognized command");
 	}
 
 	if (scalar(@Bot::commands) > 0) {

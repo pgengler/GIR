@@ -15,9 +15,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('spell', \&Modules::Spell::process);
+	Modules::register_action('spell', \&Modules::Spell::process);
 
-	&Modules::register_help('spell', \&Modules::Spell::help);
+	Modules::register_help('spell', \&Modules::Spell::help);
 }
 
 sub process($)

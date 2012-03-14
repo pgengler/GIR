@@ -18,9 +18,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('rot13', \&Modules::Rot13::rot13);
+	Modules::register_action('rot13', \&Modules::Rot13::rot13);
 
-	&Modules::register_help('rot13', \&Modules::Rot13::help);
+	Modules::register_help('rot13', \&Modules::Rot13::help);
 }
 
 sub rot13($)

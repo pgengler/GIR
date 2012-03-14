@@ -21,9 +21,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action($handleRE, \&Modules::ExchangeRates::convert);
+	Modules::register_action($handleRE, \&Modules::ExchangeRates::convert);
 
-	&Modules::register_help('exchange', \&Modules::ExchangeRates::help);
+	Modules::register_help('exchange', \&Modules::ExchangeRates::help);
 }
 
 sub convert($)

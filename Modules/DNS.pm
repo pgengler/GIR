@@ -23,9 +23,9 @@ sub register()
 {
 	my $this = shift;
 
-	&Modules::register_action('host', \&Modules::DNS::lookup);
+	Modules::register_action('host', \&Modules::DNS::lookup);
 
-	&Modules::register_help('host', \&Modules::DNS::help);
+	Modules::register_help('host', \&Modules::DNS::help);
 }
 
 sub lookup($)

@@ -45,8 +45,8 @@ sub register()
 		return -1;
 	}
 
-	&Modules::register_action('weather', \&Modules::Weather::process);
-	&Modules::register_help('weather', \&Modules::Weather::help);
+	Modules::register_action('weather', \&Modules::Weather::process);
+	Modules::register_help('weather', \&Modules::Weather::help);
 }
 
 sub process($)
