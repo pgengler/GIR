@@ -390,6 +390,11 @@ sub on_nick_change($$)
 	my $new_nick = $event->{'args'}[0];
 
 	status('%s is now known as %s', $old_nick, $new_nick);
+
+	Modules::event('nickchange', {
+		'from' => $old_nick,
+		'to'   => $new_nick,
+	});
 }
 
 sub nick_in_use($$)
