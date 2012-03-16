@@ -1,7 +1,7 @@
 package Modules::Seen;
 
 use strict;
-use lib ('./', '../Main');
+use lib ('./', '../lib');
 
 use Database::MySQL;
 

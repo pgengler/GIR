@@ -4,7 +4,7 @@ package Modules::Markov;
 ## PERL SETUP
 #######
 use strict;
-use lib ('./', '../Main');
+use lib ('./', '../lib');
 
 #######
 ## INCLUDES

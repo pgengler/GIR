@@ -4,6 +4,7 @@
 use strict;
 use threads;
 use threads::shared;
+use lib qw/ lib /;
 
 use File::Copy;
 use Getopt::Long;
