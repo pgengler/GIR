@@ -29,11 +29,14 @@ my @loaded_modules;
 # This has is structured as follows:
 # %registered = (
 #   '<module name>' => {
-#     'actions'    => [ list of { 'priority' => <priority>, 'action' => <text to handle>, 'function' => <handler function> } ],
-#     'private'    => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
-#     'listeners'  => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
-#     'help'       => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ],
-#     'nickchange' => <callback function>,
+#     'actions'     => [ list of { 'priority' => <priority>, 'action' => <text to handle>, 'function' => <handler function> } ],
+#     'private'     => [ list of { 'action'   => <text to handle>, 'function' => <handler function> } ],
+#     'listeners'   => [ list of { 'priority' => <priority>, 'function' => <listener function> } ],
+#     'help'        => [ list of { 'command'  => <command to provide help for>, 'function' => <help function> } ],
+#     'nickchange'  => <callback function>,
+#			'topicchange' => <callback function>,
+#     'join'        => <callback function>,
+#     'part'        => <callback function>,
 #   },
 #   ...
 # }
@@ -42,7 +45,12 @@ my %registered;
 # Keep a single list of actions, private handlers, listeners, and help functions
 my (%actions, %private, %listeners);
 our %help;
-my @nickchange;
+my %event_handlers = (
+	'join'        => [ ],
+	'nickchange'  => [ ],
+	'part'        => [ ],
+	'topicchange' => [ ],
+);
 
 # When set to a true value, suppresses calls to rebuild_registration_list. This is used to avoid
 # calling that function multiple times during initialization without preventing it from being
@@ -163,7 +171,12 @@ sub unload_modules()
 	%private        = ( );	
 	%listeners      = ( );
 	%help           = ( );
-	@nickchange     = ( );
+	%event_handlers = (
+		'join'        => [ ],
+		'nickchange'  => [ ],
+		'part'        => [ ],
+		'topicchange' => [ ],
+	);
 
 	restart_thread_pool();
 }
@@ -330,19 +343,24 @@ sub register_help($$)
 	}
 }
 
-sub register_nickchange($)
+sub register_event($$)
 {
-	my $func = shift;
+	my ($event, $function) = @_;
 
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::debug("Registering nickchange handler from '%s' module", $module);
+	unless (exists $event_handlers{ $event }) {
+		Bot::error("%s: can't register handler for '%s' events: invalid event type", $module, $event);
+		return;
+	}
+
+	Bot::debug("Registering %s handler from '%s' module", $event, $module);
 
 	if (exists $registered{ $module }) {
-		$registered{ $module }->{'nickchange'} = $func;
+		$registered{ $module }->{ $event } = $function;
 	} else {
-		$registered{ $module } = { 'nickchange' => $func };
+		$registered{ $module } = { $event => $function };
 	}
 }
 
@@ -353,7 +371,12 @@ sub rebuild_registration_list()
 	%private    = ( );
 	%help       = ( );
 	%listeners  = ( );
-	@nickchange = ( );
+	%event_handlers = (
+		'join'        => [ ],
+		'nickchange'  => [ ],
+		'part'        => [ ],
+		'topicchange' => [ ],
+	);
 
 	# Now, repopulate from registered items
 	foreach my $module (keys %registered) {
@@ -372,17 +395,22 @@ sub rebuild_registration_list()
 		foreach my $listener (@{ $registered{ $module }->{'listeners'} }) {
 			push @{ $listeners{ $listener->{'priority'} } }, $listener->{'function'};			
 		}
-		if (exists $registered{ $module }->{'nickchange'}) {
-			push @nickchange, $registered{ $module }->{'nickchange'};
+		foreach my $event (keys %event_handlers) {
+			if (exists $registered{ $module }->{ $event }) {
+				push @{ $event_handlers{ $event } }, $registered{ $module }->{ $event };
+			}
 		}
 	}
 }
 
-sub nick_changed($)
+sub event($$)
 {
-	my $params = shift;
+	my ($event, $params) = @_;
 
-	foreach my $callback (@nickchange) {
+	Bot::debug("Modules::event called for event of type '%s'", $event);
+	Bot::debug("Modules::event: There are %d handlers for '%s' events", scalar(@{ $event_handlers{ $event } }), $event);
+
+	foreach my $callback (@{ $event_handlers{ $event } }) {
 		$callback->($params);
 	}
 }

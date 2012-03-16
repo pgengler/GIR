@@ -430,6 +430,11 @@ sub on_join($$)
 		$channels{ $channel } = true;
 	} else {
 		status('%s has joined %s', $nick, $channel);
+
+		Modules::event('join', {
+			'channel' => $channel,
+			'nick'    => $nick,
+		});
 	}
 }
 
@@ -451,6 +456,11 @@ sub on_part($$)
 	my $message = $event->{'args'}[0];
 
 	status('%s has left %s (%s)', $user, $channel, $message);
+
+	Modules::event('part', {
+		'channel' => $channel,
+		'nick'    => $user,
+	});
 }
 
 sub on_mode($$)
@@ -495,6 +505,11 @@ sub on_topic($$)
 		my $who     = $event->{'nick'};
 
 		status("%s has changed the topic for %s to '%s'", $who, $channel, $topic);
+		Modules::event('topicchange', {
+			'channel' => $channel,
+			'nick'    => $who,
+			'topic'   => $topic,
+		});
 	}
 }
 
@@ -754,7 +769,7 @@ sub change_nick($)
 
 	$config->{'nick'} = $nick;
 
-	Modules::nick_changed({ old => $oldnick, new => $nick });
+	Modules::event('nickchange', { 'old' => $oldnick, 'new' => $nick });
 }
 
 sub save_ignore_list()
