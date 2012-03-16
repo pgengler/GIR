@@ -57,7 +57,7 @@ sub register()
 
 	Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
-	Modules::register_event('nickchange', \&Modules::Infobot::nick_changed);
+	Modules::register_event('mynickchange', \&Modules::Infobot::nick_changed);
 
 	Modules::register_help('infobot', \&Modules::Infobot::help);
 }

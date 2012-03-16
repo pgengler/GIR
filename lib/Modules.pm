@@ -45,12 +45,7 @@ my %registered;
 # Keep a single list of actions, private handlers, listeners, and help functions
 my (%actions, %private, %listeners);
 our %help;
-my %event_handlers = (
-	'join'        => [ ],
-	'nickchange'  => [ ],
-	'part'        => [ ],
-	'topicchange' => [ ],
-);
+my %event_handlers = _empty_event_handlers();
 
 # When set to a true value, suppresses calls to rebuild_registration_list. This is used to avoid
 # calling that function multiple times during initialization without preventing it from being
@@ -171,12 +166,7 @@ sub unload_modules()
 	%private        = ( );	
 	%listeners      = ( );
 	%help           = ( );
-	%event_handlers = (
-		'join'        => [ ],
-		'nickchange'  => [ ],
-		'part'        => [ ],
-		'topicchange' => [ ],
-	);
+	%event_handlers = _empty_event_handlers();
 
 	restart_thread_pool();
 }
@@ -371,12 +361,7 @@ sub rebuild_registration_list()
 	%private    = ( );
 	%help       = ( );
 	%listeners  = ( );
-	%event_handlers = (
-		'join'        => [ ],
-		'nickchange'  => [ ],
-		'part'        => [ ],
-		'topicchange' => [ ],
-	);
+	%event_handlers = _empty_event_handlers();
 
 	# Now, repopulate from registered items
 	foreach my $module (keys %registered) {
@@ -521,6 +506,18 @@ sub shutdown()
 	if ($pool) {
 		$pool->join();
 	}
+}
+
+# Get a hash structure for event handlers with no stored data
+sub _empty_event_handlers()
+{
+	return (
+		'join'         => [ ],
+		'mynickchange' => [ ],
+		'nickchange'   => [ ],
+		'part'         => [ ],
+		'topicchange'  => [ ],
+	);
 }
 
 1;

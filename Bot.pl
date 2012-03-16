@@ -769,7 +769,7 @@ sub change_nick($)
 
 	$config->{'nick'} = $nick;
 
-	Modules::event('nickchange', { 'old' => $oldnick, 'new' => $nick });
+	Modules::event('mynickchange', { 'old' => $oldnick, 'new' => $nick });
 }
 
 sub save_ignore_list()
