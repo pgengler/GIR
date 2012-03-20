@@ -106,6 +106,9 @@ sub load_modules()
 	my @modules = grep(/pm$/, @files);
 	my %mod_info;
 
+	my %blacklist = (
+		map { ($_ => 1) } @{ $Bot::config->{'skip_modules'} || [ ] },
+	);
 	my $use_whitelist = scalar(@{ $Bot::config->{'load_modules'} || [ ] });
 	my %whitelist = (
 		map { ($_ => 1) } @{ $Bot::config->{'load_modules'} || [ ] },
@@ -114,6 +117,12 @@ sub load_modules()
 	foreach my $module (@modules) {
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
+
+		# Check if module is on blacklist
+		if (exists $blacklist{ $module_name }) {
+			Bot::status("Skipping module '%s' because it's listed in 'skip_modules'", $module_name);
+			next;
+		}
 
 		# Check if module is on whitelist (if it's being used)
 		if (!$use_whitelist || exists $whitelist{ $module_name }) {

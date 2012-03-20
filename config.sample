@@ -60,6 +60,11 @@ server:
   host: irc.slashnet.org
   port: 6667
 
+# List of modules not to load; these modules can be manually loaded later
+#skip_modules:
+#  - Markov
+#  - Weather
+
 # IRC 'username' value for the bot
 username: ircbot
 
