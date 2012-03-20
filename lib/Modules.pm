@@ -106,11 +106,21 @@ sub load_modules()
 	my @modules = grep(/pm$/, @files);
 	my %mod_info;
 
+	my $use_whitelist = scalar(@{ $Bot::config->{'load_modules'} || [ ] });
+	my %whitelist = (
+		map { ($_ => 1) } @{ $Bot::config->{'load_modules'} || [ ] },
+	);
+
 	foreach my $module (@modules) {
 		# Remove ".pm" extension
 		my $module_name = substr($module, 0, -3);
 
-		load_module($module_name, 1, 1);
+		# Check if module is on whitelist (if it's being used)
+		if (!$use_whitelist || exists $whitelist{ $module_name }) {
+			load_module($module_name, 1, 1);
+		} elsif ($use_whitelist) {
+			Bot::status("Skipping module '%s' since it's not listed in 'load_modules'", $module_name);
+		}
 	}
 	restart_thread_pool();
 }

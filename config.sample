@@ -37,6 +37,15 @@ infobot_min_length: 2
 # Automatically break/wrap lines longer than this (default: 350 characters)
 line_length: 350
 
+# List of modules to load; anything not listed will not be loaded
+#load_modules:
+#  - Access
+#  - Greeting
+#  - Help
+#  - Ignore
+#  - Infobot
+#  - IrcFuncs
+
 # Full path to the directory where modules are located
 module_dir: /home/ircbot/Modules/
 
