@@ -20,24 +20,43 @@ sub new()
 	return $obj;
 }
 
+my $bash_url_expr = qr[http://bash.org/\?(\d+)$];
+
 sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('bash', \&Modules::Bash::process);
+	Modules::register_action('bash', \&Modules::Bash::process_from_text);
+	Modules::register_action($bash_url_expr, \&Modules::Bash::process_from_url);
 
 	Modules::register_help('bash', \&Modules::Bash::help);
 }
 
-sub process($)
+sub process_from_url($)
 {
-	my $message = shift;
+	my ($message) = @_;
 
-	# Check for valid id
-	my $data = $message->message();
-	unless ($data =~ /^\d+$/) {
-		return;
+	if ($message->message() =~ $bash_url_expr) {
+		return _get_quote($1);
 	}
+
+	return undef;
+}
+
+sub process_from_text($)
+{
+	my ($message) = @_;
+
+	if ($message->message() =~ /(\d+)/) {
+		return _get_quote($1);
+	}
+
+	return undef;
+}
+
+sub _get_quote($)
+{
+	my ($id) = @_;
 
 	# Look for quote in DB cache
 	my $db = new Database::MySQL();
@@ -49,7 +68,7 @@ sub process($)
 		WHERE id = ?
 	);
 	$db->prepare($sql);
-	my $sth = $db->execute($data);
+	my $sth = $db->execute($id);
 	my $row = $sth->fetchrow_hashref();
 
 	my $quote = $row ? $row->{'quote'} : undef;
@@ -65,7 +84,7 @@ sub process($)
 #	};
 
 	$ua->timeout(10);
-	my $request = new HTTP::Request('GET', "http://bash.org/?$data");
+	my $request = new HTTP::Request('GET', "http://bash.org/?${id}");
 	my $response = $ua->request($request); 
 
 	if (!$response->is_success) {
@@ -74,8 +93,8 @@ sub process($)
 
 	my $content = $response->content();
 
-	if ($content =~ /Quote #$data was rejected/ || $content =~ /Quote #$data does not exist/ || $content =~ /Quote #$data is pending moderation/) {
-		return "Couldn't get quote $data. It probably doesn't exist";
+	if ($content =~ /Quote #${id} was rejected/ || $content =~ /Quote #${id} does not exist/ || $content =~ /Quote #${id} is pending moderation/) {
+		return "Couldn't get quote ${id}. It probably doesn't exist";
 	}
 
 	if ($content =~ /\<p class=\"qt\"\>(.+?)\<\/p\>/s) {
@@ -89,11 +108,11 @@ sub process($)
 			(?, ?)
 		);
 		$db->prepare($sql);
-		$db->execute($data, $quote);
+		$db->execute($id, $quote);
 
 		return $quote;
 	} else {
-		return "Couldn't get quote $data. It probably doesn't exist.";
+		return "Couldn't get quote ${id}. It probably doesn't exist.";
 	}
 }
 
