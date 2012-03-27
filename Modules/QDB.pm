@@ -8,6 +8,7 @@ use strict;
 #######
 ## INCLUDES
 #######
+use Database::MySQL;
 use HTML::Entities;
 use LWP::UserAgent;
 
@@ -20,26 +21,43 @@ sub new()
 	return $obj;
 }
 
+my $qdb_expr = qr[^http://qdb.us/(\d+)$];
+
 sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('qdb', \&Modules::QDB::process);
+	Modules::register_action('qdb', \&Modules::QDB::process_from_text);
+	Modules::register_action($qdb_expr, \&Modules::QDB::process_from_url);
 
 	Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
-sub process($)
+sub process_from_url($)
 {
-	my $message = shift;
+	my ($message) = @_;
+
+	# Extract ID
+	if ($message->message() =~ $qdb_expr) {
+		return _get_quote($1);
+	}
+	return undef;
+}
+
+sub process_from_text($)
+{
+	my ($message) = @_;
 
 	# Check for valid id
-	my $data = '';
 	if ($message->message() =~ /^\s*(\d+)\s*$/) {
-		$data = $1;
-	} else {
-		return;
+		return _get_quote($1);
 	}
+	return undef;
+}
+
+sub _get_quote($)
+{
+	my ($id) = @_;
 
 	# Look for quote in DB cache
 	my $db = new Database::MySQL();
@@ -51,7 +69,7 @@ sub process($)
 		WHERE id = ?
 	);
 	$db->prepare($sql);
-	my $sth = $db->execute($data);
+	my $sth = $db->execute($id);
 	my $row = $sth->fetchrow_hashref();
 
 	my $quote = $row ? $row->{'quote'} : undef;
@@ -67,7 +85,7 @@ sub process($)
 #	};
 
 	$ua->timeout(10);
-	my $request = new HTTP::Request('GET', "http://qdb.us/$data");
+	my $request = new HTTP::Request('GET', "http://qdb.us/${id}");
 	my $response = $ua->request($request); 
 
 	if (!$response->is_success) {
@@ -76,16 +94,16 @@ sub process($)
 
 	my $content = $response->content;
 
-	if ($content =~ /\<p class=q\>\<b\>#$data\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
+	if ($content =~ /\<p class=q\>\<b\>#$id\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
 		my $quote = _process($1);
-		_saveQuote($data, $quote);
+		_save_quote($id, $quote);
 		return $quote;
-	} elsif ($content =~ /\<span class=qt id=qt$data\>(.+?)\<\/span\>/s) {
+	} elsif ($content =~ /\<span class=qt id=qt$id\>(.+?)\<\/span\>/s) {
 		my $quote = _process($1);
-		_saveQuote($data, $quote);
+		_save_quote($id, $quote);
 		return $quote;
 	} else {
-		return "Couldn't get quote $data. It probably doesn't exist.";
+		return "Couldn't get quote ${id}. It probably doesn't exist.";
 	}
 }
 
@@ -107,7 +125,7 @@ sub _process($)
 	return $quote;
 }
 
-sub _saveQuote($$)
+sub _save_quote($$)
 {
 	my ($id, $quote) = @_;
 
