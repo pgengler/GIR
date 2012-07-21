@@ -9,6 +9,7 @@ use strict;
 ## INCLUDES
 #######
 use LWP::Simple;
+use URI::Escape qw/ uri_escape /;
 use XML::Simple;
 
 #######
@@ -64,7 +65,7 @@ sub process($)
 
 	Bot::debug("Looking up weather for '%s'", $station);
 
-	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, $station));
+	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station)));
 
 	unless ($text) {
 		return 'Something failed in contacting the weather server.';
