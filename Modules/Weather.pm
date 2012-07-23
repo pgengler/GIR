@@ -83,40 +83,33 @@ sub process($)
 		return 'No weather information available for ' . $station;
 	}
 
-	# This maps the string to be included in the output to the name of the value in the result document.
-	# The number before the pipe (|) in the 'text' string is its position in the result string.
-	# A trailing colon (:) after the string and a period after the whole item will be added automatically.
-	# If a pipe (|) is included, any text after it will be appended to the string, before the period.
-	my %components = (
-		'1|Sky conditions'    => 'weather',
-		'2|Temperature'       => 'temperature_string',
-		'3|Dewpoint'          => 'dewpoint_string',
-		'4|Heat index'        => 'heat_index_string',
-		'5|Wind chill'        => 'windchill_string',
-		'6|Relative humidity' => 'relative_humidity',
-		'7|Pressure'          => 'pressure_string',
-		'8|Winds'             => 'wind_string',
-		'9|Visibility'        => 'visibility_mi| mile(s)'
-	);
+  my @components = (
+    { 'field' => 'weather',            'label' => 'Sky conditions' },
+    { 'field' => 'temperature_string', 'label' => 'Temperature' },
+    { 'field' => 'dewpoint_string',    'label' => 'Dewpoint' },
+    { 'field' => 'heat_index_string',  'label' => 'Heat index' },
+    { 'field' => 'windchill_string',   'label' => 'Wind chill' },
+    { 'field' => 'relative_humidity',  'label' => 'Relative humidity' },
+    { 'field' => 'pressure_string',    'label' => 'Pressure' },
+    { 'field' => 'wind_string',        'label' => 'Winds' },
+    { 'field' => 'visibility_mi',      'label' => 'Visibility', 'append' => ' mile(s)' },
+  );
 
 	my $weather = "Current conditions for $data->{'display_location'}->{'full'} ($data->{'station_id'}). $data->{'observation_time'}. ";
 
-	foreach my $text (sort { $a cmp $b } keys %components) {
-		my $ref    = $components{ $text };
-		my $append = '';
-		$text      =~ s/\d+\|//;
-		if ($ref =~ /(.+)\|(.+)/) {
-			$ref = $1;
-			$append = $2;
-		}
-		my $value = $data->{ $ref };
+  foreach my $component (@components) {
+    my $field        = $component->{'field'};
+    my $label        = $component->{'label'};
+    my $textToAppend = $component->{'append'} || '';
+
+		my $value = $data->{ $field };
 		# Skip missing data
 		if (ref($value) || $value eq 'NA' || $value eq 'N/A' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)' || $value eq ' in ( mb)' || $value eq ' F ( C)' || $value eq '-9999.00 in (-9999 mb)') {
 			next;
 		}
 
 		if ($value) {
-			$weather .= sprintf("%s: %s%s. ", $text, $value, $append);
+			$weather .= sprintf("%s: %s%s. ", $label, $value, $textToAppend);
 		}
 	}
 
