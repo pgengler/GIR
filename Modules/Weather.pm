@@ -8,16 +8,16 @@ use strict;
 #######
 ## INCLUDES
 #######
+use JSON;
 use LWP::Simple;
 use URI::Escape qw/ uri_escape /;
-use XML::Simple;
 
 #######
 ## GLOBALS
 #######
 my $CACHE_TIME = 15;	# time to cache (in minutes)
 
-use constant URL_FORMAT => 'http://api.wunderground.com/api/%s/conditions/q/%s.xml'; # 1: API key, 2: location
+use constant URL_FORMAT => 'http://api.wunderground.com/api/%s/conditions/q/%s.json'; # 1: API key, 2: location
 
 my %cache;
 
@@ -71,24 +71,19 @@ sub process($)
 		return 'Something failed in contacting the weather server.';
 	}
 
-	if ($text !~ /\</) {
-		return $text;
+  my $data = from_json($text);
+
+	if ($data->{'response'}->{'error'}) {
+		return "Unable to get weather for ${station}: $data->{'response'}->{'error'}->{'description'}";
 	}
 
-	my $xml = new XML::Simple;
-	my $doc = $xml->xml_in($text);
+	$data = $data->{'current_observation'};
 
-	if ($doc->{'error'}) {
-		return "Unable to get weather for ${station}: $doc->{'error'}->{'description'}";
-	}
-
-	$doc = $doc->{'current_observation'};
-
-	if (ref $doc->{'display_location'}->{'latitude'} eq 'HASH' || ref $doc->{'observation_location'}->{'latitude'} eq 'HASH') {
+	if (ref $data->{'display_location'}->{'latitude'} eq 'HASH' || ref $data->{'observation_location'}->{'latitude'} eq 'HASH') {
 		return 'No weather information available for ' . $station;
 	}
 
-	# This maps the string to be included in the output to the name of the value in the XML document.
+	# This maps the string to be included in the output to the name of the value in the result document.
 	# The number before the pipe (|) in the 'text' string is its position in the result string.
 	# A trailing colon (:) after the string and a period after the whole item will be added automatically.
 	# If a pipe (|) is included, any text after it will be appended to the string, before the period.
@@ -104,7 +99,7 @@ sub process($)
 		'9|Visibility'        => 'visibility_mi| mile(s)'
 	);
 
-	my $weather = "Current conditions for $doc->{'display_location'}->{'full'} ($doc->{'station_id'}). $doc->{'observation_time'}. ";
+	my $weather = "Current conditions for $data->{'display_location'}->{'full'} ($data->{'station_id'}). $data->{'observation_time'}. ";
 
 	foreach my $text (sort { $a cmp $b } keys %components) {
 		my $ref    = $components{ $text };
@@ -114,7 +109,7 @@ sub process($)
 			$ref = $1;
 			$append = $2;
 		}
-		my $value = $doc->{ $ref };
+		my $value = $data->{ $ref };
 		# Skip missing data
 		if (ref($value) || $value eq 'NA' || $value eq 'N/A' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)' || $value eq ' in ( mb)' || $value eq ' F ( C)' || $value eq '-9999.00 in (-9999 mb)') {
 			next;
