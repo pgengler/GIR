@@ -113,8 +113,6 @@ sub taf($)
 	my $webdata = $reply->as_string;
 	$webdata =~ m/($data( AMD)* \d+Z .*?)</s; 
 	my $taf = $1;                       
-	$taf =~ s/\n//gm;
-	$taf =~ s/\s+/ /g;
 	
 	# Highlight FM, TEMP, BECMG, PROB
 	$taf =~ s/(FM\d+Z?|TEMPO \d+|BECMG \d+|PROB\d+)/\cB$1\cB/g;
