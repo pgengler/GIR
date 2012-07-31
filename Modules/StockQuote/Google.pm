@@ -68,6 +68,11 @@ sub fetch()
 		'yearRange' => $tree->findvalue('/html/body//td[@data-snapfield="range_52week"]/following-sibling::td'),
 	};
 
+	foreach my $key (keys %$info) {
+		$info->{ $key } =~ s/^\s*//;
+		$info->{ $key } =~ s/\s*$//;
+	}
+
 	return $info;
 }
 
