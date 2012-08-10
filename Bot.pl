@@ -89,9 +89,9 @@ sub get_command_socket()
 	}
 
 	my $server = new IO::Socket::UNIX(
-		'Listen' => SOMAXCONN,
+		'Listen' => Socket::SOMAXCONN,
 		'Local'  => $socket_path,
-		'Type'   => SOCK_STREAM,
+		'Type'   => Socket::SOCK_STREAM,
 	);
 
 	return $server;
