@@ -2,9 +2,6 @@
 # If you rename this file as 'config' (no file extension) then it
 # will be loaded automatically when you start the bot.
 ---
-# Full path to a text file containing responses for the Eightball module
-8ball: /home/ircbot/Modules/data/8ball.txt
-
 channels:
   # list of channels the bot will join if invited or told
   allowed:
