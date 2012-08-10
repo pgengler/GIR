@@ -7,7 +7,9 @@ use threads::shared;
 use lib qw/ lib /;
 
 use File::Copy;
+use File::Spec;
 use Getopt::Long;
+use IO::Socket::UNIX;
 use Net::IRC;
 use POSIX;
 use Text::Wrap;
@@ -77,6 +79,23 @@ our $console = threads->create('Console::console');
 $bot->join();
 $console->join();
 
+sub get_command_socket()
+{
+	my $temp_directory = File::Spec->tmpdir();
+	my $socket_path    = File::Spec->catfile($temp_directory, 'ircbot');
+
+	if (-S $socket_path) {
+		unlink($socket_path);
+	}
+
+	my $server = new IO::Socket::UNIX(
+		'Listen' => SOMAXCONN,
+		'Local'  => $socket_path,
+		'Type'   => SOCK_STREAM,
+	);
+
+	return $server;
+}
 
 sub bot()
 {
@@ -112,6 +131,24 @@ sub bot()
 		$connection->add_handler('snotice', \&on_server_notice);
 
 		$irc->timeout(.25);
+
+		my $command_socket = get_command_socket();
+		$irc->addfh($command_socket, sub {
+			my $server = shift;
+			my $client = $server->accept();
+			Bot::debug('Received new connection via UNIX socket');
+			$irc->addfh($client, sub {
+				my $client = shift;
+				sysread($client, my $data, 1024);
+				Bot::debug("Received command '%s' via UNIX socket", $data);
+				my $command = Command::parse($data);
+				if ($command) {
+					push @commands, $command;
+				}
+				$client->shutdown(2);
+				$irc->removefh($client);
+			});
+		});
 
 		while ($connection->connected()) {
 			$irc->do_one_loop();
