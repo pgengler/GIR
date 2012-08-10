@@ -97,7 +97,7 @@ sub taf($)
 		$data = "K$data";
 	}
 	
-	my $taf_url = "http://weather.noaa.gov/cgi-bin/mgettaf.pl?cccc=$data";
+	my $taf_url = "http://www.aviationweather.gov/adds/metars/?chk_tafs=on&station_ids=${data}";
 	
 	# Grab METAR report from Web.   
 	my $agent   = new LWP::UserAgent;
@@ -110,8 +110,10 @@ sub taf($)
 	
 	# extract TAF from equally verbose webpage
 	my $webdata = $reply->as_string;
-	$webdata =~ m/($data( AMD)* \d+Z .*?)</s; 
-	my $taf = $1;                       
+	unless ($webdata =~ m|<font face="Monospace,Courier" size="\+1">\s*($data\s*\d+Z.+?)\s*</font>|ms) {
+		return "I can't find any TAF for ${data}.";
+	}
+	my $taf = $1;
 	
 	# Highlight FM, TEMP, BECMG, PROB
 	$taf =~ s/(FM\d+Z?|TEMPO \d+|BECMG \d+|PROB\d+)/\cB$1\cB/g;
