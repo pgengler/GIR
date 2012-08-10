@@ -57,7 +57,7 @@ sub metar($)
 		$data = "K$data";
 	}
 
-	my $metar_url = "http://weather.noaa.gov/cgi-bin/mgetmetar.pl?cccc=$data";
+	my $metar_url = "http://www.aviationweather.gov/adds/metars/?chk_metars=on&station_ids=${data}";
 	
 	# Grab METAR report from Web.
 	my $agent   = new LWP::UserAgent;
@@ -68,9 +68,8 @@ sub metar($)
 		return "Either $data doesn't exist (try a 4-letter station code like KMMU), or the NOAA site is unavailable right now.";
 	}
 	
-	# extract METAR from incredibly and painfully verbose webpage
 	my $webdata = $reply->as_string;
-	$webdata =~ m/($data\s\d+Z.*?)</s;    
+	$webdata =~ m|<FONT FACE="Monospace,Courier">($data\s\d+Z.*?)</FONT>|s;
 	my $metar = $1;
 	$metar =~ s/\n//gm;
 	$metar =~ s/\s+/ /g;
