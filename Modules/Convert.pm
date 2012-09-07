@@ -143,6 +143,7 @@ sub register()
 		'kilometers'    => 'km',
 		'kilometre'     => 'km',
 		'kilometres'    => 'km',
+		'kph'           => 'km/hr',
 		'light-second'  => 'ls',
 		'light second'  => 'ls',
 		'light-seconds' => 'ls',
