@@ -15,7 +15,7 @@ sub new()
 }
 
 my $handleRE = qr/\s*exchange\s+(\d*(\.\d+)?)?\s*(\w{3})\s+(for|to)\s+(\w{3})\s*/;
-my $urlFormat = 'http://themoneyconverter.com/%s/rss.xml';
+my $urlFormat = 'http://themoneyconverter.com/rss-feed/%s/rss.xml';
 
 sub register()
 {
