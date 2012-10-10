@@ -565,7 +565,7 @@ sub on_kick($$)
 	my $reason  = $event->{'args'}[1] || '';
 
 	if ($kicked ne $config->{'nick'}) {
-		status('%s has kicked %s from %s ($s)', $kicker, $kicked, $channel, $reason);
+		status('%s has kicked %s from %s (%s)', $kicker, $kicked, $channel, $reason);
 	} else {
 		status('%s has kicked me from %s (%s)', $kicker, $channel, $reason);
 		delete $channels{ $channel };
