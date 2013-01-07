@@ -9,7 +9,7 @@ use Graph;
 
 my %aliases;
 
-my $match_expr = qr/^\s*convert\s+(\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/;
+my $match_expr = qr/^\s*convert\s+([+-]?\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/;
 
 my $conversions = {
 	# Distance conversions
