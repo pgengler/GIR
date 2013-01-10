@@ -1,9 +1,10 @@
 package Modules::ExchangeRates;
 
-#######
-## PERL SETUP
-#######
 use strict;
+
+use Util;
+
+use XML::Simple qw/ xml_in /;
 
 ##############
 sub new()
@@ -37,31 +38,29 @@ sub convert($)
 
 	my $url = sprintf($urlFormat, $from);
 	Bot::debug('Modules::ExchangeRates: Fetching URL %s', $url);
-	my $content = _fetch($url);
+	my $content = eval { get_url($url) };
 
-	if ($content) {
-
-		my $conversions = _parse($content);
-
-		if (exists $conversions->{ $to }) {
-			my $conversion = $conversions->{ $to };
-
-			if ($amount) {
-				$conversion =~ /= (\d+\.\d+)/;
-				my $rate = $1;
-				my $result = $amount * $rate;
-				$conversion =~ s/^1/$amount/;
-				$conversion =~ s/$rate/$result/;
-			}
-
-			return $conversion;
-		} else {
-			return "Can't convert between '$from' and '$to'";
-		}
-
-	} else {
-		return "Couldn't fetch conversions for '$from'";
+	if ($@) {
+		return "Couldn't fetch conversions for '${from}'";
 	}
+
+	my $conversions = _parse($content);
+
+	if (not exists $conversions->{ $to }) {
+		return "Can't convert between '${from}' and '${to}'";
+	}
+
+	my $conversion = $conversions->{ $to };
+
+	if ($amount) {
+		$conversion =~ /= (\d+\.\d+)/;
+		my $rate = $1;
+		my $result = $amount * $rate;
+		$conversion =~ s/^1/$amount/;
+		$conversion =~ s/$rate/$result/;
+	}
+
+	return $conversion;
 }
 
 sub help($)
@@ -71,26 +70,11 @@ sub help($)
 	return "'exchange <from> to <to>': gets the exchange rate between the two currencies";
 }
 
-sub _fetch($)
-{
-	my ($url) = @_;
-
-	my $ua = new LWP::UserAgent();
-	$ua->timeout(10);
-	my $request = new HTTP::Request('GET', $url);
-	my $response = $ua->request($request);
-
-	return undef unless $response->is_success();
-
-	return $response->content();
-}
-
 sub _parse($)
 {
 	my ($data) = @_;
 
-	my $xml = new XML::Simple();
-	my $doc = $xml->xml_in($data, 'ForceArray' => 'item');
+	my $doc = xml_in($data, 'ForceArray' => 'item');
 
 	my $conversions = { };
 

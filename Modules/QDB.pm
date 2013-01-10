@@ -1,16 +1,11 @@
 package Modules::QDB;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
+use Util;
+
 use Database::MySQL;
 use HTML::Entities;
-use LWP::UserAgent;
 
 ##############
 sub new()
@@ -79,20 +74,12 @@ sub _get_quote($)
 	}
 
 	# Fetch from qdb.us
-	my $ua = new LWP::UserAgent;
-#	if (my $proxy = Bot::getparam('httpproxy')) {
-#		$ua->proxy('http', $proxy)
-#	};
+	my $url = "https://qdb.us/${id}";
+	my $content = eval { get_url($url) };
 
-	$ua->timeout(10);
-	my $request = new HTTP::Request('GET', "http://qdb.us/${id}");
-	my $response = $ua->request($request); 
-
-	if (!$response->is_success) {
+	if ($@) {
 		return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
 	}
-
-	my $content = $response->content;
 
 	if ($content =~ /\<p class=q\>\<b\>#$id\<\/b\>\<br\>(.+?)(\<br\>\<i\>Comment\:\<\/i\>(.+?))?\<\/p\>/s) {
 		my $quote = _process($1);

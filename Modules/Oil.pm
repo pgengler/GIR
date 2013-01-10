@@ -2,7 +2,7 @@ package Modules::Oil;
 
 use strict;
 
-use LWP::Simple;
+use Util;
 
 sub new()
 {
@@ -24,15 +24,16 @@ sub fetch($)
 	my $message = shift;
 
 	my $url = 'http://www.howmuchisoil.com/price.cgi?format=csv';
+	my $content = eval { get_url($url) };
 
-	my $result = get($url);
-
-	if ($result) {
-		chomp $result;
-		my ($price, $change, $pchange, $date, $time) = split(/,/, $result);
-
-		return sprintf('As of %s on %s, oil was at $%.2f, %s $%.2f (%s%%)', $time, $date, $price, ($change > 0) ? 'up' : 'down', abs($change), abs($pchange));
+	if ($@) {
+		return "Unable to fetch current oil prices; please try again later";
 	}
+
+	chomp $content;
+	my ($price, $change, $pchange, $date, $time) = split(/,/, $content);
+
+	return sprintf('As of %s on %s, oil was at $%.2f, %s $%.2f (%s%%)', $time, $date, $price, ($change > 0) ? 'up' : 'down', abs($change), abs($pchange));
 }
 
 1;

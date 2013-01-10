@@ -1,18 +1,12 @@
 package Modules::Translate;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
+use Util;
+
 use Encode;
-use HTTP::Request;
-use LWP::UserAgent;
 use URI::Escape qw/ uri_escape /;
-use XML::Simple;
+use XML::Simple qw/ xml_in /;
 
 ##############
 sub new()
@@ -63,12 +57,7 @@ sub translate($)
 		$text     = $3;
 	}
 
-	my $translation = _getTranslation($fromCode, $toCode, $text);
-
-	if ($translation) {
-		return $translation;
-	}
-	return undef;
+	return _getTranslation($fromCode, $toCode, $text);
 }
 
 sub _getTranslation($$$)
@@ -79,17 +68,14 @@ sub _getTranslation($$$)
 	my $appId = $Bot::config->{'modules'}->{'Translate'}->{'app_id'};
 
 	my $url = sprintf('http://api.microsofttranslator.com/v2/Http.svc/Translate?appId=%s&from=%s&to=%s&text=%s', $appId, $fromLanguage, $toLanguage, $text);
-	my $agent = new LWP::UserAgent();
-	$agent->timeout(10);
+	my $content = eval { get_url($url) };
 
-	my $request = new HTTP::Request('GET', $url);
-	my $response = $agent->request($request);
-
-	if ($response->is_success()) {
-		my $content = $response->content();
-		my $doc = XMLin($content);
-		return Encode::encode('UTF-8', $doc->{'content'});
+	if ($@) {
+		return undef;
 	}
+
+	my $doc = xml_in($content);
+	return Encode::encode('UTF-8', $doc->{'content'});
 }
 
 sub help($)

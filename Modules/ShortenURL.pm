@@ -2,11 +2,11 @@ package Modules::ShortenURL;
 
 use strict;
 
+use Util;
+
 use constant API_URL_FORMAT => 'https://api-ssl.bitly.com/v3/shorten?format=json&login=%s&apiKey=%s&longUrl=%s';
 
-use HTTP::Request;
 use JSON;
-use LWP::UserAgent;
 use URI::Escape;
 
 sub new()
@@ -51,16 +51,16 @@ sub shorten()
 	my $apiKey = $Bot::config->{'modules'}->{'ShortenURL'}->{'api_key'};
 	my $requestURL = sprintf(API_URL_FORMAT, $login, $apiKey, $url);
 
-	my $response = _getData($requestURL);
+	my $content = eval { get_url($requestURL) };
 
-	unless ($response) {
+	if ($@) {
 		return _error($message);
 	}
 
 	# Parse response
 	my $data;
 	eval {
-		$data = JSON::decode_json($response);
+		$data = JSON::decode_json($content);
 	};
 	if ($@ || ref($data) ne 'HASH') {
 		Bot::error("Modules::ShortenURL: JSON parsing failed: %s", $@);
@@ -68,23 +68,6 @@ sub shorten()
 	}
 
 	return $data->{'data'}->{'url'};
-}
-
-sub _getData($)
-{
-	my ($url) = @_;
-
-	my $ua = new LWP::UserAgent;
-	$ua->timeout(10);
-
-	my $request  = new HTTP::Request('GET', $url);
-	my $response = $ua->request($request);
-	unless ($response->is_success()) {
-		Bot::error("Modules::ShortenURL: Error getting URL '%s': %s", $url, $response->status_line());
-		return undef;
-	}
-
-	return $response->content();
 }
 
 sub _error($)
