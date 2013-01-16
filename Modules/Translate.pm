@@ -2,7 +2,7 @@ package Modules::Translate;
 
 use strict;
 
-use Util;
+use GIR::Util;
 
 use Encode;
 use URI::Escape qw/ uri_escape /;
@@ -22,20 +22,20 @@ sub register()
 	my $this = shift;
 
 	# Check for necessary configuration parameters
-	my $moduleConfig = $Bot::config->{'modules'}->{'Translate'};
+	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Translate'};
 	if (not defined $moduleConfig) {
-		Bot::status("Modules::Translate: no configuration information present, skipping initialization");
+		GIR::Bot::status("Modules::Translate: no configuration information present, skipping initialization");
 		return -1;
 	}
 
 	unless ($moduleConfig->{'app_id'}) {
-		Bot::status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
+		GIR::Bot::status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
 		return -1;
 	}
 
-	Modules::register_action('translate', \&Modules::Translate::translate);
+	GIR::Modules::register_action('translate', \&Modules::Translate::translate);
 
-	Modules::register_help('translate', \&Modules::Translate::help);
+	GIR::Modules::register_help('translate', \&Modules::Translate::help);
 }
 
 sub translate($)
@@ -65,7 +65,7 @@ sub _getTranslation($$$)
 	my ($fromLanguage, $toLanguage, $text) = @_;
 	$text = uri_escape($text);
 
-	my $appId = $Bot::config->{'modules'}->{'Translate'}->{'app_id'};
+	my $appId = $GIR::Bot::config->{'modules'}->{'Translate'}->{'app_id'};
 
 	my $url = sprintf('http://api.microsofttranslator.com/v2/Http.svc/Translate?appId=%s&from=%s&to=%s&text=%s', $appId, $fromLanguage, $toLanguage, $text);
 	my $content = eval { get_url($url) };

@@ -1,8 +1,5 @@
 package Modules::Rot13;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
 ##############
@@ -18,9 +15,9 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('rot13', \&Modules::Rot13::rot13);
+	GIR::Modules::register_action('rot13', \&Modules::Rot13::rot13);
 
-	Modules::register_help('rot13', \&Modules::Rot13::help);
+	GIR::Modules::register_help('rot13', \&Modules::Rot13::help);
 }
 
 sub rot13($)

@@ -2,7 +2,7 @@ package Modules::Oil;
 
 use strict;
 
-use Util;
+use GIR::Util;
 
 sub new()
 {
@@ -16,7 +16,7 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('how much is oil', \&Modules::Oil::fetch);
+	GIR::Modules::register_action('how much is oil', \&Modules::Oil::fetch);
 }
 
 sub fetch($)

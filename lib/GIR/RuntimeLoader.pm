@@ -1,4 +1,4 @@
-package RuntimeLoader;
+package GIR::RuntimeLoader;
 
 #######
 ## PERL SETUP

@@ -15,10 +15,10 @@ use POSIX;
 use Text::Wrap;
 use YAML;
 
-use Console;
-use Modules;
+use GIR::Console;
+use GIR::Modules;
 
-package Bot;
+package GIR::Bot;
 
 use constant {
 	false => 0,
@@ -54,7 +54,7 @@ Getopt::Long::GetOptions(
 $config = load_config($config_file);
 
 # Perform pre-loading initialization for module stuff
-Modules::init();
+GIR::Modules::init();
 
 # Unbuffer standard output
 select(STDOUT);
@@ -67,14 +67,14 @@ $SIG{'INT'} = \&shutdown;
 load_ignore();
 
 # Load extras
-Modules::load_modules();
+GIR::Modules::load_modules();
 
 #######
 ## START IRCING
 #######
 
 our $bot     = threads->create('bot');
-our $console = threads->create('Console::console');
+our $console = threads->create('GIR::Console::console');
 
 $bot->join();
 $console->join();
@@ -108,7 +108,7 @@ sub bot()
 		%channels = ();
 
 		# Connect to the server
-		Bot::connect();
+		GIR::Bot::connect();
 
 		# Set up event handlers
 		$connection->add_global_handler('001', \&on_connect);
@@ -136,11 +136,11 @@ sub bot()
 		$irc->addfh($command_socket, sub {
 			my $server = shift;
 			my $client = $server->accept();
-			Bot::debug('Received new connection via UNIX socket');
+			GIR::Bot::debug('Received new connection via UNIX socket');
 			$irc->addfh($client, sub {
 				my $client = shift;
 				sysread($client, my $data, 1024);
-				Bot::debug("Received command '%s' via UNIX socket", $data);
+				GIR::Bot::debug("Received command '%s' via UNIX socket", $data);
 				my $command = Command::parse($data);
 				if ($command) {
 					push @commands, $command;
@@ -170,12 +170,12 @@ sub load_config($)
 	my $config;
 
 	eval {
-		open(my $file, '<', $config_file || 'config') or Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
+		open(my $file, '<', $config_file || 'config') or GIR::Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
 		$config = YAML::LoadFile($file);
 		close($file);
 	};
 	if ($@) {
-		Bot::fatal_error("Failed to read config file; you probably have an error in your YAML syntax (did you use tabs instead of spaces?)");
+		GIR::Bot::fatal_error("Failed to read config file; you probably have an error in your YAML syntax (did you use tabs instead of spaces?)");
 	}
 
 	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
@@ -269,7 +269,7 @@ sub bot_shutdown()
 {
 	status('Bot thread is shutting down...');
 
-	Modules::shutdown();
+	GIR::Modules::shutdown();
 
 	# Look for a quit message
 	my $message = "Leaving";
@@ -300,9 +300,9 @@ sub fatal_error($;@)
 {
 	my ($message, @parameters) = @_;
 
-	Bot::error($message, @parameters);
+	GIR::Bot::error($message, @parameters);
 
-	Bot::shutdown();
+	GIR::Bot::shutdown();
 }
 
 #######
@@ -314,7 +314,7 @@ sub error($;@)
 {
 	my ($message, @parameters) = @_;
 
-	Bot::log('ERROR: ' . $message, @parameters);
+	GIR::Bot::log('ERROR: ' . $message, @parameters);
 }
 
 #######
@@ -326,9 +326,9 @@ sub debug($;@)
 {
 	my ($message, @parameters) = @_;
 
-	return unless $Bot::config->{'debug'};
+	return unless $GIR::Bot::config->{'debug'};
 
-	Bot::log('DEBUG: ' . $message, @parameters);
+	GIR::Bot::log('DEBUG: ' . $message, @parameters);
 }
 
 #######
@@ -338,7 +338,7 @@ sub status($;@)
 {
 	my ($message, @parameters) = @_;
 
-	Bot::log($message, @parameters);
+	GIR::Bot::log($message, @parameters);
 }
 
 sub log($;@)
@@ -370,7 +370,7 @@ sub message($$)
 {
 	my ($conn, $event) = @_;
 
-	my $message = new Message($event);
+	my $message = GIR::Message->new($event);
 
 	my $nick = $message->from();
 	my $to   = $message->where();
@@ -390,7 +390,7 @@ sub message($$)
 	} else {
 		status('>%s< %s', $nick, $text);
 	}
-	Modules::dispatch($message);
+	GIR::Modules::dispatch($message);
 }
 
 #######
@@ -428,7 +428,7 @@ sub on_nick_change($$)
 
 	status('%s is now known as %s', $old_nick, $new_nick);
 
-	Modules::event('nickchange', {
+	GIR::Modules::event('nickchange', {
 		'from' => $old_nick,
 		'to'   => $new_nick,
 	});
@@ -473,7 +473,7 @@ sub on_join($$)
 	} else {
 		status('%s has joined %s', $nick, $channel);
 
-		Modules::event('join', {
+		GIR::Modules::event('join', {
 			'channel' => $channel,
 			'nick'    => $nick,
 		});
@@ -499,7 +499,7 @@ sub on_part($$)
 
 	status('%s has left %s (%s)', $user, $channel, $message);
 
-	Modules::event('part', {
+	GIR::Modules::event('part', {
 		'channel' => $channel,
 		'nick'    => $user,
 	});
@@ -547,7 +547,7 @@ sub on_topic($$)
 		my $who     = $event->{'nick'};
 
 		status("%s has changed the topic for %s to '%s'", $who, $channel, $topic);
-		Modules::event('topicchange', {
+		GIR::Modules::event('topicchange', {
 			'channel' => $channel,
 			'nick'    => $who,
 			'topic'   => $topic,
@@ -601,7 +601,7 @@ sub on_notice($$)
 	status('-%s- %s', $event->{'from'}, $event->{'args'}[0]);
 
 	if ($event->{'nick'} eq 'NickServ' && $event->{'args'}[0] =~ /This nickname is registered and protected/i && $config->{'nickserv_pass'}) {
-		Bot::say('NickServ', 'identify ' . $config->{'nickserv_pass'});
+		GIR::Bot::say('NickServ', 'identify ' . $config->{'nickserv_pass'});
 	}
 }
 
@@ -696,7 +696,7 @@ sub load_ignore()
 #######
 ## Parameters:
 ##   $message
-##   - a Message object that should be tested
+##   - a GIR::Message object that should be tested
 ##
 ## Return value:
 ##   If the message should be ignored (because the sender's hostmask
@@ -811,7 +811,7 @@ sub change_nick($)
 
 	$config->{'nick'} = $nick;
 
-	Modules::event('mynickchange', { 'old' => $oldnick, 'new' => $nick });
+	GIR::Modules::event('mynickchange', { 'old' => $oldnick, 'new' => $nick });
 }
 
 sub save_ignore_list()
@@ -852,10 +852,10 @@ sub reload_modules(;$)
 
 	unless ($module) {
 		status('Reloading modules');
-		Modules::load_modules();
+		GIR::Modules::load_modules();
 	} else {
-		Modules::unload_module($module);
-		Modules::load_module($module, false, false);
+		GIR::Modules::unload_module($module);
+		GIR::Modules::load_module($module, false, false);
 	}
 }
 
@@ -863,14 +863,14 @@ sub load_module($)
 {
 	my $module = shift;
 
-	Modules::load_module($module, false, false);
+	GIR::Modules::load_module($module, false, false);
 }
 
 sub unload_module($)
 {
 	my $module = shift;
 
-	Modules::unload_module($module);
+	GIR::Modules::unload_module($module);
 }
 
 sub set_debug($)

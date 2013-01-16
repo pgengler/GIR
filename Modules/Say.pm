@@ -1,8 +1,5 @@
 package Modules::Say;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
 ##############
@@ -18,11 +15,11 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('say', \&Modules::Say::say, 2);
-	Modules::register_action('action', \&Modules::Say::action, 2);
+	GIR::Modules::register_action('say', \&Modules::Say::say, 2);
+	GIR::Modules::register_action('action', \&Modules::Say::action, 2);
 
-	Modules::register_help('say', \&Modules::Say::help);
-	Modules::register_help('action', \&Modules::Say::help);
+	GIR::Modules::register_help('say', \&Modules::Say::help);
+	GIR::Modules::register_help('action', \&Modules::Say::help);
 }
 
 sub say($)
@@ -34,7 +31,7 @@ sub say($)
 	return undef unless $target && $msg;
 
 	if ($message->is_explicit()) {
-		Bot::enqueue_say($target, $msg);
+		GIR::Bot::enqueue_say($target, $msg);
 		return "OK, " . $message->from();
 	}
 }
@@ -48,7 +45,7 @@ sub action($)
 	return undef unless $target && $msg;
 
 	if ($message->is_explicit()) {
-		Bot::enqueue_action($target, $msg);
+		GIR::Bot::enqueue_action($target, $msg);
 		return "OK, " . $message->from();
 	}
 }

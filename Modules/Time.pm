@@ -1,13 +1,7 @@
 package Modules::Time;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## GLOBALS
-#######
 our $_useSwatch = 0;
 our $_useVeggie = 0;
 
@@ -33,14 +27,14 @@ sub register()
 	};
 	$_useVeggie = 1 unless $@;
 
-	Modules::register_action('time', \&Modules::Time::select);
-	Modules::register_action('unixtime', \&Modules::Time::unix_time);
-	Modules::register_action('localtime', \&Modules::Time::local_time);
-	Modules::register_action('gmtime', \&Modules::Time::gm_time);
-	Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
-	Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
+	GIR::Modules::register_action('time', \&Modules::Time::select);
+	GIR::Modules::register_action('unixtime', \&Modules::Time::unix_time);
+	GIR::Modules::register_action('localtime', \&Modules::Time::local_time);
+	GIR::Modules::register_action('gmtime', \&Modules::Time::gm_time);
+	GIR::Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
+	GIR::Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
 
-	Modules::register_help('time', \&Modules::Time::help);
+	GIR::Modules::register_help('time', \&Modules::Time::help);
 }
 
 sub select($)

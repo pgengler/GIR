@@ -2,7 +2,7 @@ package Modules::Weather;
 
 use strict;
 
-use Util;
+use GIR::Util;
 
 use JSON;
 use URI::Escape qw/ uri_escape /;
@@ -26,20 +26,20 @@ sub register()
 {
 	my $this = shift;
 
-	my $moduleConfig = $Bot::config->{'modules'}->{'Weather'};
+	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Weather'};
 
 	if (not defined $moduleConfig) {
-		Bot::status("Modules::Weather: no configuration information present; skipping initialization");
+		GIR::Bot::status("Modules::Weather: no configuration information present; skipping initialization");
 		return -1;
 	}
 
 	unless ($moduleConfig->{'api_key'}) {
-		Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
+		GIR::Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
 		return -1;
 	}
 
-	Modules::register_action('weather', \&Modules::Weather::process);
-	Modules::register_help('weather', \&Modules::Weather::help);
+	GIR::Modules::register_action('weather', \&Modules::Weather::process);
+	GIR::Modules::register_help('weather', \&Modules::Weather::help);
 }
 
 sub process($)
@@ -55,9 +55,9 @@ sub process($)
 		return $cache{ $station }->{'weather'};
 	}
 
-	Bot::debug("Looking up weather for '%s'", $station);
+	GIR::Bot::debug("Looking up weather for '%s'", $station);
 
-	my $url = sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station));
+	my $url = sprintf(URL_FORMAT, $GIR::Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station));
 	my $content = eval { get_url($url) };
 
 	if ($@) {	

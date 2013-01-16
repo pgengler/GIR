@@ -1,4 +1,4 @@
-package Message;
+package GIR::Message;
 
 use strict;
 use feature ':5.10';
@@ -15,7 +15,7 @@ use constant {
 ##   Accepts a Net::IRC::Event object for a public or private message.
 ##
 ## Return value:
-##   Returns a new instance of the Message class.
+##   Returns a new instance of the GIR::Message class.
 #######
 sub new()
 {
@@ -35,7 +35,7 @@ sub new()
 			'_addressed' => false,
 			'_public'    => ($event->{'type'} eq 'public'),
 		};
-	} elsif ($obj->isa('Message')) {
+	} elsif ($obj->isa('GIR::Message')) {
 		my $message = $obj;
 		$params ||= { };
 		$self = {
@@ -49,7 +49,7 @@ sub new()
 			'_parsed'    => undef,
 		};
 	} else {
-		die "Can't create new Message from a " . ref($obj);
+		die "Can't create new GIR::Message from a " . ref($obj);
 	}
 
 	bless $self, $class;
@@ -236,10 +236,10 @@ sub _parse()
 {
 	my $self = shift;
 
-	if ($self->{'_raw'} =~ /^\s*$Bot::config->{'nick'}(\,|\:|\s)\s*(.+)$/i) {
+	if ($self->{'_raw'} =~ /^\s*$GIR::Bot::config->{'nick'}(\,|\:|\s)\s*(.+)$/i) {
 		$self->{'_addressed'} = true;
 		$self->{'_parsed'}    = $2;
-	} elsif ($self->{'_raw'} =~ /(.+?)(\,|\:|\s+)\s*$Bot::config->{'nick'}(\.|\?|\!)?\s*$/i) {
+	} elsif ($self->{'_raw'} =~ /(.+?)(\,|\:|\s+)\s*$GIR::Bot::config->{'nick'}(\.|\?|\!)?\s*$/i) {
 		$self->{'_addressed'} = true;
 		$self->{'_parsed'}    = $1;
 	}

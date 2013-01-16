@@ -8,7 +8,7 @@ package Modules::Access;
 use strict;
 use lib ('./', '../lib');
 
-use Util;
+use GIR::Util;
 
 sub new()
 {
@@ -22,9 +22,9 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('show access', \&Modules::Access::show_access);
-	Modules::register_action('add access', \&Modules::Access::add_access);
-	Modules::register_action('remove access', \&Modules::Access::remove_access);
+	GIR::Modules::register_action('show access', \&Modules::Access::show_access);
+	GIR::Modules::register_action('add access', \&Modules::Access::add_access);
+	GIR::Modules::register_action('remove access', \&Modules::Access::remove_access);
 }
 
 sub show_access($)
@@ -83,7 +83,7 @@ sub check_access($$$)
 	my $user_info = db->query($query, $user, $password)->fetch;
 
 	unless ($user_info && $user_info->{'id'}) {
-		Bot::debug("Modules::Access::check_access: User '%s' not found.", $user);
+		GIR::Bot::debug("Modules::Access::check_access: User '%s' not found.", $user);
 		return 0;
 	}
 
@@ -99,7 +99,7 @@ sub check_access($$$)
 	if ($access && $access->{'permission_id'}) {
 		return 1;
 	}
-	Bot::debug("Modules::Access::check_access: User %s doesn't have '%s' permission", $user_info->{'id'}, $access);
+	GIR::Bot::debug("Modules::Access::check_access: User %s doesn't have '%s' permission", $user_info->{'id'}, $access);
 	return 0;
 }
 

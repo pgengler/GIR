@@ -1,4 +1,4 @@
-package Modules;
+package GIR::Modules;
 
 #######
 ## PERL SETUP
@@ -12,8 +12,8 @@ use threads::shared;
 #######
 use Thread::Pool::Simple;
 
-use Message;
-use RuntimeLoader;
+use GIR::Message;
+use GIR::RuntimeLoader;
 
 #######
 ## GLOBALS
@@ -97,9 +97,9 @@ sub load_modules()
 	# Unload any existing modules
 	unload_modules();
 
-	my $module_dir = $Bot::config->{'module_dir'};
+	my $module_dir = $GIR::Bot::config->{'module_dir'};
 
-	opendir(my $dir, $module_dir) or Bot::fatal_error('Unable to open the modules directory: %s', $!);
+	opendir(my $dir, $module_dir) or GIR::Bot::fatal_error('Unable to open the modules directory: %s', $!);
 	my @files = readdir($dir);
 	closedir($dir);
 
@@ -107,11 +107,11 @@ sub load_modules()
 	my %mod_info;
 
 	my %blacklist = (
-		map { ($_ => 1) } @{ $Bot::config->{'skip_modules'} || [ ] },
+		map { ($_ => 1) } @{ $GIR::Bot::config->{'skip_modules'} || [ ] },
 	);
-	my $use_whitelist = scalar(@{ $Bot::config->{'load_modules'} || [ ] });
+	my $use_whitelist = scalar(@{ $GIR::Bot::config->{'load_modules'} || [ ] });
 	my %whitelist = (
-		map { ($_ => 1) } @{ $Bot::config->{'load_modules'} || [ ] },
+		map { ($_ => 1) } @{ $GIR::Bot::config->{'load_modules'} || [ ] },
 	);
 
 	foreach my $module (@modules) {
@@ -120,7 +120,7 @@ sub load_modules()
 
 		# Check if module is on blacklist
 		if (exists $blacklist{ $module_name }) {
-			Bot::status("Skipping module '%s' because it's listed in 'skip_modules'", $module_name);
+			GIR::Bot::status("Skipping module '%s' because it's listed in 'skip_modules'", $module_name);
 			next;
 		}
 
@@ -128,7 +128,7 @@ sub load_modules()
 		if (!$use_whitelist || exists $whitelist{ $module_name }) {
 			load_module($module_name, 1, 1);
 		} elsif ($use_whitelist) {
-			Bot::status("Skipping module '%s' since it's not listed in 'load_modules'", $module_name);
+			GIR::Bot::status("Skipping module '%s' since it's not listed in 'load_modules'", $module_name);
 		}
 	}
 	restart_thread_pool();
@@ -138,14 +138,14 @@ sub load_module($$$)
 {
 	my ($name, $suppress_restart, $auto) = @_;
 
-	my $class = new RuntimeLoader('Modules::' . $name);
+	my $class = GIR::RuntimeLoader->new('Modules::' . $name);
 
-	$class->add_path($Bot::config->{'module_dir'} . '../');
+	$class->add_path($GIR::Bot::config->{'module_dir'} . '../');
 
 	my $module = $class->load();
 
 	unless ($module) {
-		Bot::status("Failed to load module '%s': %s", $name, $@);
+		GIR::Bot::status("Failed to load module '%s': %s", $name, $@);
 		$class->unload();
 		return;
 	}
@@ -158,14 +158,14 @@ sub load_module($$$)
 	$suppress_rebuild = 0;
 
 	if ($ret == -1) {
-		Bot::status("Module '%s' requested to not be loaded", $name);
+		GIR::Bot::status("Module '%s' requested to not be loaded", $name);
 		unload_module($name, 1);
 		return;
 	}
 
 	push @loaded_modules, $class;
 
-	Bot::status('Loaded module %s', $name);
+	GIR::Bot::status('Loaded module %s', $name);
 
 	rebuild_registration_list();
 	# Only restart the thread pool when we load a specific module; when we're loading everything, don't restart the thread pool when each module is loaded
@@ -199,7 +199,7 @@ sub unload_module($;$)
 	for (my $i = 0; $i < scalar(@loaded_modules); $i++) {
 		my $class = $loaded_modules[$i];
 		if ($class->name() eq $mod_name) {
-			Bot::status("Unloading module '%s'", $name);
+			GIR::Bot::status("Unloading module '%s'", $name);
 
 			# Remove from list of modules
 			splice(@loaded_modules, $i, 1);
@@ -216,7 +216,7 @@ sub unload_module($;$)
 		}
 	}
 
-	Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
+	GIR::Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
 }
 
 sub register_action($$;$)
@@ -228,7 +228,7 @@ sub register_action($$;$)
 
 	$priority ||= 1;
 
-	Bot::debug("Registering handler for '%s' from '%s' module with priority %d", $action, $module, $priority);
+	GIR::Bot::debug("Registering handler for '%s' from '%s' module with priority %d", $action, $module, $priority);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'actions'} }, {
@@ -258,7 +258,7 @@ sub unregister_action($)
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::debug("Unregistering handler for '%s' from '%s'", $action, $module);
+	GIR::Bot::debug("Unregistering handler for '%s' from '%s'", $action, $module);
 
 	if (exists $registered{ $module }->{'actions'}) {
 		my @actions = ( );
@@ -279,7 +279,7 @@ sub register_private($$)
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::debug("Registering private handler for '%s' from '%s' module", $action, $module);
+	GIR::Bot::debug("Registering private handler for '%s' from '%s' module", $action, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'private'} }, {
@@ -305,7 +305,7 @@ sub register_listener($$)
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::debug("Registering listener (priority %d) from '%s' module", $priority, $module);
+	GIR::Bot::debug("Registering listener (priority %d) from '%s' module", $priority, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'listeners'} }, {
@@ -333,7 +333,7 @@ sub register_help($$)
 	my @caller_info = caller;
 	my $module      = $caller_info[0];
 
-	Bot::debug("Registering help for '%s' from '%s' module", $command, $module);
+	GIR::Bot::debug("Registering help for '%s' from '%s' module", $command, $module);
 
 	if (exists $registered{ $module }) {
 		push @{ $registered{ $module }->{'help'} }, {
@@ -360,11 +360,11 @@ sub register_event($$)
 	my $module      = $caller_info[0];
 
 	unless (exists $event_handlers{ $event }) {
-		Bot::error("%s: can't register handler for '%s' events: invalid event type", $module, $event);
+		GIR::Bot::error("%s: can't register handler for '%s' events: invalid event type", $module, $event);
 		return;
 	}
 
-	Bot::debug("Registering %s handler from '%s' module", $event, $module);
+	GIR::Bot::debug("Registering %s handler from '%s' module", $event, $module);
 
 	if (exists $registered{ $module }) {
 		$registered{ $module }->{ $event } = $function;
@@ -411,8 +411,8 @@ sub event($$)
 {
 	my ($event, $params) = @_;
 
-	Bot::debug("Modules::event called for event of type '%s'", $event);
-	Bot::debug("Modules::event: There are %d handlers for '%s' events", scalar(@{ $event_handlers{ $event } }), $event);
+	GIR::Bot::debug("Modules::event called for event of type '%s'", $event);
+	GIR::Bot::debug("Modules::event: There are %d handlers for '%s' events", scalar(@{ $event_handlers{ $event } }), $event);
 
 	foreach my $callback (@{ $event_handlers{ $event } }) {
 		$callback->($params);
@@ -433,7 +433,7 @@ sub dispatch_t($)
 	my $result = process($message);
 
 	if ($result && $result ne 'NOREPLY') {
-		Bot::enqueue_say($message->where(), $result);
+		GIR::Bot::enqueue_say($message->where(), $result);
 	}
 }
 
@@ -442,18 +442,18 @@ sub process($;$)
 	my ($message, $nests) = @_;
 	$nests ||= 0;
 
-	if ($message->message() =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $Bot::config->{'max_nest'}) {
+	if ($message->message() =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $GIR::Bot::config->{'max_nest'}) {
 		my $pre  = $1 || '';
 		my $nest = $2 || '';
 		my $post = $3 || '';
-		Bot::debug("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post);
+		GIR::Bot::debug("Nested: pre: %s\ncommand: %s\npost: %s", $pre, $nest, $post);
 
-		my $msg = new Message($message, { 'message' => $nest });
+		my $msg = GIR::Message->new($message, { 'message' => $nest });
 		my $result = process($msg, $nests + 1) || '';
 
 		$result = '' if $result eq 'NOREPLY';
 		$result = sprintf('%s%s%s', $pre, $result, $post);
-		$message = new Message($message, { 'message' => $result });
+		$message = GIR::Message->new($message, { 'message' => $result });
 	}
 
 
@@ -478,9 +478,9 @@ sub process($;$)
 			} else {
 				my $msg;
 				if ($message->message() =~ /^$act(\!|\.|\?)*$/i) {
-					$msg = new Message($message, { 'message' => '' });
+					$msg = GIR::Message->new($message, { 'message' => '' });
 				} elsif ($message->message() =~ /^$act\s+(.+?)$/i) {
-					$msg = new Message($message, {
+					$msg = GIR::Message->new($message, {
 						'message' => $1,
 					});
 				}
@@ -500,7 +500,7 @@ sub process($;$)
 					return $result if $result;
 				}
 			} elsif ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
-				my $msg = new Message($message, {
+				my $msg = GIR::Message->new($message, {
 					'message'  => $1,
 				});
 				$result = $private{ $private }->($msg);
@@ -519,7 +519,7 @@ sub process($;$)
 
 sub shutdown()
 {
-	Bot::debug('Cleaning up modules...');
+	GIR::Bot::debug('Cleaning up modules...');
 
 	# Wait for threads to finish before exiting
 	if ($pool) {

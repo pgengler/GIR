@@ -1,4 +1,4 @@
-package Command;
+package GIR::Command;
 
 use strict;
 
@@ -32,10 +32,10 @@ sub parse($)
 	} elsif ($string =~ /^\s*nick\s+(.+)$/) {
 		return _command_string('nick', $1);
 	} elsif ($string =~ /^\s*debug\s+(on|off)\s*$/) {
-return _command_string('debug', $1);
+		return _command_string('debug', $1);
 	}
 
-	Bot::status("Unrecognized command '%s'", $string);
+	GIR::Bot::status("Unrecognized command '%s'", $string);
 }
 
 sub _command_string($@)

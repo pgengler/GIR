@@ -3,7 +3,7 @@ package Modules::Markov;
 use strict;
 use lib ('./', '../lib');
 
-use Util;
+use GIR::Util;
 
 ##############
 sub new()
@@ -18,15 +18,15 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('markov', \&Modules::Markov::output);
-	Modules::register_action('markov2', \&Modules::Markov::output_multi);
-	Modules::register_action('vokram', \&Modules::Markov::output_from_end);
-	Modules::register_listener(\&Modules::Markov::learn, 1);
-	Modules::register_listener(\&Modules::Markov::respond_if_addressed, 2);
+	GIR::Modules::register_action('markov', \&Modules::Markov::output);
+	GIR::Modules::register_action('markov2', \&Modules::Markov::output_multi);
+	GIR::Modules::register_action('vokram', \&Modules::Markov::output_from_end);
+	GIR::Modules::register_listener(\&Modules::Markov::learn, 1);
+	GIR::Modules::register_listener(\&Modules::Markov::respond_if_addressed, 2);
 
-	Modules::register_help('markov', \&Modules::Markov::help);
-	Modules::register_help('markov2', \&Modules::Markov::help);
-	Modules::register_help('vokram', \&Modules::Markov::help);
+	GIR::Modules::register_help('markov', \&Modules::Markov::help);
+	GIR::Modules::register_help('markov2', \&Modules::Markov::help);
+	GIR::Modules::register_help('vokram', \&Modules::Markov::help);
 }
 
 #######
@@ -42,10 +42,10 @@ sub output($)
 	if ($data && $data =~ /^(.+?)\s+(.+?)$/) {
 		$first  = $1;
 		$second = $2;
-		Bot::debug("Modules::Markov::output: using '%s' and '%s'", $first, $second);
+		GIR::Bot::debug("Modules::Markov::output: using '%s' and '%s'", $first, $second);
 	} elsif ($data && $data =~ /^(.+)$/) {
 		$first = $1;
-		Bot::debug("Modules::Markov::output: using '%s'", $first);
+		GIR::Bot::debug("Modules::Markov::output: using '%s'", $first);
 	}
 	return gen_output($first, $second);
 }
@@ -436,26 +436,26 @@ sub respond_if_addressed($)
 			# Now figure out which word(s) to use
 			$r = rand();
 			if ($r < .2) {
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[0], $words[1]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[0], $words[1]);
 				# Use first two words
 				$msg = gen_output($words[0], $words[1]);
 			} elsif ($r < .4) {
 				# Pick random word and its follower
 				$r = int(rand(scalar(@words) - 1));
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
 				$msg = gen_output($words[$r], $words[$r + 1]);
 			} elsif ($r < .6) {
 				# Pick first word
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
 				$msg = gen_output($words[0]);
 			} elsif ($r < .8) {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[ $r ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[ $r ]);
 				$msg = gen_output($words[$r]);
 			} else {
 				# No word
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
 				$msg = gen_output();
 			}
 		} elsif ($r < .8) { # bidirectional markov
@@ -463,21 +463,21 @@ sub respond_if_addressed($)
 			$r = rand();
 			if ($r < .25) {
 				# Use first two words
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[0], $words[1]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[0], $words[1]);
 				$msg = gen_output_multi($words[0], $words[1]);
 			} elsif ($r < .5) {
 				# Pick random word and its follower
 				$r = int(rand(scalar(@words) - 1));
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[ $r ], $words[ $r + 1 ]);
 				$msg = gen_output_multi($words[$r], $words[$r + 1]);
 			} elsif ($r < .75) {
 				# Use first word
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
 				$msg = gen_output_multi($words[0]);
 			} else {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[ $r ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[ $r ]);
 				$msg = gen_output_multi($words[$r]);
 			}
 		} else { # reverse markov
@@ -486,31 +486,31 @@ sub respond_if_addressed($)
 			if ($r < .3333) {
 				# Use last two words
 				my $n = scalar(@words) - 1;
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s' and '%s'", $words[ $n - 1 ], $words[ $n ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s' and '%s'", $words[ $n - 1 ], $words[ $n ]);
 				$msg = gen_output_from_end($words[$n - 1], $words[$n]);
 			} elsif ($r < .66666) {
 				# Use last word
 				my $n = scalar(@words) - 1;
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $n ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $n ]);
 				$msg = gen_output_from_end($words[$n]);
 			} else {
 				# Pick random word
 				$r = int(rand(scalar(@words)));
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $r ]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating vokram response from '%s'", $words[ $r ]);
 				$msg = gen_output_from_end($words[$r]);
 			}
 		}
 	} else {
 		if (rand() < .5) {
 			if (rand() < .5) {
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
 				$msg = gen_output($words[0]);
 			} else {
-				Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
+				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s'", $words[0]);
 				$msg = gen_output_multi($words[0]);
 			}
 		} else {
-			Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
+			GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from random word");
 			$msg = gen_output();
 		}
 	}

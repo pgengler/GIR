@@ -3,7 +3,7 @@ package Modules::Be;
 use strict;
 use lib ('./', '../lib');
 
-use Util;
+use GIR::Util;
 
 ##############
 sub new()
@@ -18,7 +18,7 @@ sub register()
 {
 	my $this = shift;
 
-#	&Modules::register_action('be', \&Modules::Be::output);
+#	GIR::Modules::register_action('be', \&Modules::Be::output);
 }
 
 #######
