@@ -53,18 +53,12 @@ sub _get_quote($)
 {
 	my ($id) = @_;
 
-	# Look for quote in DB cache
-	my $db = new Database::MySQL();
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $sql = qq(
 		SELECT quote
 		FROM bashquotes
 		WHERE id = ?
 	);
-	$db->prepare($sql);
-	my $sth = $db->execute($id);
-	my $row = $sth->fetchrow_hashref();
+	my $row = db->query($sql, $id)->fetch;
 
 	my $quote = $row ? $row->{'quote'} : undef;
 
@@ -94,8 +88,7 @@ sub _get_quote($)
 			VALUES
 			(?, ?)
 		);
-		$db->prepare($sql);
-		$db->execute($id, $quote);
+		db->query($sql, $id, $quote);
 
 		return $quote;
 	} else {

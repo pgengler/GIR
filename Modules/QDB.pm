@@ -4,7 +4,6 @@ use strict;
 
 use Util;
 
-use Database::MySQL;
 use HTML::Entities;
 
 ##############
@@ -55,19 +54,12 @@ sub _get_quote($)
 	my ($id) = @_;
 
 	# Look for quote in DB cache
-	my $db = new Database::MySQL();
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $sql = qq(
 		SELECT quote
 		FROM qdbquotes
 		WHERE id = ?
 	);
-	$db->prepare($sql);
-	my $sth = $db->execute($id);
-	my $row = $sth->fetchrow_hashref();
-
-	my $quote = $row ? $row->{'quote'} : undef;
+	my $quote = db->query($sql, $id)->fetch('quote');
 
 	if ($quote) {
 		return $quote;
@@ -116,17 +108,13 @@ sub _save_quote($$)
 {
 	my ($id, $quote) = @_;
 
-	my $db = new Database::MySQL();
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $sql = q(
 		INSERT INTO qdbquotes
 		(id, quote)
 		VALUES
 		(?, ?)
 	);
-	$db->prepare($sql);
-	$db->execute($id, $quote);
+	db->query($sql, $id, $quote);
 }
 
 1;

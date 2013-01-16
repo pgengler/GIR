@@ -1,12 +1,30 @@
 package Util;
 
+use v5.10;
 use strict;
 use warnings;
 use parent 'Exporter';
 
+use Database::MySQL;
+
 use LWP::UserAgent;
 
-our @EXPORT = qw/ get_url /;
+our @EXPORT = qw/ db get_url /;
+
+sub db()
+{
+	state $db;
+
+	unless (defined $db) {
+		$db = Database::MySQL->new(
+			'database' => $Bot::config->{'database'}->{'name'},
+			'password' => $Bot::config->{'database'}->{'password'},
+			'username' => $Bot::config->{'database'}->{'user'},
+		);
+	}
+
+	return $db;
+}
 
 sub get_url($)
 {

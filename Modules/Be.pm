@@ -1,15 +1,9 @@
 package Modules::Be;
 
-#######
-## PERL SETUP
-#######
 use strict;
 use lib ('./', '../lib');
 
-#######
-## INCLUDES
-#######
-use Database::MySQL;
+use Util;
 
 ##############
 sub new()
@@ -36,18 +30,13 @@ sub output()
 
 	return unless $message->is_addressed();
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $query = qq~
 		SELECT this, next
 		FROM markov
 		WHERE prev = '__BEGIN__' AND who = ?
 		ORDER BY count * RAND() DESC
 	~;
-	$db->prepare($query);
-	my $sth  = $db->execute($message->message());
-	my $word = $sth->fetchrow_hashref();
+	my $word = db->query($query, $message->message)->fetch;
 
 	unless ($word && $word->{'this'}) {
 		return;
@@ -62,11 +51,10 @@ sub output()
 		WHERE prev = ? AND this = ? AND who = ?
 		ORDER BY count * RAND() DESC
 	~;
-	$db->prepare($query);
+	my $statement = db->statement($query);
 	while ($word && $word->{'this'} ne '__END__' && $words++ < 50) {
 		$phrase = $phrase . $word->{'this'} . ' ';
-		$sth    = $db->execute($word->{'this'}, $word->{'next'}, $message->message());
-		$word   = $sth->fetchrow_hashref();
+		$word   = $statement->execute($word->{'this'}, $word->{'next'}, $message->message)->fetch;
 	}
 
 	chomp $phrase;

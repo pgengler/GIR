@@ -3,7 +3,7 @@ package Modules::Karma;
 use strict;
 use lib ('./', '../lib');
 
-use Database::MySQL;
+use Util;
 
 sub new()
 {
@@ -33,27 +33,15 @@ sub get($)
 
 	my $karma = 0;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $query = qq~
 		SELECT name, karma
 		FROM karma
 		WHERE LOWER(name) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute(lc($name));
+	my $user = db->query($query, lc($name))->fetch;
 
-	if ($sth) {
-		my $user = $sth->fetchrow_hashref();
-		if ($user && $user->{'karma'}) {
-			$karma = $user->{'karma'};
-		}
-	}
-
-	if ($karma) {
-		return "$name has karma of $karma";
+	if ($user && $user->{'karma'}) {
+		return "$name has karma of $user->{'karma'}";
 	} else {
 		return "$name has neutral karma";
 	}
@@ -81,19 +69,13 @@ sub update($)
 		return "You can't change your own karma!";
 	}
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Check if entry already exists
 	my $query = qq~
 		SELECT name
 		FROM karma
 		WHERE name = ?
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute(lc($name));
-	my $karma = $sth->fetchrow_hashref();
+	my $karma = db->query($query, lc($name))->fetch;
 
 	if ($karma) {
 		if ($direction eq '++') {
@@ -109,17 +91,16 @@ sub update($)
 				WHERE LOWER(name) = LOWER(?)
 			~;
 		}
-		$db->prepare($query);
-		$db->execute(lc($name));
+		db->query($query, lc($name));
 	} else {
+		my $initial_value = ($direction eq '--' ? -1 : 1);
 		$query = qq~
 			INSERT INTO karma
 			(name, karma)
 			VALUES
 			(?, ?)
 		~;
-		$db->prepare($query);
-		$db->execute(lc($name), $direction eq '--' ? -1 : 1);
+		db->query($query, lc($name), $initial_value);
 	}
 	return undef;
 }
