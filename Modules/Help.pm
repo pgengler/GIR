@@ -14,7 +14,7 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('help', \&Modules::Help::process);
+	GIR::Modules::register_action('help', \&Modules::Help::process);
 }
 
 sub process($)
@@ -26,13 +26,13 @@ sub process($)
 	my $topic = $message->message();
 
 	if ($topic && $topic !~ /^\s*help\s*$/) {
-		if ($Modules::help{ $topic }) {
-			return $Modules::help{ $topic }->($message);
+		if ($GIR::Modules::help{ $topic }) {
+			return $GIR::Modules::help{ $topic }->($message);
 		} else {
 			return "No help is available for '$topic'";
 		}
 	} else {
-		my @topics = sort { $a cmp $b } keys %Modules::help;
+		my @topics = sort { $a cmp $b } keys %GIR::Modules::help;
 		return 'Type "help <command>" for help on a specific command; available commands are: ' . join(', ', @topics);
 	}
 }

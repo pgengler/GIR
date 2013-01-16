@@ -1,9 +1,8 @@
 package Modules::Karma;
 
 use strict;
-use lib ('./', '../lib');
 
-use Util;
+use GIR::Util;
 
 sub new()
 {
@@ -19,8 +18,8 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('karma', \&Modules::Karma::get);
-	Modules::register_action($update_expr, \&Modules::Karma::update);
+	GIR::Modules::register_action('karma', \&Modules::Karma::get);
+	GIR::Modules::register_action($update_expr, \&Modules::Karma::update);
 }
 
 sub get($)

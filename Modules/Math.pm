@@ -1,8 +1,5 @@
 package Modules::Math;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
 ##############
@@ -18,7 +15,7 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_listener(\&Modules::Math::process, 3);
+	GIR::Modules::register_listener(\&Modules::Math::process, 3);
 }
 
 sub process()

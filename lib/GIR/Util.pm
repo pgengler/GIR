@@ -1,4 +1,4 @@
-package Util;
+package GIR::Util;
 
 use v5.10;
 use strict;
@@ -17,9 +17,9 @@ sub db()
 
 	unless (defined $db) {
 		$db = Database::MySQL->new(
-			'database' => $Bot::config->{'database'}->{'name'},
-			'password' => $Bot::config->{'database'}->{'password'},
-			'username' => $Bot::config->{'database'}->{'user'},
+			'database' => $GIR::Bot::config->{'database'}->{'name'},
+			'password' => $GIR::Bot::config->{'database'}->{'password'},
+			'username' => $GIR::Bot::config->{'database'}->{'user'},
 		);
 	}
 

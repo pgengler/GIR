@@ -3,8 +3,8 @@ package Modules::Infobot;
 use strict;
 use lib ('./', '../lib');
 
-use Message;
-use Util;
+use GIR::Message;
+use GIR::Util;
 
 #######
 ## GLOBALS
@@ -19,7 +19,7 @@ my $forget_expr         = qr/^forget\s+(.+)$/;
 my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
 my $what_reply_expr     = qr/^(what\s*(\'s|is|are)*\s+)(.+?)\?*$/;
 my $question_reply_expr = qr/^(.+)\?$/;
-my $replace_expr        = qr/^no\,?\s+(($Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
+my $replace_expr        = qr/^no\,?\s+(($GIR::Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
 my $append_expr         = qr/^(.+)\s+(is|are)\s+also\s+(.+)$/;
 
 #######
@@ -37,23 +37,23 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
-	Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
-	Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
-	Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
-	Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
-	Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
-	Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
-	Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
-	Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
-	Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
-	Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
+	GIR::Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
+	GIR::Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
+	GIR::Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
+	GIR::Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
+	GIR::Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
+	GIR::Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
+	GIR::Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
+	GIR::Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
+	GIR::Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
+	GIR::Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
+	GIR::Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
 
-	Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
+	GIR::Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
-	Modules::register_event('mynickchange', \&Modules::Infobot::nick_changed);
+	GIR::Modules::register_event('mynickchange', \&Modules::Infobot::nick_changed);
 
-	Modules::register_help('infobot', \&Modules::Infobot::help);
+	GIR::Modules::register_help('infobot', \&Modules::Infobot::help);
 }
 
 sub process($)
@@ -65,10 +65,10 @@ sub process($)
 	# Figure out what we're doing
 	if ($data =~ $force_learn_expr) {
 		return learn($message, $1, $2, $3);
-	} elsif ($data =~ /^no\,?\s+(($Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i) {
+	} elsif ($data =~ /^no\,?\s+(($GIR::Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i) {
 		my $msg;
 		if ($1) {
-			$msg = new Message($message, { 'addressed' => 1 });
+			$msg = GIR::Message->new($message, { 'addressed' => 1 });
 		} else {
 			$msg = $message;
 		}
@@ -86,7 +86,7 @@ sub process($)
 	} elsif ($data =~ $question_reply_expr) {
 		return reply($message, $1);
 	} else {
-		Bot::debug("Infobot::process fell through somehow: message == %s", $data);
+		GIR::Bot::debug("Infobot::process fell through somehow: message == %s", $data);
 	}
 }
 
@@ -122,7 +122,7 @@ sub learn($$$$)
 		~;
 		db->query($query, $phrase, $relates, $value);
 
-		Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
+		GIR::Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
 	}
 
 	if ($message->is_explicit()) {
@@ -148,7 +148,7 @@ sub append($$$$)
 		# Make sure the item isn't locked
 		if ($result->{'locked'}) {
 			if ($message->is_explicit()) {
-				Bot::status('LOCKED: %s', $result->{'phrase'});
+				GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
 				return "I can't update that, " . $message->from();
 			} else {
 				return 'NOREPLY';
@@ -200,7 +200,7 @@ sub forget($$)
 	while (my $result = $statement->fetch) {
 		if ($result->{'locked'}) {
 			$locked = 1;
-			Bot::status('LOCKED: %s', $result->{'phrase'});
+			GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
 		} else {
 			$found = 1;
 
@@ -211,7 +211,7 @@ sub forget($$)
 			~;
 			db->query($query, $what);
 
-			Bot::status('FORGET: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+			GIR::Bot::status('FORGET: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 		}
 	}
 
@@ -254,7 +254,7 @@ sub amend($$$$)
 	# Check if it's locked
 	if ($result->{'locked'}) {
 		if ($message->is_explicit()) {
-			Bot::status('LOCKED: %s', $result->{'phrase'});
+			GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
 			return "I can't update that, " . $message->from();
 		} else {
 			return 'NOREPLY';
@@ -270,12 +270,12 @@ sub amend($$$$)
 		}
 	}
 
-	Bot::status('OLD: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+	GIR::Bot::status('OLD: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
 	# Replace
 	$result->{'value'} =~ s/$rep_part/$with/i;
 
-	Bot::status('NEW: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+	GIR::Bot::status('NEW: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
 	# Update
 	$query = qq~
@@ -313,15 +313,15 @@ sub replace($$$$)
 	# Check if the item is locked
 	if ($result->{'locked'}) {
 		if ($message->is_explicit()) {
-			Bot::status('LOCKED: %s', $result->{'phrase'});
+			GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
 			return "I can't update that, " . $message->from();
 		} else {
 			return 'NOREPLY';
 		}
 	}
 
-	Bot::status('WAS: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
-	Bot::status('IS:  %s =%s=> %s', $result->{'phrase'}, $relates, $value);
+	GIR::Bot::status('WAS: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
+	GIR::Bot::status('IS:  %s =%s=> %s', $result->{'phrase'}, $relates, $value);
 
 	# Update
 	$query = qq~
@@ -360,8 +360,8 @@ sub reply($$)
 	$data =~ s/[\?|\!|\.|\,|\s*]+$//;
 
 	# Ignore anything that wasn't explicitly requested and is too short
-	if (exists($Bot::config->{'infobot_min_length'}) && !$explicit && length($data) < $Bot::config->{'infobot_min_length'}) {
-		Bot::status("Skipping '%s' because it's too short", $data);
+	if (exists($GIR::Bot::config->{'infobot_min_length'}) && !$explicit && length($data) < $GIR::Bot::config->{'infobot_min_length'}) {
+		GIR::Bot::status("Skipping '%s' because it's too short", $data);
 		return;
 	}
 
@@ -375,7 +375,7 @@ sub reply($$)
 		}
 	}
 
-	Bot::status('FOUND: %s =%s=> %s', $phrase, $relates, $value);
+	GIR::Bot::status('FOUND: %s =%s=> %s', $phrase, $relates, $value);
 
 	# Replace param placeholders with values
 	my $max_param_used = 0;
@@ -397,28 +397,28 @@ sub reply($$)
 	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<action\>\s*(.+)$/) {
-		Bot::enqueue_action($message->where(), parse_special($1, $message->from()));
+		GIR::Bot::enqueue_action($message->where(), parse_special($1, $message->from()));
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
-			Bot::status('Feedback limit reached!');
+			GIR::Bot::status('Feedback limit reached!');
 			return undef;
 		}
 
-		my $msg = new Message($message, {
+		my $msg = GIR::Message->new($message, {
 			'message' => $1,
 		});
-		Modules::dispatch_t($msg);
+		GIR::Modules::dispatch_t($msg);
 		$feedbacked--;
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*(|.+?)\s*\<(.+?)\>\s*(.+)*$/) {
 		# Feedback
 		my ($extra, $action, $param) = ($1, $2, $3);
 
-		Bot::debug("Modules::Infobot::reply: Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra);
+		GIR::Bot::debug("Modules::Infobot::reply: Feeding back action '%s' with extra info '%s' and pre-string '%s'", $action, $param, $extra);
 
 		if (++$feedbacked > 2) {
-			Bot::status('Feedback limit reached!');
+			GIR::Bot::status('Feedback limit reached!');
 			return undef;
 		}
 
@@ -429,14 +429,14 @@ sub reply($$)
 
 		my $result;
 
-		my $msg = new Message($message, {
+		my $msg = GIR::Message->new($message, {
 			'message' => $data,
 		});
 
 		if ($extra) {
-			$result = $extra . ' ' . Modules::process($msg);
+			$result = $extra . ' ' . GIR::Modules::process($msg);
 		} else {
-			$result = Modules::process($msg);
+			$result = GIR::Modules::process($msg);
 		}
 		$feedbacked--;
 
@@ -460,7 +460,7 @@ sub find_match_aux($@)
 	return undef unless $data;
 
 	# Look for entry for this phrase
-	Bot::debug("Modules::Infobot::find_match_aux: Looking for match for phrase '%s'", $data);
+	GIR::Bot::debug("Modules::Infobot::find_match_aux: Looking for match for phrase '%s'", $data);
 	my $query = qq~
 		SELECT phrase, relates, value
 		FROM infobot
@@ -473,7 +473,7 @@ sub find_match_aux($@)
 		# Make sure there's a suitable match
 		my @parts = split(/\s*\|\s*/, $result->{'value'});
 		if (scalar(@parts) > 1) {
-			Bot::status("FOUND: %s [splitting into parts]", $result->{'value'});
+			GIR::Bot::status("FOUND: %s [splitting into parts]", $result->{'value'});
 			my $have_params = scalar(@params);
 			# Keep only parts that don't require more parameters than are available
 			@parts = grep {
@@ -501,7 +501,7 @@ sub find_match_aux($@)
 
 			if (scalar(@parts) > 0) {
 				$result->{'value'} = $parts[int(rand(scalar(@parts)))];
-				Bot::status('CHOSE: %s', $result->{'value'});
+				GIR::Bot::status('CHOSE: %s', $result->{'value'});
 			} else {
 				return undef;
 			}
@@ -631,7 +631,7 @@ sub literal($)
 
 	return undef unless $phrase;
 
-	Bot::debug("Modules::Infobot::literal: Looking up literal value of '%s'", $phrase);
+	GIR::Bot::debug("Modules::Infobot::literal: Looking up literal value of '%s'", $phrase);
 
 	# Look up this phrase
 	my $query = qq~
@@ -683,9 +683,9 @@ sub nick_changed($)
 	my $params = shift;
 
 	# Rebuild regexp for replace handler to incorporate new nick
-	Modules::unregister_action($replace_expr);
+	GIR::Modules::unregister_action($replace_expr);
 	$replace_expr = qr/^no\,?\s+(($params->{'new'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
-	Modules::register_action($replace_expr, \&Modules::Infobot::process, 2);
+	GIR::Modules::register_action($replace_expr, \&Modules::Infobot::process, 2);
 }
 
 sub help($)

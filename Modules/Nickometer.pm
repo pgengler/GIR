@@ -22,9 +22,9 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('nickometer', \&Modules::Nickometer::process);
+	GIR::Modules::register_action('nickometer', \&Modules::Nickometer::process);
 
-	Modules::register_help('nickometer', \&Modules::Nickometer::help);
+	GIR::Modules::register_help('nickometer', \&Modules::Nickometer::help);
 }
 
 sub process($)

@@ -2,7 +2,7 @@ package Modules::Aviation;
 
 use strict;
 
-use Util;
+use GIR::Util;
 
 ##############
 sub new()
@@ -17,11 +17,11 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('metar', \&Modules::Aviation::metar);
-	Modules::register_action('taf', \&Modules::Aviation::taf);
+	GIR::Modules::register_action('metar', \&Modules::Aviation::metar);
+	GIR::Modules::register_action('taf', \&Modules::Aviation::taf);
 
-	Modules::register_help('metar', \&Modules::Aviation::help);
-	Modules::register_help('taf', \&Modules::Aviation::help);
+	GIR::Modules::register_help('metar', \&Modules::Aviation::help);
+	GIR::Modules::register_help('taf', \&Modules::Aviation::help);
 }
 
 sub metar($)

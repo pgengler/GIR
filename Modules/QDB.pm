@@ -2,7 +2,7 @@ package Modules::QDB;
 
 use strict;
 
-use Util;
+use GIR::Util;
 
 use HTML::Entities;
 
@@ -21,10 +21,10 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('qdb', \&Modules::QDB::process_from_text);
-	Modules::register_action($qdb_expr, \&Modules::QDB::process_from_url);
+	GIR::Modules::register_action('qdb', \&Modules::QDB::process_from_text);
+	GIR::Modules::register_action($qdb_expr, \&Modules::QDB::process_from_url);
 
-	Modules::register_help('qdb', \&Modules::QDB::help);
+	GIR::Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
 sub process_from_url($)

@@ -1,13 +1,6 @@
 package Modules::Ignore;
 
-#######
-## PERL SETUP
-#######
 use strict;
-
-#######
-## SETUP
-#######
 
 sub new()
 {
@@ -21,13 +14,10 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_private('ignore', \&Modules::Ignore::ignore);
-	Modules::register_private('unignore', \&Modules::Ignore::unignore);
+	GIR::Modules::register_private('ignore', \&Modules::Ignore::ignore);
+	GIR::Modules::register_private('unignore', \&Modules::Ignore::unignore);
 }
 
-#######
-## MAIN
-#######
 sub ignore($)
 {
 	my $message = shift;
@@ -40,7 +30,7 @@ sub ignore($)
 	}
 
 	# Add to ignore list
-	Bot::add_ignore($nick);
+	GIR::Bot::add_ignore($nick);
 
 	return "$nick has been added to the ignore list";
 }
@@ -57,7 +47,7 @@ sub unignore($)
 	}
 
 	# Add to ignore list
-	Bot::remove_ignore($nick);
+	GIR::Bot::remove_ignore($nick);
 
 	return "$nick has been removed from the ignore list";
 }	

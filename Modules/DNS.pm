@@ -23,9 +23,9 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('host', \&Modules::DNS::lookup);
+	GIR::Modules::register_action('host', \&Modules::DNS::lookup);
 
-	Modules::register_help('host', \&Modules::DNS::help);
+	GIR::Modules::register_help('host', \&Modules::DNS::help);
 }
 
 sub lookup($)
@@ -38,7 +38,7 @@ sub lookup($)
 	if (defined($packed_ip)) {
 		return "$hostname resolves to " . inet_ntoa($packed_ip);
 	} else {
-		Bot::status("Host '%s' not found.", $hostname);
+		GIR::Bot::status("Host '%s' not found.", $hostname);
 		return 'Host not found' if $message->is_addressed();
 	}
 }

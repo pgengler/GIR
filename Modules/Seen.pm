@@ -1,9 +1,8 @@
 package Modules::Seen;
 
 use strict;
-use lib ('./', '../lib');
 
-use Util;
+use GIR::Util;
 
 sub new()
 {
@@ -17,10 +16,10 @@ sub register()
 {
 	my $this = shift;
 
-	Modules::register_action('seen', \&Modules::Seen::seen);
-	Modules::register_listener(\&Modules::Seen::update, -1);
+	GIR::Modules::register_action('seen', \&Modules::Seen::seen);
+	GIR::Modules::register_listener(\&Modules::Seen::update, -1);
 
-	Modules::register_help('seen', \&Modules::Seen::help);
+	GIR::Modules::register_help('seen', \&Modules::Seen::help);
 }
 
 sub seen($)
