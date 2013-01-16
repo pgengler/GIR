@@ -1,20 +1,12 @@
 package Modules::Weather;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
+use Util;
+
 use JSON;
-use LWP::Simple;
 use URI::Escape qw/ uri_escape /;
 
-#######
-## GLOBALS
-#######
 my $CACHE_TIME = 15;	# time to cache (in minutes)
 
 use constant URL_FORMAT => 'http://api.wunderground.com/api/%s/conditions/q/%s.json'; # 1: API key, 2: location
@@ -65,13 +57,14 @@ sub process($)
 
 	Bot::debug("Looking up weather for '%s'", $station);
 
-	my $text = get(sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station)));
+	my $url = sprintf(URL_FORMAT, $Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station));
+	my $content = eval { get_url($url) };
 
-	unless ($text) {
+	if ($@) {	
 		return 'Something failed in contacting the weather server.';
 	}
 
-  my $data = from_json($text);
+  my $data = from_json($content);
 
 	if ($data->{'response'}->{'error'}) {
 		return "Unable to get weather for ${station}: $data->{'response'}->{'error'}->{'description'}";

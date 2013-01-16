@@ -3,7 +3,7 @@ package Modules::Seen;
 use strict;
 use lib ('./', '../lib');
 
-use Database::MySQL;
+use Util;
 
 sub new()
 {
@@ -29,9 +29,6 @@ sub seen($)
 
 	my $nick    = $message->message();
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Remove leading/trailing whitespace
 	$nick =~ s/^\s*(.+?)\s*$/$1/;
 
@@ -45,9 +42,7 @@ sub seen($)
 		FROM seen
 		WHERE who = ?
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($nick);
-	my $seen = $sth->fetchrow_hashref();
+	my $seen = db->query($query, $nick)->fetch;
 
 	if ($seen) {
 		my $howlong = time() - $seen->{'when'};
@@ -111,18 +106,13 @@ sub update($)
 		$data = '<private>';
 	}
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Check to see if we have an entry for this user
 	my $query = qq~
 		SELECT who
 		FROM seen
 		WHERE who = ?
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute(lc($message->from()));
-	my $seen = $sth->fetchrow_hashref();
+	my $seen = db->query($query, lc($message->from))->fetch;
 
 	if ($seen && $seen->{'who'}) {
 		$query = qq~
@@ -132,8 +122,7 @@ sub update($)
 				`when` = NOW()
 			WHERE who = ?
 		~;
-		$db->prepare($query);
-		$db->execute($where, $data, lc($message->from()));
+		db->query($query, $where, $data, lc($message->from));
 	} else {
 		$query = qq~
 			INSERT INTO seen
@@ -141,8 +130,7 @@ sub update($)
 			VALUES
 			(?, ?, ?, NOW())
 		~;
-		$db->prepare($query);
-		$db->execute(lc($message->from()), $data, $where);
+		db->query($query, lc($message->from), $data, $where);
 	}
 	return undef;
 }

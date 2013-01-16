@@ -1,16 +1,10 @@
 package Modules::Infobot;
 
-#######
-## PERL SETUP
-#######
 use strict;
 use lib ('./', '../lib');
 
-#######
-## INCLUDES
-#######
-use Database::MySQL;
 use Message;
+use Util;
 
 #######
 ## GLOBALS
@@ -105,22 +99,13 @@ sub learn($$$$)
 		return;
 	}
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Check to see if we already have something matching this
 	my $query = qq~
 		SELECT phrase, value
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($phrase);
-
-	my $result = $sth->fetchrow_hashref();
-
-	$sth->finish();
+	my $result = db->query($query, $phrase)->fetch;
 
 	if ($result) {
 		if ($message->is_explicit()) {
@@ -135,8 +120,7 @@ sub learn($$$$)
 			VALUES
 			(?, ?, ?)
 		~;
-		$db->prepare($query);
-		$db->execute($phrase, $relates, $value);	
+		db->query($query, $phrase, $relates, $value);
 
 		Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
 	}
@@ -152,22 +136,13 @@ sub append($$$$)
 {
 	my ($message, $phrase, $relates, $value) = @_;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Get current info
 	my $query = qq~
 		SELECT phrase, value, locked
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($phrase);
-
-	my $result = $sth->fetchrow_hashref();
-
-	$sth->finish();
+	my $result = db->query($query, $phrase)->fetch;
 
 	if ($result) {
 		# Make sure the item isn't locked
@@ -192,8 +167,7 @@ sub append($$$$)
 				value = ?
 			WHERE LOWER(phrase) = LOWER(?)
 		~;
-		$db->prepare($query);
-		$db->execute($result->{'value'}, $result->{'phrase'});
+		db->query($query, $result->{'value'}, $result->{'phrase'});
 	} else {
 		if ($message->is_explicit()) {
 			return "I didn't have anything matching '$phrase', " . $message->from();
@@ -210,10 +184,6 @@ sub forget($$)
 {
 	my ($message, $what) = @_;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# cut off final punctuation
 	$what =~ s/[.!?]+$//;
 
@@ -225,10 +195,9 @@ sub forget($$)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($what);
+	my $statement = db->query($query, $what);
 
-	while (my $result = $sth->fetchrow_hashref()) {
+	while (my $result = $statement->fetch) {
 		if ($result->{'locked'}) {
 			$locked = 1;
 			Bot::status('LOCKED: %s', $result->{'phrase'});
@@ -240,14 +209,11 @@ sub forget($$)
 				DELETE FROM infobot
 				WHERE LOWER(phrase) = LOWER(?)
 			~;
-			$db->prepare($query);
-			$db->execute($what);
+			db->query($query, $what);
 
 			Bot::status('FORGET: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 		}
 	}
-
-	$sth->finish();
 
 	if ($found) {
 		return $message->from() . ": I forgot $what";
@@ -268,10 +234,6 @@ sub amend($$$$)
 
 	my $rep_part = quotemeta($replace);
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Look for initial value
 	my $query = qq~
 		SELECT phrase, relates, value, locked
@@ -279,9 +241,7 @@ sub amend($$$$)
 		WHERE LOWER(phrase) = LOWER(?)
 		LIMIT 1
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($what);
-	my $result = $sth->fetchrow_hashref();
+	my $result = db->query($query, $what)->fetch;
 
 	unless ($result) {
 		if ($message->is_explicit()) {
@@ -323,8 +283,7 @@ sub amend($$$$)
 			value = ?
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	$db->execute($result->{'value'}, $result->{'phrase'});
+	db->query($query, $result->{'value'}, $result->{'phrase'});
 
 	if ($message->is_explicit()) {
 		return "OK, " . $message->from();
@@ -335,19 +294,13 @@ sub replace($$$$)
 {
 	my ($message, $what, $relates, $value) = @_;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Look up current value
 	my $query = qq~
 		SELECT phrase, relates, value, locked
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($what);
-	my $result = $sth->fetchrow_hashref();
+	my $result = db->query($query, $what)->fetch;
 
 	unless ($result) {
 		if ($message->is_explicit()) {
@@ -377,8 +330,7 @@ sub replace($$$$)
 			relates = ?
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	$db->execute($value, $relates, $what);
+	db->query($query, $value, $relates, $what);
 
 	if ($message->is_explicit()) {
 		return "OK, " . $message->from();
@@ -397,10 +349,6 @@ sub reply($$)
 {
 	my ($message, $data) = @_;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Determine if this was likely something explicitly requested.
 	# This means that it included the bot's name and ended in a question mark
 	my $explicit = ($message->is_addressed() && $data =~ /\?\s*$/);
@@ -417,7 +365,7 @@ sub reply($$)
 		return;
 	}
 
-	my ($phrase, $relates, $value, @params) = find_match($db, $data);
+	my ($phrase, $relates, $value, @params) = find_match($data);
 
 	unless ($phrase) {
 		if ($explicit) {
@@ -457,8 +405,6 @@ sub reply($$)
 			return undef;
 		}
 
-		$db->close();
-
 		my $msg = new Message($message, {
 			'message' => $1,
 		});
@@ -483,8 +429,6 @@ sub reply($$)
 
 		my $result;
 
-		$db->close();
-
 		my $msg = new Message($message, {
 			'message' => $data,
 		});
@@ -502,16 +446,16 @@ sub reply($$)
 	}
 }
 
-sub find_match($$)
+sub find_match($)
 {
-	my ($db, $data) = @_;
+	my ($data) = @_;
 
-	return find_match_aux($db, $data, ( ));	
+	return find_match_aux($data, ( ));	
 }
 
-sub find_match_aux($$@)
+sub find_match_aux($@)
 {
-	my ($db, $data, @params) = @_;
+	my ($data, @params) = @_;
 
 	return undef unless $data;
 
@@ -523,10 +467,7 @@ sub find_match_aux($$@)
 		WHERE LOWER(phrase) = LOWER(?)
 		LIMIT 1
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($data);
-	my $result = $sth->fetchrow_hashref();
-	$sth->finish();
+	my $result = db->query($query, $data)->fetch;
 
 	if ($result) {
 		# Make sure there's a suitable match
@@ -603,7 +544,7 @@ sub find_match_aux($$@)
 		return undef;
 	}
 
-	return find_match_aux($db, $data, @params);
+	return find_match_aux($data, @params);
 }
 
 sub lock($)
@@ -621,20 +562,14 @@ sub lock($)
 		return "You don't have permission to do that, " . $message->from() . '!';
 	}
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Make sure phrase exists
 	my $query = qq~
 		SELECT *
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($phrase);
+	my $entry = db->query($query, $phrase)->fetch;
 
-	my $entry = $sth->fetchrow_hashref();
 	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
 	}
@@ -645,8 +580,7 @@ sub lock($)
 			locked = 1
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	$db->execute($phrase);
+	db->query($query, $phrase);
 
 	return "OK, " . $message->from();
 }
@@ -666,20 +600,14 @@ sub unlock($)
 		return "You don't have permission to do that, " . $message->from() . '!';
 	}
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	# Make sure phrase exists
 	my $query = qq~
 		SELECT *
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($phrase);
+	my $entry = db->query($query, $phrase)->fetch;
 
-	my $entry = $sth->fetchrow_hashref();
 	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
 	}
@@ -690,8 +618,7 @@ sub unlock($)
 			locked = 0
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	$db->execute($phrase);
+	db->query($query, $phrase);
 
 	return "OK, " . $message->from();
 }	
@@ -704,10 +631,6 @@ sub literal($)
 
 	return undef unless $phrase;
 
-	# Open database
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	Bot::debug("Modules::Infobot::literal: Looking up literal value of '%s'", $phrase);
 
 	# Look up this phrase
@@ -716,9 +639,7 @@ sub literal($)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	$db->prepare($query);
-	my $sth = $db->execute($phrase);
-	my $result = $sth->fetchrow_hashref();
+	my $result = db->query($query, $phrase)->fetch;
 
 	if ($result) {
 		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});

@@ -1,127 +1,41 @@
 package Database::MySQL;
 
 use strict;
-use DBI;
 
-sub new()
+use base qw/ Database::Base /;
+
+sub connect()
 {
-	my $pkg = shift;
-	my $obj = { 
-		'queries'		=> 0,
-		'database'	=> '',
-		'user'			=> '',
-		'password'	=> '',
-		'host'			=> '',
-		'dbh'				=> undef,
-		'error'     => undef
-	};
-	bless $obj, $pkg;
-	return $obj;
-}
+	my $self = shift;
 
-sub init()
-{
-	my $this = shift;
-	my ($user, $password, $database, $host, $error) = @_;
-	$host = 'localhost' unless $host;
-	if ($error) {
-		$this->{'error'} = $error;
-	} else {
-		$this->{'error'} = \&error;
-	}
-	$this->{'dbh'} = DBI->connect("DBI:mysql:$database:$host:3306", $user, $password) or $this->{'error'}->(Carp::longmess(DBI::errstr), 1);
-}
-
-sub close()
-{
-	my $this = shift;
-	$this->{'dbh'}->disconnect();
-}
-
-sub query()
-{
-	my ($this, $query) = @_;
-	my $sth = $this->{'dbh'}->prepare($query);
-	$this->{'query'} = $query;
-	$sth->execute() or $this->{'error'}->(Carp::longmess("Couldn't execute statement: " . $sth->errstr . " in query " . $query), 1);
-	$this->{'queries'}++;
-	return $sth;
-}
-
-sub prepare()
-{
-	my ($this, $query) = @_;
-	$this->{'sth'} = $this->{'dbh'}->prepare($query);
-	$this->{'query'} = $query;
-	return $this->{'sth'};
-}
-
-sub execute()
-{
-	my ($this, @params) = @_;
-	return unless $this->{'sth'};
-	$this->{'sth'}->execute(@params) or $this->{'error'}->(Carp::longmess("Couldn't execute statement: " . $this->{'sth'}->errstr . " in query " . $this->{'query'}), 1);
-	return $this->{'sth'};
-}
-
-sub start_transaction()
-{
-	my $this = shift;
-
-	# Abort if we're already in a transaction
-	if ($this->{'transaction'}) {
-		return;
+	if ($self->{'_dbh'}) {
+		$self->disconnect();
 	}
 
-	my $sth = $this->{'dbh'}->prepare('BEGIN');
-	$sth->execute();
-	$this->{'transaction'} = 1;
-}
+	# Default to 'localhost'
+	$self->{'host'} ||= 'localhost';
+	# Default to port 3306
+	$self->{'port'} ||= 3306;
+	# UTF-8 support should be enabled by default
+	$self->{'enable_utf8'} = 1 unless defined($self->{'enable_utf8'});
 
-sub commit_transaction()
-{
-	my $this = shift;
-
-	# Abort if we're not in a transaction
-	unless ($this->{'transaction'}) {
-		return;
+	# Make sure enough data is present to connect
+	unless ($self->{'database'} && $self->{'username'}) {
+		$self->{'error'}->(Carp::longmess("Missing database or user name"), $self);
 	}
 
-	my $sth = $this->{'dbh'}->prepare('COMMIT');
-	$sth->execute();
-	$this->{'transaction'} = 0;
-}
+	$self->{'_dbh'} = DBI->connect("DBI:mysql:$self->{'database'}:$self->{'host'}:$self->{'port'};mysql_enable_utf8=$self->{'enable_utf8'}", $self->{'username'}, $self->{'password'}) or $self->{'error'}->(Carp::longmess(DBI::errstr), $self);
 
-sub rollback_transaction()
-{
-	my $this = shift;
+	$self->{'_connected'} = 1;
 
-	# Abort if we're not in a transaction
-	unless ($this->{'transaction'}) {
-		return;
-	}
-
-	$this->{'dbh'}->prepare('ROLLBACK');
-	$this->{'dbh'}->execute();
-	$this->{'transaction'} = 0;
-}	
-
-sub num_queries()
-{
-	my $this = shift;
-	return $this->{'queries'};
+	return $self;
 }
 
 sub insert_id()
 {
-	my $this = shift;
-	return $this->{'dbh'}->{'mysql_insertid'};
-}
+	my $self = shift;
 
-sub error()
-{
-	my $message = shift;
-	die $message;
+	return $self->{'_dbh'}->{'mysql_insertid'};
 }
 
 1;

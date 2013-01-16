@@ -1,15 +1,10 @@
 package Modules::Bash;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
+use Util;
+
 use HTML::Entities;
-use LWP::UserAgent;
 
 ##############
 sub new()
@@ -58,18 +53,12 @@ sub _get_quote($)
 {
 	my ($id) = @_;
 
-	# Look for quote in DB cache
-	my $db = new Database::MySQL();
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $sql = qq(
 		SELECT quote
 		FROM bashquotes
 		WHERE id = ?
 	);
-	$db->prepare($sql);
-	my $sth = $db->execute($id);
-	my $row = $sth->fetchrow_hashref();
+	my $row = db->query($sql, $id)->fetch;
 
 	my $quote = $row ? $row->{'quote'} : undef;
 
@@ -78,20 +67,12 @@ sub _get_quote($)
 	}
 
 	# Fetch from bash.org
-	my $ua = new LWP::UserAgent;
-#	if (my $proxy = Bot::getparam('httpproxy')) {
-#		$ua->proxy('http', $proxy)
-#	};
+	my $url = "http://bash.org/?${id}";
+	my $content = eval { get_url($url) };
 
-	$ua->timeout(10);
-	my $request = new HTTP::Request('GET', "http://bash.org/?${id}");
-	my $response = $ua->request($request); 
-
-	if (!$response->is_success) {
+	if ($@) {
 		return "Something failed in connecting to bash.org. Try again later.";
 	}
-
-	my $content = $response->content();
 
 	if ($content =~ /Quote #${id} was rejected/ || $content =~ /Quote #${id} does not exist/ || $content =~ /Quote #${id} is pending moderation/) {
 		return "Couldn't get quote ${id}. It probably doesn't exist";
@@ -107,8 +88,7 @@ sub _get_quote($)
 			VALUES
 			(?, ?)
 		);
-		$db->prepare($sql);
-		$db->execute($id, $quote);
+		db->query($sql, $id, $quote);
 
 		return $quote;
 	} else {

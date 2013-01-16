@@ -1,15 +1,9 @@
 package Modules::Markov;
 
-#######
-## PERL SETUP
-#######
 use strict;
 use lib ('./', '../lib');
 
-#######
-## INCLUDES
-#######
-use Database::MySQL;
+use Util;
 
 ##############
 sub new()
@@ -27,7 +21,6 @@ sub register()
 	Modules::register_action('markov', \&Modules::Markov::output);
 	Modules::register_action('markov2', \&Modules::Markov::output_multi);
 	Modules::register_action('vokram', \&Modules::Markov::output_from_end);
-#	Modules::register_listener(\&Modules::Markov::user_learn, 'always');
 	Modules::register_listener(\&Modules::Markov::learn, 1);
 	Modules::register_listener(\&Modules::Markov::respond_if_addressed, 2);
 
@@ -61,8 +54,6 @@ sub gen_output(;$$)
 {
 	my ($first, $second) = @_;
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 	my $word;
 
 	my $phrase = '';
@@ -75,10 +66,7 @@ sub gen_output(;$$)
 			ORDER BY RAND()
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first, $second);
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query, $first, $second)->fetch;
 
 		if ($word && $word->{'prev'}) {
 			$phrase .= "$word->{'prev'} ";
@@ -94,10 +82,7 @@ sub gen_output(;$$)
 			ORDER BY RAND()
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first);
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query, $first)->fetch;
 
 		unless ($word && $word->{'this'}) {
 			return $first;
@@ -110,9 +95,7 @@ sub gen_output(;$$)
 			FROM words
 			WHERE prev = '__BEGIN__'
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute();
-		my $count = $sth->fetchrow_hashref()->{'count'};
+		my $count = db->query($query)->fetch('count');
 
 		## Now pick a random number between 0 and $count - 1
 		my $row = int(rand($count));
@@ -124,10 +107,7 @@ sub gen_output(;$$)
 			WHERE prev = '__BEGIN__'
 			LIMIT $row, 1
 		~;
-		$db->prepare($query);
-		$sth = $db->execute();
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query)->fetch;
 	}
 
 	$phrase .= "$word->{'this'} ";
@@ -142,17 +122,16 @@ sub gen_output(;$$)
 		ORDER BY RAND() DESC
 		LIMIT 1
 	~;
-	$db->prepare($query);
+	my $statement = db->statement($query);
 
 	my $count = 0;
 	while (1) {
 		# Get next word
-		my $sth = $db->execute($word->{'this'}, $word->{'next'});
-		$word = $sth->fetchrow_hashref();
+		my $word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
+
 		unless ($word && $word->{'this'}) {
 			last;
 		}
-		$sth->finish();
 
 		$phrase .= "$word->{'this'} ";
 
@@ -188,8 +167,6 @@ sub gen_output_multi(;$$)
 {
 	my ($first, $second) = @_;
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
 	my $word;
 
 	my $phrase = '';
@@ -203,11 +180,7 @@ sub gen_output_multi(;$$)
 			ORDER BY RAND()
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first, $second);
-		$word = $sth->fetchrow_hashref();
-		my $start = $word;
-		$sth->finish();
+		my $start = $word = db->query($query, $first, $second)->fetch;
 
 		$phrase  = $word->{'this'};
 
@@ -219,11 +192,10 @@ sub gen_output_multi(;$$)
 			ORDER BY RAND()
 			LIMIT 1
 		~;
-		$db->prepare($query);
+		my $statement = db->statement($query);
 
 		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
-			$sth    = $db->execute($word->{'prev'}, $word->{'this'});
-			$word   = $sth->fetchrow_hashref();
+			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
 			$phrase = "$word->{'this'} $phrase";
 		}
 
@@ -234,12 +206,11 @@ sub gen_output_multi(;$$)
 			WHERE prev = ? AND this = ?
 			ORDER BY RAND()
 		~;
-		$db->prepare($query);
+		$statement = db->statement($query);
 
 		$word = $start;
 		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
-			$sth = $db->execute($word->{'this'}, $word->{'next'});
-			$word = $sth->fetchrow_hashref();
+			$word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
 			$phrase = "$phrase $word->{'this'}";
 		}
 	} elsif ($first) {
@@ -251,11 +222,7 @@ sub gen_output_multi(;$$)
 			ORDER BY RAND()
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first);
-		$word = $sth->fetchrow_hashref();
-		my $start = $word;
-		$sth->finish();
+		my $start = $word = db->query($query, $first)->fetch;
 
 		$phrase  = $word->{'this'};
 
@@ -266,11 +233,10 @@ sub gen_output_multi(;$$)
 			WHERE this = ? AND next = ?
 			ORDER BY RAND()
 		~;
-		$db->prepare($query);
+		my $statement = db->statement($query);
 
 		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
-			$sth    = $db->execute($word->{'prev'}, $word->{'this'});
-			$word   = $sth->fetchrow_hashref();
+			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
 			$phrase = "$word->{'this'} $phrase";
 		}
 
@@ -281,12 +247,11 @@ sub gen_output_multi(;$$)
 			WHERE prev = ? AND this = ?
 			ORDER BY RAND()
 		~;
-		$db->prepare($query);
+		$statement = db->statement($query);
 
 		$word = $start;
 		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
-			$sth = $db->execute($word->{'this'}, $word->{'next'});
-			$word = $sth->fetchrow_hashref();
+			$word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
 			$phrase = "$phrase $word->{'this'}";
 		}
 	} else {
@@ -321,9 +286,6 @@ sub gen_output_from_end(;$$)
 
 	my $phrase = '';
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my $query;
 
 	if ($first && $second) {
@@ -334,10 +296,7 @@ sub gen_output_from_end(;$$)
 			ORDER BY RAND() DESC
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first, $second);
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query, $first, $second)->fetch;
 
 		if ($word && $word->{'next'}) {
 			$phrase .= "$word->{'next'} ";
@@ -353,10 +312,7 @@ sub gen_output_from_end(;$$)
 			ORDER BY RAND() DESC
 			LIMIT 1
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute($first);
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query, $first)->fetch;
 
 		unless ($word && $word->{'this'}) {
 			return $first;
@@ -369,9 +325,7 @@ sub gen_output_from_end(;$$)
 			FROM words
 			WHERE next = '__END__'
 		~;
-		$db->prepare($query);
-		my $sth = $db->execute();
-		my $count = $sth->fetchrow_hashref()->{'count'};
+		my $count = db->statement($query)->fetch('count');
 
 		## Now pick a random number between 0 and $count - 1
 		my $row = int(rand($count));
@@ -383,10 +337,7 @@ sub gen_output_from_end(;$$)
 			WHERE next = '__END__'
 			LIMIT $row, 1
 		~;
-		$db->prepare($query);
-		$sth = $db->execute();
-		$word = $sth->fetchrow_hashref();
-		$sth->finish();
+		$word = db->query($query)->fetch;
 	}
 
 	$phrase = "$word->{'this'} $phrase";
@@ -401,17 +352,15 @@ sub gen_output_from_end(;$$)
 		ORDER BY RAND() DESC
 		LIMIT 1
 	~;
-	$db->prepare($query);
+	my $statement = db->statement($query);
 
 	my $count = 0;
 	do {
 		# Get next word
-		my $sth = $db->execute($word->{'prev'}, $word->{'this'});
-		$word = $sth->fetchrow_hashref();
+		$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
 		unless ($word && $word->{'this'}) {
 			last;
 		}
-		$sth->finish();
 
 		$phrase = "$word->{'this'} $phrase";
 
@@ -430,9 +379,6 @@ sub learn($)
 	# Skip #mefi bots (TODO: generalize this)
 	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt' || $message->from() eq 'shake');
 
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
 	my @parts = split(/\s+/, $data);
 
 	return if scalar(@parts) == 0;
@@ -440,81 +386,26 @@ sub learn($)
 	unshift @parts, '__BEGIN__';
 	push @parts, '__END__';
 
+	my $lookup_sql = q(
+		SELECT prev, this, next
+		FROM words
+		WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255)
+	);
+	my $lookup = db->statement($lookup_sql);
+
+	my $insert_sql = q(
+		INSERT INTO words
+		(prev, this, next)
+		VALUES
+		(?, ?, ?)
+	);
+	my $insert = db->statement($insert_sql);
+
 	for (my $i = 1; $i < scalar(@parts) - 1; $i++) {
-		# Check to see if we already have this combo
-		my $query = qq~
-			SELECT prev, this, next
-			FROM words
-			WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255)
-		~;
-		$db->prepare($query);
-		my $sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1]);
-		my $word = $sth->fetchrow_hashref();
-		$sth->finish();
+		my $word = $lookup->execute($parts[$i - 1], $parts[$i], $parts[$i + 1])->fetch;
 
 		unless ($word && ($word->{'prev'} || $word->{'this'} || $word->{'next'})) {
-			$query = qq~
-				INSERT INTO words
-				(prev, this, next)
-				VALUES
-				(?, ?, ?)
-			~;
-		}
-		$db->prepare($query);
-		$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1]);
-		$sth->finish();
-	}
-}
-
-#######
-## LEARN (USER)
-#######
-sub user_learn($)
-{
-	my $message = shift;
-	my $data    = $message->message();
-
-	my $db = new Database::MySQL;
-	$db->init($Bot::config->{'database'}->{'user'}, $Bot::config->{'database'}->{'password'}, $Bot::config->{'database'}->{'name'});
-
-	my @parts = split(/\s+/, $data);
-
-	next if scalar(@parts) == 0;
-
-	unshift @parts, '__BEGIN__';
-	push @parts, '__END__';
-
-	for (my $i = 1; $i < scalar(@parts) - 1; $i++) {
-		# Check to see if we already have this combo
-		my $query = qq~
-			SELECT prev, this, next
-			FROM markov
-			WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255)
-		~;
-		$db->prepare($query);
-		my $sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1]);
-		my $word = $sth->fetchrow_hashref();
-		$sth->finish();
-
-		if ($word && ($word->{'prev'} || $word->{'this'} || $word->{'next'})) {
-			# Update count
-			$query = qq~
-				UPDATE markov SET
-					count = count + 1
-				WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255) AND who = ?
-			~;
-			$db->prepare($query);
-			$db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $message->from());
-		} else {
-			$query = qq~
-				INSERT INTO markov
-				(prev, this, next, who)
-				VALUES
-				(?, ?, ?, ?)
-			~;
-			$db->prepare($query);
-			$sth = $db->execute($parts[$i - 1], $parts[$i], $parts[$i + 1], $message->from());
-			$sth->finish();
+			$insert->execute($parts[$i - 1], $parts[$i], $parts[$i + 1]);
 		}
 	}
 }

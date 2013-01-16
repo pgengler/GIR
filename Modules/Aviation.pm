@@ -1,24 +1,8 @@
 package Modules::Aviation;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
-use LWP::UserAgent;
-
-#######
-## GLOBALS
-#######
-my $no_agent = 0;
-
-BEGIN {
-	eval "use LWP::UserAgent";
-	$no_agent++ if ($@);
-}
+use Util;
 
 ##############
 sub new()
@@ -60,16 +44,13 @@ sub metar($)
 	my $metar_url = "http://www.aviationweather.gov/adds/metars/?chk_metars=on&station_ids=${data}";
 	
 	# Grab METAR report from Web.
-	my $agent   = new LWP::UserAgent;
-	my $request = new HTTP::Request(GET => $metar_url);
-	my $reply   = $agent->request($request);
-	
-	unless ($reply->is_success) {
+	my $content = eval { get_url($metar_url) };
+
+	if ($@) {
 		return "Either $data doesn't exist (try a 4-letter station code like KMMU), or the NOAA site is unavailable right now.";
 	}
 	
-	my $webdata = $reply->as_string;
-	$webdata =~ m|<FONT FACE="Monospace,Courier">($data\s\d+Z.*?)</FONT>|s;
+	$content =~ m|<FONT FACE="Monospace,Courier">($data\s\d+Z.*?)</FONT>|s;
 	my $metar = $1;
 	$metar =~ s/\n//gm;
 	$metar =~ s/\s+/ /g;
@@ -100,17 +81,14 @@ sub taf($)
 	my $taf_url = "http://www.aviationweather.gov/adds/metars/?chk_tafs=on&station_ids=${data}";
 	
 	# Grab METAR report from Web.   
-	my $agent   = new LWP::UserAgent;
-	my $request = new HTTP::Request(GET => $taf_url);
-	my $reply = $agent->request($request);
-	
-	unless ($reply->is_success) {
+	my $content = eval { get_url($taf_url) };
+
+	if ($@) {
 		return "Either $data doesn't exist (try a 4-letter station code like KEWR), or the NOAA site is unavailable right now.";
 	}
 	
 	# extract TAF from equally verbose webpage
-	my $webdata = $reply->as_string;
-	unless ($webdata =~ m|<font face="Monospace,Courier" size="\+1">\s*($data\s*\d+Z.+?)\s*</font>|ms) {
+	unless ($content =~ m|<font face="Monospace,Courier" size="\+1">\s*($data\s*\d+Z.+?)\s*</font>|ms) {
 		return "I can't find any TAF for ${data}.";
 	}
 	my $taf = $1;
