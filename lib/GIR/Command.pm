@@ -17,6 +17,8 @@ sub parse($)
 		return _command_string('unload', $1);
 	} elsif ($string =~ /^load\s+(.+)\s*$/) {
 		return _command_string('load', $1);
+	} elsif ($string =~ /^list modules/) {
+		return _command_string('list modules');
 	} elsif ($string =~ /^\s*part\s+(.+?)(\s+(.+))?$/i) {
 		return _command_string('part', $1, $3);
 	} elsif ($string =~ /^\s*join\s+(.+)$/i) {

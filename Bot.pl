@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-#!/opt/perl-thread/bin/perl -w
 
 use strict;
 use threads;
@@ -656,17 +655,18 @@ sub enqueue_action($$)
 sub bot_command()
 {
 	my %funcs = (
-		'part'    => \&part,
-		'join'    => \&join,
-		'say'     => \&say,
-		'action'  => \&action,
-		'discon'  => \&quit,
-		'connect' => \&connect,
-		'nick'    => \&change_nick,
-		'reload'  => \&reload_modules,
-		'load'    => \&load_module,
-		'unload'  => \&unload_module,
-		'debug'   => \&set_debug
+		'part'         => \&part,
+		'join'         => \&join,
+		'say'          => \&say,
+		'action'       => \&action,
+		'discon'       => \&quit,
+		'connect'      => \&connect,
+		'nick'         => \&change_nick,
+		'reload'       => \&reload_modules,
+		'load'         => \&load_module,
+		'unload'       => \&unload_module,
+		'list modules' => \&list_modules,
+		'debug'        => \&set_debug
 	);
 
 	while (my $command = shift @commands) {
@@ -871,6 +871,16 @@ sub unload_module($)
 	my $module = shift;
 
 	GIR::Modules::unload_module($module);
+}
+
+sub list_modules()
+{
+	my @loaded_modules = GIR::Modules::loaded_modules();
+
+	status("The following modules are loaded:");
+	foreach my $module (@loaded_modules) {
+		status("\t${module}");
+	}
 }
 
 sub set_debug($)

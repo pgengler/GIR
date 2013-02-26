@@ -219,6 +219,12 @@ sub unload_module($;$)
 	GIR::Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
 }
 
+sub loaded_modules()
+{
+	my @module_names = map { (my $name = $_->name) =~ s/Modules:://; $name } @loaded_modules;
+	return sort { $a cmp $b } @module_names;
+}
+
 sub register_action($$;$)
 {
 	my ($action, $func, $priority) = @_;
