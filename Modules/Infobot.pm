@@ -37,23 +37,23 @@ sub register()
 {
 	my $this = shift;
 
-	GIR::Modules::register_action($force_learn_expr, \&Modules::Infobot::process, 3); # learn() forcefully
-	GIR::Modules::register_action($learn_expr, \&Modules::Infobot::process); # learn()
-	GIR::Modules::register_action($forget_expr, \&Modules::Infobot::process); # forget()
-	GIR::Modules::register_action($amend_expr, \&Modules::Infobot::process); # amend()
-	GIR::Modules::register_action($what_reply_expr, \&Modules::Infobot::process, 2); # reply()
-	GIR::Modules::register_action($question_reply_expr, \&Modules::Infobot::process); # reply
-	GIR::Modules::register_action($replace_expr, \&Modules::Infobot::process, 2); # replace()
-	GIR::Modules::register_action($append_expr, \&Modules::Infobot::process, 2); # append()
-	GIR::Modules::register_action('lock', \&Modules::Infobot::lock); # lock()
-	GIR::Modules::register_action('unlock', \&Modules::Infobot::unlock); # unlock()
-	GIR::Modules::register_action('literal', \&Modules::Infobot::literal); # literal()
+	GIR::Modules::register_action($force_learn_expr, \&process, 3); # learn() forcefully
+	GIR::Modules::register_action($learn_expr, \&process); # learn()
+	GIR::Modules::register_action($forget_expr, \&process); # forget()
+	GIR::Modules::register_action($amend_expr, \&process); # amend()
+	GIR::Modules::register_action($what_reply_expr, \&process, 2); # reply()
+	GIR::Modules::register_action($question_reply_expr, \&process); # reply
+	GIR::Modules::register_action($replace_expr, \&process, 2); # replace()
+	GIR::Modules::register_action($append_expr, \&process, 2); # append()
+	GIR::Modules::register_action('lock', \&lock); # lock()
+	GIR::Modules::register_action('unlock', \&unlock); # unlock()
+	GIR::Modules::register_action('literal', \&literal); # literal()
 
-	GIR::Modules::register_listener(\&Modules::Infobot::reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
+	GIR::Modules::register_listener(\&reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
 
-	GIR::Modules::register_event('mynickchange', \&Modules::Infobot::nick_changed);
+	GIR::Modules::register_event('mynickchange', \&nick_changed);
 
-	GIR::Modules::register_help('infobot', \&Modules::Infobot::help);
+	GIR::Modules::register_help('infobot', \&help);
 }
 
 sub process($)
@@ -685,7 +685,7 @@ sub nick_changed($)
 	# Rebuild regexp for replace handler to incorporate new nick
 	GIR::Modules::unregister_action($replace_expr);
 	$replace_expr = qr/^no\,?\s+(($params->{'new'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
-	GIR::Modules::register_action($replace_expr, \&Modules::Infobot::process, 2);
+	GIR::Modules::register_action($replace_expr, \&process, 2);
 }
 
 sub help($)
