@@ -103,6 +103,34 @@ my $conversions = {
 	'oz' => {
 		'lb' => \&ounces_to_pounds,
 	},
+
+	# bytes and such
+	'bits' => {
+		'bytes' => \&bits_to_bytes,
+	},
+	'bytes' => {
+		'bits' => \&bytes_to_bits,
+		'kb'  => \&byte_order_of_magnitude_up,
+	},
+	'kb' => {
+		'bytes' => \&byte_order_of_magnitude_down,
+		'mb'    => \&byte_order_of_magnitude_up,
+	},
+	'mb' => {
+		'gb' => \&byte_order_of_magnitude_up,
+		'kb' => \&byte_order_of_magnitude_down,
+	},
+	'gb' => {
+		'tb' => \&byte_order_of_magnitude_up,
+		'mb' => \&byte_order_of_magnitude_down,
+	},
+	'tb' => {
+		'gb' => \&byte_order_of_magnitude_down,
+		'pb' => \&byte_order_of_magnitude_up,
+	},
+	'pb' => {
+		'tb' => \&byte_order_of_magnitude_down,
+	},
 };
 
 ##############
@@ -120,6 +148,8 @@ sub register()
 
 	# Initialize conversions
 	%aliases = (
+		'bit'           => 'bits',
+		'byte'          => 'bytes',
 		'celcius'       => 'c',
 		'centigrade'    => 'c',
 		'centimeter'    => 'cm',
@@ -130,6 +160,8 @@ sub register()
 		'feet'          => 'ft',
 		'foot'          => 'ft',
 		'fps'           => 'ft/s',
+		'gigabyte'      => 'gb',
+		'gigabytes'     => 'gb',
 		'gram'          => 'g',
 		'grams'         => 'g',
 		'hour'          => 'hr',
@@ -137,6 +169,8 @@ sub register()
 		'inch'          => 'in',
 		'inches'        => 'in',
 		'kelvin'        => 'k',
+		'kilobyte '     => 'kb',
+		'kilobytes'     => 'kb',
 		'kilogram'      => 'kg',
 		'kilograms'     => 'kg',
 		'kilometer'     => 'km',
@@ -152,6 +186,8 @@ sub register()
 		'light year'    => 'ly',
 		'light-years'   => 'ly',
 		'light years'   => 'ly',
+		'megabyte'      => 'mb',
+		'megabytes'     => 'mb',
 		'meter'         => 'm',
 		'meters'        => 'm',
 		'metre'         => 'm',
@@ -165,11 +201,15 @@ sub register()
 		'ounces'        => 'oz',
 		'parsec'        => 'pc',
 		'parsecs'       => 'pc',
+		'petabyte'      => 'pb',
+		'petabytes'     => 'pb',
 		'pound'         => 'lb',
 		'pounds'        => 'lb',
 		'second'        => 's',
 		'seconds'       => 's',
 		'sm'            => 'mi',
+		'terabyte'      => 'tb',
+		'terabytes'     => 'tb',
 		'ua'            => 'au',
 		'yard'          => 'yd',
 		'yards'         => 'yd'
@@ -552,6 +592,38 @@ sub pounds_to_ounces($)
 	my ($pounds) = @_;
 
 	return $pounds * 16.0;
+}
+
+##############
+## COMPUTER UNIT CONVERSIONS
+##############
+sub bits_to_bytes($)
+{
+	my ($bits) = @_;
+
+	return $bits / 8;
+}
+
+sub bytes_to_bits($)
+{
+	my ($bytes) = @_;
+
+	return $bytes * 8;
+}
+
+# e.g., mb -> kb
+sub byte_order_of_magnitude_down($)
+{
+	my ($value) = @_;
+
+	return $value * 1024.0;
+}
+
+sub byte_order_of_magnitude_up($)
+{
+	my ($value) = @_;
+
+	return $value / 1024.0;
 }
 
 1;
