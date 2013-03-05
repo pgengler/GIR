@@ -393,11 +393,11 @@ sub reply($$)
 
 	# Parse if we need to
 	if ($value =~ /^\s*\<reply\>\s*(\S.*)$/) {
-		return parse_special($1, $message->from());
+		return parse_special($1, $message);
 	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<action\>\s*(.+)$/) {
-		GIR::Bot::enqueue_action($message->where(), parse_special($1, $message->from()));
+		GIR::Bot::enqueue_action($message->where(), parse_special($1, $message));
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
@@ -442,7 +442,7 @@ sub reply($$)
 
 		return $result;
 	} else {
-		return "$phrase $relates " . parse_special($value, $message->from());
+		return "$phrase $relates " . parse_special($value, $message);
 	}
 }
 
@@ -657,11 +657,13 @@ sub literal($)
 # Handle $who in string
 sub parse_special($$)
 {
-	my ($str, $user) = @_;
+	my ($str, $message) = @_;
 
 	return unless defined $str;
 
+	my $user = $message->from;
 	$str =~ s/\$who/$user/ig;
+	$str =~ s/#{(.+?)}/feedback(GIR::Message->new($message, { 'message' => $1, 'addressed' => 1 }))/eg;
 
 	return $str;
 }
@@ -686,6 +688,19 @@ sub nick_changed($)
 	GIR::Modules::unregister_action($replace_expr);
 	$replace_expr = qr/^no\,?\s+(($params->{'new'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
 	GIR::Modules::register_action($replace_expr, \&process, 2);
+}
+
+sub feedback($)
+{
+	my ($message) = @_;
+
+	my $result = '';
+	if ($feedbacked <= 2) {
+		$feedbacked++;
+		$result = GIR::Modules::process($message);
+		$feedbacked--;
+	}
+	return $result;
 }
 
 sub help($)
