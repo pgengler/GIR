@@ -421,7 +421,8 @@ sub event($$)
 	GIR::Bot::debug("Modules::event: There are %d handlers for '%s' events", scalar(@{ $event_handlers{ $event } }), $event);
 
 	foreach my $callback (@{ $event_handlers{ $event } }) {
-		$callback->($params);
+		eval { $callback->($params) };
+		GIR::Bot::error($@) if $@;
 	}
 }
 
@@ -470,7 +471,8 @@ sub process($;$)
 	my $result = '';
 
 	foreach my $listener (@{ $listeners{-1} }) {
-		$listener->($message);
+		eval { $listener->($message) };
+		GIR::Bot::error($@) if $@;
 	}
 
 	foreach my $priority (sort { $b <=> $a } keys %actions) {
@@ -478,7 +480,8 @@ sub process($;$)
 			my $act = $action->{'action'};
 			if (ref($act) eq 'Regexp') {
 				if ($message->message() =~ $act) {
-					$result = $action->{'function'}->($message);
+					$result = eval { $action->{'function'}->($message) };
+					GIR::Bot::error($@) if $@;
 					return $result if $result;
 				}
 			} else {
@@ -491,7 +494,8 @@ sub process($;$)
 					});
 				}
 				if ($msg) {
-					$result = $action->{'function'}->($msg);
+					$result = eval { $action->{'function'}->($msg) };
+					GIR::Bot::error($@) if $@;
 					return $result if $result;
 				}
 			}
@@ -502,14 +506,16 @@ sub process($;$)
 		foreach my $private (@private) {
 			if (ref($private) eq 'Regexp') {
 				if ($message->message() =~ $private) {
-					$result = $private{ $private }->($message);
+					$result = eval { $private{ $private }->($message) };
+					GIR::Bot::error($@) if $@;
 					return $result if $result;
 				}
 			} elsif ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
 				my $msg = GIR::Message->new($message, {
 					'message'  => $1,
 				});
-				$result = $private{ $private }->($msg);
+				$result = eval { $private{ $private }->($msg) };
+				GIR::Bot::error($@) if $@;
 				return $result if $result;
 			}
 		}
@@ -517,7 +523,8 @@ sub process($;$)
 
 	foreach my $priority (sort { $b <=> $a } keys %listeners) {
 		foreach my $listener (@{ $listeners{ $priority } }) {
-			$result = $listener->($message);
+			$result = eval { $listener->($message) };
+			GIR::Bot::error($@) if $@;
 			return $result if $result;
 		}
 	}
