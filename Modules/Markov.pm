@@ -376,8 +376,7 @@ sub learn($)
 	my $message = shift;
 	my $data    = $message->message();
 
-	# Skip #mefi bots (TODO: generalize this)
-	return if ($message->from() eq 'lrrr' || $message->from() eq 'douglbutt' || $message->from() eq 'shake');
+	return if should_ignore($message->from());
 
 	my @parts = split(/\s+/, $data);
 
@@ -531,6 +530,19 @@ sub help($)
 	} elsif ($message->message() eq 'vokram') {
 		return "'vokram <word> [<word>]': create and print a Markov chain that ends with the given word(s). At most two words can be used as the basis for the chain. See also 'markov' and 'markov2'";
 	}
+}
+
+##############
+
+sub should_ignore($)
+{
+	my ($nick) = @_;
+
+	my $nicks_to_ignore = $GIR::Bot::config->{'modules'}->{'Markov'}->{'ignore'} || [ ];
+
+	GIR::Bot::debug("Modules::Markov: checking whether to ignore '%s': %s", $nick, ($nick ~~ $nicks_to_ignore) ? 'yes' : 'no');
+
+	return ($nick ~~ $nicks_to_ignore);
 }
 
 1;

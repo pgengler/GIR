@@ -67,6 +67,12 @@ username: ircbot
 
 # Module-specific configuration options
 modules:
+  # configuration options for the Markov module
+  Markov:
+    # users to ignore (e.g., other markov bots)
+    # give as a list of nick
+    ignore:
+
   # configuration options for the ShortenURL module
   ShortenURL:
     # bit.ly login
