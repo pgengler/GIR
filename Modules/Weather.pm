@@ -46,34 +46,41 @@ sub process($)
 {
 	my $message = shift;
 
-	my $station = $message->message();
+	my $location = $message->message();
 
-	return unless $station;
+	return unless $location;
 
 	# Check if we have cached data, and it's still valid
-	if ($cache{ $station } && $cache{ $station }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
-		return $cache{ $station }->{'weather'};
+	if ($cache{ $location } && $cache{ $location }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
+		return $cache{ $location }->{'weather'};
 	}
 
-	GIR::Bot::debug("Looking up weather for '%s'", $station);
+	GIR::Bot::debug("Modules::Weather: Looking up weather for '%s'", $location);
 
-	my $url = sprintf(URL_FORMAT, $GIR::Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($station));
+	my $url = sprintf(URL_FORMAT, $GIR::Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($location));
 	my $content = eval { get_url($url) };
 
-	if ($@) {	
-		return 'Something failed in contacting the weather server.';
+	if ($@) {
+		GIR::Bot::error('Modules::Weather: request to server failed: %s', $@);
+		return $message->is_explicit ? 'Something failed in contacting the weather server.' : undef;
 	}
 
   my $data = from_json($content);
 
 	if ($data->{'response'}->{'error'}) {
-		return "Unable to get weather for ${station}: $data->{'response'}->{'error'}->{'description'}";
+		GIR::Bot::debug('Modules::Weather: weather server returned an error: %s', $data->{'response'}->{'error'}->{'description'});
+		return $message->is_explicit ? "Unable to get weather for ${location}: $data->{'response'}->{'error'}->{'description'}" : undef;
+	}
+
+	unless (exists $data->{'current_observation'}) {
+		GIR::Bot::debug("Modules::Weather: no current conditions found for '%s'; location may be ambiguous", $location);
+		return $message->is_explicit ? "No weather information available for ${location}" : undef;
 	}
 
 	$data = $data->{'current_observation'};
 
 	if (ref $data->{'display_location'}->{'latitude'} eq 'HASH' || ref $data->{'observation_location'}->{'latitude'} eq 'HASH') {
-		return 'No weather information available for ' . $station;
+		return $message->is_explicit ? "No weather information available for ${location}" : undef;
 	}
 
   my @components = (
@@ -110,7 +117,7 @@ sub process($)
 		'retrieved' => time(),
 		'weather'   => $weather
 	);
-	$cache{ $station } = \%info;
+	$cache{ $location } = \%info;
 	return $weather;
 }
 
