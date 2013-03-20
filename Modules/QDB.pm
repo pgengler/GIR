@@ -66,10 +66,11 @@ sub _get_quote($)
 	}
 
 	# Fetch from qdb.us
-	my $url = "https://qdb.us/${id}";
+	my $url = "http://qdb.us/${id}";
 	my $content = eval { get_url($url) };
 
 	if ($@) {
+		GIR::Bot::error("Modules::QDB: failed to get quote %d from qdb.us: %s", $id, $@);
 		return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
 	}
 
