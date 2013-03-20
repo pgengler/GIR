@@ -138,7 +138,7 @@ sub add_access($)
 		~;
 		db->query($query, $to_add);
 
-		$access = db->insert_id;
+		$access = db->insert_id('access_permissions', 'id');
 	} else {
 		$access = $access->{'id'};
 	}
@@ -216,7 +216,7 @@ sub remove_access($)
 		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE p.name = ? AND up.user_id = ?
 	~;
-	my $permission = db->query($query, $to_remove, $user_info->{'id'});
+	my $permission = db->query($query, $to_remove, $user_info->{'id'})->fetch;
 
 	unless ($permission && $permission->{'id'}) {
 		return "$target_user doesn't have that permission, $user";
