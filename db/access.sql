@@ -1,7 +1,6 @@
 CREATE TABLE access_permissions (
-	id INT NOT NULL auto_increment,
-	name VARCHAR(128) NOT NULL,
-	PRIMARY KEY(id)
+	id SERIAL PRIMARY KEY,
+	name VARCHAR(128) NOT NULL
 );
 
 INSERT INTO access_permissions (name) VALUES ('add_access');
@@ -20,10 +19,7 @@ CREATE TABLE access_user_permissions (
 );
 
 CREATE TABLE access_users (
-	id INT NOT NULL auto_increment,
+	id SERIAL PRIMARY KEY,
 	nick VARCHAR(128) NOT NULL,
-	password VARCHAR(128) NOT NULL,
-	PRIMARY KEY(id)
+	password VARCHAR(128) NOT NULL
 );
-	
-
