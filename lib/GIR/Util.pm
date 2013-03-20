@@ -30,7 +30,10 @@ sub get_url($)
 {
 	my ($url) = @_;
 
-	my $agent = LWP::UserAgent->new;
+	my $agent = LWP::UserAgent->new(
+		'agent' => 'Mozilla/5.0',
+		'timeout' => 3,
+	);
 	my $response = $agent->get($url);
 
 	unless ($response->is_success) {
