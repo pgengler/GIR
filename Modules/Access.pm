@@ -130,15 +130,10 @@ sub add_access($)
 
 	# Add it if it doesn't
 	unless ($access && $access->{'id'}) {
-		$query = qq~
-			INSERT INTO access_permissions
-			(name)
-			VALUES
-			(?)
+		$query = q~
+			INSERT INTO access_permissions (name) VALUES (?) RETURNING id
 		~;
-		db->query($query, $to_add);
-
-		$access = db->insert_id('access_permissions', 'id');
+		$access = db->query($query, $to_add)->fetch('id')
 	} else {
 		$access = $access->{'id'};
 	}
