@@ -577,7 +577,7 @@ sub lock($)
 	# Update record
 	$query = qq~
 		UPDATE infobot SET
-			locked = 1
+			locked = true
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
 	db->query($query, $phrase);
@@ -615,13 +615,13 @@ sub unlock($)
 	# Update record
 	$query = qq~
 		UPDATE infobot SET
-			locked = 0
+			locked = false
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
 	db->query($query, $phrase);
 
 	return "OK, " . $message->from();
-}	
+}
 
 sub literal($)
 {
