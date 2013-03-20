@@ -187,11 +187,12 @@ sub fetch()
 	}
 
 	if (defined($column)) {
-		return $self->{'_sth'}->fetchrow_hashref()->{ $column };
+		my $row = $self->{'_sth'}->fetchrow_hashref;
+		return $row ? $row->{ $column } : undef;
 	} elsif (wantarray()) {
-		return $self->{'_sth'}->fetchrow_array();
+		return $self->{'_sth'}->fetchrow_array;
 	} else {
-		return $self->{'_sth'}->fetchrow_hashref();
+		return $self->{'_sth'}->fetchrow_hashref;
 	}
 }
 
