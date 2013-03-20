@@ -37,7 +37,7 @@ sub seen($)
 
 	# Check if we've seen this person
 	my $query = qq~
-		SELECT who, what, `where`, UNIX_TIMESTAMP(`when`) AS `when`
+		SELECT who, what, "where", EXTRACT(epoch FROM "when") AS "when"
 		FROM seen
 		WHERE who = ?
 	~;
@@ -116,16 +116,16 @@ sub update($)
 	if ($seen && $seen->{'who'}) {
 		$query = qq~
 			UPDATE seen SET
-				`where` = ?,
+				"where" = ?,
 				what = ?,
-				`when` = NOW()
+				"when" = NOW()
 			WHERE who = ?
 		~;
 		db->query($query, $where, $data, lc($message->from));
 	} else {
 		$query = qq~
 			INSERT INTO seen
-			(who, what, `where`, `when`)
+			(who, what, "where", "when")
 			VALUES
 			(?, ?, ?, NOW())
 		~;
