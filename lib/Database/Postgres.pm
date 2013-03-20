@@ -27,8 +27,18 @@ sub connect
 sub insert_id()
 {
 	my $self = shift;
+	my ($table, $column) = @_;
 
-	die "Not Implemented";
+	unless (defined($table) && defined($column)) {
+		die "Database::Postgres::insert_id requires both table and column name";
+	}
+
+	my $sql = q(
+		SELECT currval(pg_get_serial_sequence(?, ?)) AS id
+	);
+	my $statement = $self->query($sql, $table, $column);
+
+	return $statement->fetch('id');
 }
 
 1;
