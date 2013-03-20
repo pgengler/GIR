@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use parent 'Exporter';
 
-use Database::MySQL;
+use Database::Postgres;
 
 use LWP::UserAgent;
 
@@ -16,7 +16,7 @@ sub db()
 	state $db;
 
 	unless (defined $db) {
-		$db = Database::MySQL->new(
+		$db = Database::Postgres->new(
 			'database' => $GIR::Bot::config->{'database'}->{'name'},
 			'password' => $GIR::Bot::config->{'database'}->{'password'},
 			'username' => $GIR::Bot::config->{'database'}->{'user'},
