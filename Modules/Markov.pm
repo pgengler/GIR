@@ -63,7 +63,7 @@ sub gen_output(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 			LIMIT 1
 		~;
 		$word = db->query($query, $first, $second)->fetch;
@@ -79,7 +79,7 @@ sub gen_output(;$$)
 			SELECT this, next
 			FROM words
 			WHERE this = ? AND next <> '__END__'
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 			LIMIT 1
 		~;
 		$word = db->query($query, $first)->fetch;
@@ -119,7 +119,7 @@ sub gen_output(;$$)
 		SELECT this, next
 		FROM words
 		WHERE prev = ? AND this = ?
-		ORDER BY RAND() DESC
+		ORDER BY RANDOM() DESC
 		LIMIT 1
 	~;
 	my $statement = db->statement($query);
@@ -177,7 +177,7 @@ sub gen_output_multi(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 			LIMIT 1
 		~;
 		my $start = $word = db->query($query, $first, $second)->fetch;
@@ -189,7 +189,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 			LIMIT 1
 		~;
 		my $statement = db->statement($query);
@@ -204,7 +204,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 		~;
 		$statement = db->statement($query);
 
@@ -219,7 +219,7 @@ sub gen_output_multi(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 			LIMIT 1
 		~;
 		my $start = $word = db->query($query, $first)->fetch;
@@ -231,7 +231,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 		~;
 		my $statement = db->statement($query);
 
@@ -245,7 +245,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RAND()
+			ORDER BY RANDOM()
 		~;
 		$statement = db->statement($query);
 
@@ -293,7 +293,7 @@ sub gen_output_from_end(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RAND() DESC
+			ORDER BY RANDOM() DESC
 			LIMIT 1
 		~;
 		$word = db->query($query, $first, $second)->fetch;
@@ -309,7 +309,7 @@ sub gen_output_from_end(;$$)
 			SELECT prev, this
 			FROM words
 			WHERE this = ? AND next = '__END__'
-			ORDER BY RAND() DESC
+			ORDER BY RANDOM() DESC
 			LIMIT 1
 		~;
 		$word = db->query($query, $first)->fetch;
@@ -349,7 +349,7 @@ sub gen_output_from_end(;$$)
 		SELECT prev, this
 		FROM words
 		WHERE this = ? AND next = ?
-		ORDER BY RAND() DESC
+		ORDER BY RANDOM() DESC
 		LIMIT 1
 	~;
 	my $statement = db->statement($query);
