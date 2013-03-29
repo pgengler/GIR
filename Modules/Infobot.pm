@@ -342,6 +342,8 @@ sub reply_listener($)
 {
 	my $message = shift;
 
+	return undef unless $message->is_explicit;
+
 	return reply($message, $message->message());
 }
 
