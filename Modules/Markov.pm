@@ -105,7 +105,8 @@ sub gen_output(;$$)
 			SELECT this, next
 			FROM words
 			WHERE prev = '__BEGIN__'
-			LIMIT $row, 1
+			OFFSET ${row}
+			LIMIT 1
 		~;
 		$word = db->query($query)->fetch;
 	}
@@ -127,8 +128,7 @@ sub gen_output(;$$)
 	my $count = 0;
 	while (1) {
 		# Get next word
-		my $word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
-
+		$word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
 		unless ($word && $word->{'this'}) {
 			last;
 		}
@@ -335,7 +335,8 @@ sub gen_output_from_end(;$$)
 			SELECT prev, this
 			FROM words
 			WHERE next = '__END__'
-			LIMIT $row, 1
+			OFFSET ${row}
+			LIMIT 1
 		~;
 		$word = db->query($query)->fetch;
 	}
