@@ -15,7 +15,7 @@ sub new()
 	return $obj;
 }
 
-my $bash_url_expr = qr[http://bash.org/\?(\d+)$];
+my $bash_url_expr = qr[^http://bash.org/\?(\d+)$];
 
 sub register()
 {
