@@ -280,9 +280,10 @@ sub bot_shutdown()
 		}
 	}
 
-	$connection->quit($message);
-
-	$connection->disconnect();
+	if ($connection) {
+		$connection->quit($message);
+		$connection->disconnect();
+	}
 
 	$running = false;
 	$connected = false;
