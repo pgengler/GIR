@@ -8,19 +8,8 @@ use Encode;
 use URI::Escape qw/ uri_escape /;
 use XML::Simple qw/ xml_in /;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	# Check for necessary configuration parameters
 	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Translate'};
 	if (not defined $moduleConfig) {

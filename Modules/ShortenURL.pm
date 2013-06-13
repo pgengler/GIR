@@ -9,12 +9,7 @@ use constant API_URL_FORMAT => 'https://api-ssl.bitly.com/v3/shorten?format=json
 use JSON;
 use URI::Escape;
 
-sub new()
-{
-	return bless { }, shift;
-}
-
-sub register()
+sub register
 {
 	# Check that both a login and API key are provided in the configuration
 	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'ShortenURL'};

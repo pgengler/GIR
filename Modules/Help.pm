@@ -2,18 +2,8 @@ package Modules::Help;
 
 use strict;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('help', \&Modules::Help::process);
 }
 

@@ -4,19 +4,8 @@ use strict;
 
 use GIR::Util;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('metar', \&Modules::Aviation::metar);
 	GIR::Modules::register_action('taf', \&Modules::Aviation::taf);
 

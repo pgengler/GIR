@@ -2,12 +2,7 @@ package Modules::LoanCalc;
 
 use strict;
 
-sub new()
-{
-	return bless { }, shift;
-}
-
-sub register()
+sub register
 {
 	GIR::Modules::register_action('loancalc', \&Modules::LoanCalc::calculate);
 	GIR::Modules::register_help('loancalc', \&Modules::LoanCalc::help);

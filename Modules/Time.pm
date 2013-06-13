@@ -5,19 +5,8 @@ use strict;
 our $_useSwatch = 0;
 our $_useVeggie = 0;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	eval {
 		require Time::Beat;
 	};

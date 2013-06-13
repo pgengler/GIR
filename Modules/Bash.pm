@@ -6,21 +6,10 @@ use GIR::Util;
 
 use HTML::Entities;
 
-##############
-sub new()
-{
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
 my $bash_url_expr = qr[^http://bash.org/\?(\d+)$];
 
-sub register()
+sub register
 {
-	my $this = shift;
-
 	GIR::Modules::register_action('bash', \&Modules::Bash::process_from_text);
 	GIR::Modules::register_action($bash_url_expr, \&Modules::Bash::process_from_url);
 

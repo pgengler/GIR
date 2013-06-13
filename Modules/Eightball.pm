@@ -3,18 +3,8 @@ package Modules::Eightball;
 use strict;
 use feature 'state';
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('8ball', \&Modules::Eightball::process);
 	GIR::Modules::register_action('8-ball', \&Modules::Eightball::process);
 

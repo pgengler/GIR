@@ -2,18 +2,8 @@ package Modules::Ignore;
 
 use strict;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_private('ignore', \&Modules::Ignore::ignore);
 	GIR::Modules::register_private('unignore', \&Modules::Ignore::unignore);
 }

@@ -2,22 +2,12 @@ package Modules::Spell;
 
 use strict;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
+	my $self = shift;
 
-sub register()
-{
-	my $this = shift;
-
-	GIR::Modules::register_action('spell', \&Modules::Spell::process);
-
-	GIR::Modules::register_help('spell', \&Modules::Spell::help);
+	GIR::Modules::register_action('spell', \&process);
+	GIR::Modules::register_help('spell', \&help);
 }
 
 sub process($)

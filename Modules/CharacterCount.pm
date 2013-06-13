@@ -4,8 +4,6 @@ use strict;
 
 use GIR::Util;
 
-sub new { bless { }, shift }
-
 sub register
 {
   GIR::Modules::register_action('charcount', \&count_chars);

@@ -13,19 +13,8 @@ use constant URL_FORMAT => 'http://api.wunderground.com/api/%s/conditions/q/%s.j
 
 my %cache;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Weather'};
 
 	if (not defined $moduleConfig) {

@@ -4,20 +4,10 @@ use strict;
 
 use GIR::Util;
 
-sub new()
-{
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
 my $update_expr = qr/^(.+)(\+\+|\-\-)$/;
 
-sub register()
+sub register
 {
-	my $this = shift;
-
 	GIR::Modules::register_action('karma', \&Modules::Karma::get);
 	GIR::Modules::register_action($update_expr, \&Modules::Karma::update);
 }

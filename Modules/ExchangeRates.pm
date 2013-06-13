@@ -6,22 +6,11 @@ use GIR::Util;
 
 use XML::Simple qw/ xml_in /;
 
-##############
-sub new()
-{
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
 my $handleRE = qr/\s*exchange\s+(\d*(\.\d+)?)?\s*(\w{3})\s+(for|to)\s+(\w{3})\s*/;
 my $urlFormat = 'http://themoneyconverter.com/rss-feed/%s/rss.xml';
 
-sub register()
+sub register
 {
-	my $this = shift;
-
 	GIR::Modules::register_action($handleRE, \&Modules::ExchangeRates::convert);
 
 	GIR::Modules::register_help('exchange', \&Modules::ExchangeRates::help);

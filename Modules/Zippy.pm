@@ -1,17 +1,7 @@
 package Modules::Zippy;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('yow', \&Modules::Zippy::zippy);
 	GIR::Modules::register_help('yow', \&Modules::Zippy::help);
 }

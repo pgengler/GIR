@@ -101,8 +101,11 @@ sub load()
 	# Add custom paths to @INC
 	unshift @INC, @{ $self->{'_path'} };
 
+	my $class = $self->{'_class'};
 	eval qq~
+		no strict 'refs';
 		require '$file';
+		\@{\"${class}::ISA\"} = 'GIR::Module';
 		\$self->{'_obj'} = $self->{'_class'}->new();
 	~;
 

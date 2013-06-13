@@ -5,11 +5,6 @@ use warnings;
 
 my $DICE_REGEXP = qr/^(roll\s+)?(\d?)d(\d+)$/;
 
-sub new
-{
-	bless { }, shift;
-}
-
 sub register
 {
 	GIR::Modules::register_action($DICE_REGEXP, \&roll);

@@ -1,28 +1,11 @@
 package Modules::DNS;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
 use Socket;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('host', \&Modules::DNS::lookup);
 
 	GIR::Modules::register_help('host', \&Modules::DNS::help);

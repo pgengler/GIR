@@ -2,19 +2,8 @@ package Modules::Rot13;
 
 use strict;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('rot13', \&Modules::Rot13::rot13);
 
 	GIR::Modules::register_help('rot13', \&Modules::Rot13::help);

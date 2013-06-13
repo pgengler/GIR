@@ -1,8 +1,5 @@
 package Modules::Convert;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
 use Graph;
@@ -134,18 +131,8 @@ my $conversions = {
 };
 
 ##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = {	};
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	# Initialize conversions
 	%aliases = (
 		'bit'           => 'bits',

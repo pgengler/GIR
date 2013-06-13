@@ -4,18 +4,8 @@ use strict;
 
 use GIR::Util;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('seen', \&Modules::Seen::seen);
 	GIR::Modules::register_listener(\&Modules::Seen::update, -1);
 

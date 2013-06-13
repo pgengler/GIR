@@ -20,18 +20,8 @@ BEGIN {
 	);
 }
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action(qr/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)(\,|\s)?($GIR::Bot::config->{'nick'})?\s*$/, \&Modules::Greeting::process);
 }
 

@@ -1,27 +1,11 @@
 package Modules::Nickometer;
 
-#######
-## PERL SETUP
-#######
 use strict;
 
-#######
-## INCLUDES
-#######
 use POSIX;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('nickometer', \&Modules::Nickometer::process);
 
 	GIR::Modules::register_help('nickometer', \&Modules::Nickometer::help);

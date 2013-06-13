@@ -3,24 +3,12 @@ package Modules::QDB;
 use strict;
 
 use GIR::Util;
-
 use HTML::Entities;
-
-##############
-sub new()
-{
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
 
 my $qdb_expr = qr[^http://qdb.us/(\d+)$];
 
-sub register()
+sub register
 {
-	my $this = shift;
-
 	GIR::Modules::register_action('qdb', \&Modules::QDB::process_from_text);
 	GIR::Modules::register_action($qdb_expr, \&Modules::QDB::process_from_url);
 

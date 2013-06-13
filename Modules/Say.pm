@@ -2,19 +2,8 @@ package Modules::Say;
 
 use strict;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('say', \&Modules::Say::say, 2);
 	GIR::Modules::register_action('action', \&Modules::Say::action, 2);
 

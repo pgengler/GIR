@@ -2,19 +2,8 @@ package Modules::Math;
 
 use strict;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_listener(\&Modules::Math::process, 3);
 }
 

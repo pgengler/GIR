@@ -4,18 +4,8 @@ use strict;
 
 use Modules::StockQuote::Google;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('quote', \&Modules::Stock::quote);
 	GIR::Modules::register_action('squote', \&Modules::Stock::short_quote);
 

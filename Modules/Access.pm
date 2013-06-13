@@ -6,22 +6,11 @@ package Modules::Access;
 ## - change password?
 
 use strict;
-use lib ('./', '../lib');
 
 use GIR::Util;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('show access', \&Modules::Access::show_access);
 	GIR::Modules::register_action('add access', \&Modules::Access::add_access);
 	GIR::Modules::register_action('remove access', \&Modules::Access::remove_access);

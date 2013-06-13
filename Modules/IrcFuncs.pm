@@ -2,18 +2,8 @@ package Modules::IrcFuncs;
 
 use strict;
 
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('op', \&Modules::IrcFuncs::op);
 	GIR::Modules::register_action('deop', \&Modules::IrcFuncs::deop);
 	GIR::Modules::register_action('kick', \&Modules::IrcFuncs::kick);

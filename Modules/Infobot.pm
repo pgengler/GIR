@@ -1,7 +1,6 @@
 package Modules::Infobot;
 
 use strict;
-use lib ('./', '../lib');
 
 use GIR::Message;
 use GIR::Util;
@@ -22,21 +21,8 @@ my $question_reply_expr = qr/^(.+)\?$/;
 my $replace_expr        = qr/^no\,?\s+(($GIR::Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
 my $append_expr         = qr/^(.+)\s+(is|are)\s+also\s+(.+)$/;
 
-#######
-## MAIN
-#######
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action($force_learn_expr, \&process, 3); # learn() forcefully
 	GIR::Modules::register_action($learn_expr, \&process); # learn()
 	GIR::Modules::register_action($forget_expr, \&process); # forget()

@@ -1,23 +1,11 @@
 package Modules::Markov;
 
 use strict;
-use lib ('./', '../lib');
 
 use GIR::Util;
 
-##############
-sub new()
+sub register
 {
-	my $pkg = shift;
-	my $obj = { };
-	bless $obj, $pkg;
-	return $obj;
-}
-
-sub register()
-{
-	my $this = shift;
-
 	GIR::Modules::register_action('markov', \&Modules::Markov::output);
 	GIR::Modules::register_action('markov2', \&Modules::Markov::output_multi);
 	GIR::Modules::register_action('vokram', \&Modules::Markov::output_from_end);
