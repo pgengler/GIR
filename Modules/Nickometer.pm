@@ -73,7 +73,6 @@ sub nickometer($)
 			$nick =~ tr/023457+8/ozeasttb/;
 		}
 		if ($nick =~ /$special_pattern/i) {
-#			$this->punish($special_cost{$special}, "matched special case /$special_pattern/");
 			$score += $special_cost{$special};
 		}
 	}
@@ -85,7 +84,6 @@ sub nickometer($)
 	$nick =~ s/([^A-Za-z0-9]{2,})
 		/my $consecutive = length($1);
 		if ($consecutive) {
-#			$this->punish(&slow_pow(10, $consecutive), "$consecutive total consecutive non-alphas");
 			$score += slow_pow(10, $consecutive);
 		}
 		$1
@@ -98,7 +96,6 @@ sub nickometer($)
 	}
 	my $parentheses = ($nick =~ tr/(){}[]/(){}[]/);
 	if ($parentheses) {
-#		$this->punish(&slow_pow(10, $parentheses), "$parentheses unmatched " . ($parentheses == 1 ? 'parenthesis' : 'parentheses'));
 		$score += slow_pow(10, $parentheses);
 	}
 
@@ -112,27 +109,23 @@ sub nickometer($)
 	# Punish uppercase to lowercase shifts and vice-versa, modulo exceptions above
 	my $case_shifts = case_shifts($orig_case);
 	if ($case_shifts > 1 && $orig_case =~ /[A-Z]/) {
-#		$this->punish(&slow_pow(9, $case_shifts), $case_shifts . ' case ' . (($case_shifts == 1) ? 'shift' : 'shifts'));
 		$score += slow_pow(0, $case_shifts);
 	}
 
 	# Punish lame endings
 	if ($orig_case =~ /[XY][^a-zA-Z]*$/) {
-#		$this->punish(50, 'last alpha lame');
 		$score += 50;
 	}
 
 	# Punish letter to numeric shifts and vice-versa
 	my $number_shifts = number_shifts($nick);
 	if ($number_shifts > 1) {
-#		$this->punish(&slow_pow(9, $number_shifts), $number_shifts . ' letter/number ' . (($number_shifts == 1) ? 'shift' : 'shifts'));
 		$score += slow_pow(9, $number_shifts);
 	}
 
 	# Punish extraneous caps
 	my $caps = ($nick =~ tr/A-Z/A-Z/);
 	if ($caps) {
-#		$this->punish(&slow_pow(7, $caps), "$caps extraneous caps");
 		$score += slow_pow(7, $caps);
 	}
 
@@ -142,7 +135,6 @@ sub nickometer($)
 	my $remains_length = length($remains);
 
 	if ($remains) {
-#		$this->punish(50 * $remains_length + &slow_pow(9, $remains_length), $remains_length . ' extraneous ' . (($remains_length == 1) ? 'symbol' : 'symbols'));
 		$score += ((50 * $remains_length) + slow_pow(9, $remains_length));
 	}
 
