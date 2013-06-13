@@ -9,7 +9,7 @@ use XML::Simple qw/ xml_in /;
 sub register
 {
 	# Check for necessary configuration parameters
-	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Translate'};
+	my $moduleConfig = config();
 	if (not defined $moduleConfig) {
 		GIR::Bot::status("Modules::Translate: no configuration information present, skipping initialization");
 		return -1;
@@ -52,7 +52,7 @@ sub _getTranslation($$$)
 	my ($fromLanguage, $toLanguage, $text) = @_;
 	$text = uri_escape($text);
 
-	my $appId = $GIR::Bot::config->{'modules'}->{'Translate'}->{'app_id'};
+	my $appId = config()->{'app_id'};
 
 	my $url = sprintf('http://api.microsofttranslator.com/v2/Http.svc/Translate?appId=%s&from=%s&to=%s&text=%s', $appId, $fromLanguage, $toLanguage, $text);
 	my $content = eval { get_url($url) };

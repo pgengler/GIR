@@ -42,8 +42,8 @@ sub shorten()
 	$url = URI::Escape::uri_escape($url);
 
 	# Build request URL
-	my $login  = $GIR::Bot::config->{'modules'}->{'ShortenURL'}->{'login'};
-	my $apiKey = $GIR::Bot::config->{'modules'}->{'ShortenURL'}->{'api_key'};
+	my $login  = config()->{'login'};
+	my $apiKey = config()->{'api_key'};
 	my $requestURL = sprintf(API_URL_FORMAT, $login, $apiKey, $url);
 
 	my $content = eval { get_url($requestURL) };

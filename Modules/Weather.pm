@@ -13,7 +13,7 @@ my %cache;
 
 sub register
 {
-	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'Weather'};
+	my $moduleConfig = config();
 
 	if (not defined $moduleConfig) {
 		GIR::Bot::status("Modules::Weather: no configuration information present; skipping initialization");
@@ -44,7 +44,7 @@ sub process($)
 
 	GIR::Bot::debug("Modules::Weather: Looking up weather for '%s'", $location);
 
-	my $url = sprintf(URL_FORMAT, $GIR::Bot::config->{'modules'}->{'Weather'}->{'api_key'}, uri_escape($location));
+	my $url = sprintf(URL_FORMAT, config()->{'api_key'}, uri_escape($location));
 	my $content = eval { get_url($url) };
 
 	if ($@) {
