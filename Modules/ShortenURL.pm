@@ -12,7 +12,7 @@ use URI::Escape;
 sub register
 {
 	# Check that both a login and API key are provided in the configuration
-	my $moduleConfig = $GIR::Bot::config->{'modules'}->{'ShortenURL'};
+	my $moduleConfig = config();
 	if ($moduleConfig->{'login'} && $moduleConfig->{'api_key'}) {
 		GIR::Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {

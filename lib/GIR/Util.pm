@@ -9,7 +9,7 @@ use Database::Postgres;
 
 use LWP::UserAgent;
 
-our @EXPORT = qw/ db get_url /;
+our @EXPORT = qw/ config db get_url /;
 
 sub db()
 {
@@ -41,6 +41,16 @@ sub get_url($)
 	}
 
 	return $response->content;
+}
+
+sub config()
+{
+	my ($package) = caller;
+	if ($package =~ /^Modules::(.+?)$/) {
+		my $module_name = $1;
+		return $GIR::Bot::config->{'modules'}->{ $module_name } || { };
+	}
+	return { };
 }
 
 1;
