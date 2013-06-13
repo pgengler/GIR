@@ -2,8 +2,6 @@ package Modules::Oil;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
 	GIR::Modules::register_action('how much is oil', \&Modules::Oil::fetch);

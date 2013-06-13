@@ -2,8 +2,6 @@ package Modules::Karma;
 
 use strict;
 
-use GIR::Util;
-
 my $update_expr = qr/^(.+)(\+\+|\-\-)$/;
 
 sub register
@@ -27,7 +25,7 @@ sub get($)
 		FROM karma
 		WHERE LOWER(name) = LOWER(?)
 	~;
-	my $user = db->query($query, lc($name))->fetch;
+	my $user = db()->query($query, lc($name))->fetch;
 
 	if ($user && $user->{'karma'}) {
 		return "$name has karma of $user->{'karma'}";
@@ -64,7 +62,7 @@ sub update($)
 		FROM karma
 		WHERE name = ?
 	~;
-	my $karma = db->query($query, lc($name))->fetch;
+	my $karma = db()->query($query, lc($name))->fetch;
 
 	if ($karma) {
 		if ($direction eq '++') {
@@ -80,7 +78,7 @@ sub update($)
 				WHERE LOWER(name) = LOWER(?)
 			~;
 		}
-		db->query($query, lc($name));
+		db()->query($query, lc($name));
 	} else {
 		my $initial_value = ($direction eq '--' ? -1 : 1);
 		$query = qq~
@@ -89,7 +87,7 @@ sub update($)
 			VALUES
 			(?, ?)
 		~;
-		db->query($query, lc($name), $initial_value);
+		db()->query($query, lc($name), $initial_value);
 	}
 	return undef;
 }

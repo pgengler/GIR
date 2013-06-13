@@ -2,8 +2,6 @@ package Modules::Seen;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
 	GIR::Modules::register_action('seen', \&Modules::Seen::seen);
@@ -15,6 +13,8 @@ sub register
 sub seen($)
 {
 	my $message = shift;
+
+	print \&db, "\n";
 
 	my $nick    = $message->message();
 
@@ -31,7 +31,7 @@ sub seen($)
 		FROM seen
 		WHERE who = ?
 	~;
-	my $seen = db->query($query, $nick)->fetch;
+	my $seen = db()->query($query, $nick)->fetch;
 
 	if ($seen) {
 		my $howlong = time() - $seen->{'when'};
@@ -101,7 +101,7 @@ sub update($)
 		FROM seen
 		WHERE who = ?
 	~;
-	my $seen = db->query($query, lc($message->from))->fetch;
+	my $seen = db()->query($query, lc($message->from))->fetch;
 
 	if ($seen && $seen->{'who'}) {
 		$query = qq~
@@ -111,7 +111,7 @@ sub update($)
 				"when" = NOW()
 			WHERE who = ?
 		~;
-		db->query($query, $where, $data, lc($message->from));
+		db()->query($query, $where, $data, lc($message->from));
 	} else {
 		$query = qq~
 			INSERT INTO seen
@@ -119,7 +119,7 @@ sub update($)
 			VALUES
 			(?, ?, ?, NOW())
 		~;
-		db->query($query, lc($message->from), $data, $where);
+		db()->query($query, lc($message->from), $data, $where);
 	}
 	return undef;
 }

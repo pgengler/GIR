@@ -7,8 +7,6 @@ package Modules::Access;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
 	GIR::Modules::register_action('show access', \&Modules::Access::show_access);
@@ -38,7 +36,7 @@ sub show_access($)
 		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE up.user_id = (SELECT id FROM access_users WHERE nick = ?)
 	~;
-	my $statement = db->query($query, $user);
+	my $statement = db()->query($query, $user);
 
 	my @permissions;
 	while (my $permission = $statement->fetch) {
@@ -69,7 +67,7 @@ sub check_access($$$)
 		FROM access_users
 		WHERE nick = ? AND password = ?
 	~;
-	my $user_info = db->query($query, $user, $password)->fetch;
+	my $user_info = db()->query($query, $user, $password)->fetch;
 
 	unless ($user_info && $user_info->{'id'}) {
 		GIR::Bot::debug("Modules::Access::check_access: User '%s' not found.", $user);
@@ -83,7 +81,7 @@ sub check_access($$$)
 		LEFT JOIN access_permissions p ON p.id = up.permission_id
 		WHERE up.user_id = ? AND p.name = ?
 	~;
-	$access = db->query($query, $user_info->{'id'}, $access)->fetch;
+	$access = db()->query($query, $user_info->{'id'}, $access)->fetch;
 
 	if ($access && $access->{'permission_id'}) {
 		return 1;
@@ -115,14 +113,14 @@ sub add_access($)
 		FROM access_permissions
 		WHERE name = ?
 	~;
-	my $access = db->query($query, $to_add)->fetch;
+	my $access = db()->query($query, $to_add)->fetch;
 
 	# Add it if it doesn't
 	unless ($access && $access->{'id'}) {
 		$query = q~
 			INSERT INTO access_permissions (name) VALUES (?) RETURNING id
 		~;
-		$access = db->query($query, $to_add)->fetch('id')
+		$access = db()->query($query, $to_add)->fetch('id')
 	} else {
 		$access = $access->{'id'};
 	}
@@ -133,7 +131,7 @@ sub add_access($)
 		FROM access_users
 		WHERE nick = ?
 	~;
-	my $user_info = db->query($query, $target_user)->fetch;
+	my $user_info = db()->query($query, $target_user)->fetch;
 
 	unless ($user_info && $user_info->{'id'}) {
 		return "$target_user isn't registered.";
@@ -146,7 +144,7 @@ sub add_access($)
 		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE up.user_id = ? AND p.id = ?
 	~;
-	my $curr_access = db->query($query, $user_info->{'id'}, $access)->fetch;
+	my $curr_access = db()->query($query, $user_info->{'id'}, $access)->fetch;
 
 	if ($curr_access && $curr_access->{'id'}) {
 		return "$target_user already has the permission '$to_add'";
@@ -159,7 +157,7 @@ sub add_access($)
 		VALUES
 		(?, ?)
 	~;
-	db->query($query, $user_info->{'id'}, $access);
+	db()->query($query, $user_info->{'id'}, $access);
 
 	return 'Permission added';
 }
@@ -187,7 +185,7 @@ sub remove_access($)
 		FROM access_users
 		WHERE nick = ?
 	~;
-	my $user_info = db->query($query, $target_user)->fetch;
+	my $user_info = db()->query($query, $target_user)->fetch;
 
 	unless ($user_info && $user_info->{'id'}) {
 		return "$target_user isn't registered, $user";
@@ -200,7 +198,7 @@ sub remove_access($)
 		LEFT JOIN access_user_permissions up ON up.permission_id = p.id
 		WHERE p.name = ? AND up.user_id = ?
 	~;
-	my $permission = db->query($query, $to_remove, $user_info->{'id'})->fetch;
+	my $permission = db()->query($query, $to_remove, $user_info->{'id'})->fetch;
 
 	unless ($permission && $permission->{'id'}) {
 		return "$target_user doesn't have that permission, $user";
@@ -211,7 +209,7 @@ sub remove_access($)
 		DELETE FROM access_user_permissions
 		WHERE user_id = ? AND permission_id = ?
 	~;
-	db->query($query, $user_info->{'id'}, $permission->{'id'});
+	db()->query($query, $user_info->{'id'}, $permission->{'id'});
 
 	return 'Permission removed';
 }

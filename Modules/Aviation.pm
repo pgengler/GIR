@@ -2,8 +2,6 @@ package Modules::Aviation;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
 	GIR::Modules::register_action('metar', \&Modules::Aviation::metar);

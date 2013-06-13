@@ -10,7 +10,7 @@ sub new
 	{
 		no strict 'refs';
 		foreach my $function (@GIR::Util::EXPORT) {
-			*{"${class}::${function}"} = *{"GIR::Util::${function}"};
+			*{"${class}::${function}"} = \&{"GIR::Util::${function}"};
 		}
 	}
 	bless { }, $class;

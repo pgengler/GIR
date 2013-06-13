@@ -2,8 +2,6 @@ package Modules::Markov;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
 	GIR::Modules::register_action('markov', \&Modules::Markov::output);
@@ -54,7 +52,7 @@ sub gen_output(;$$)
 			ORDER BY RANDOM()
 			LIMIT 1
 		~;
-		$word = db->query($query, $first, $second)->fetch;
+		$word = db()->query($query, $first, $second)->fetch;
 
 		if ($word && $word->{'prev'}) {
 			$phrase .= "$word->{'prev'} ";
@@ -70,7 +68,7 @@ sub gen_output(;$$)
 			ORDER BY RANDOM()
 			LIMIT 1
 		~;
-		$word = db->query($query, $first)->fetch;
+		$word = db()->query($query, $first)->fetch;
 
 		unless ($word && $word->{'this'}) {
 			return $first;
@@ -83,7 +81,7 @@ sub gen_output(;$$)
 			FROM words
 			WHERE prev = '__BEGIN__'
 		~;
-		my $count = db->query($query)->fetch('count');
+		my $count = db()->query($query)->fetch('count');
 
 		## Now pick a random number between 0 and $count - 1
 		my $row = int(rand($count));
@@ -96,7 +94,7 @@ sub gen_output(;$$)
 			OFFSET ${row}
 			LIMIT 1
 		~;
-		$word = db->query($query)->fetch;
+		$word = db()->query($query)->fetch;
 	}
 
 	$phrase .= "$word->{'this'} ";
@@ -111,7 +109,7 @@ sub gen_output(;$$)
 		ORDER BY RANDOM() DESC
 		LIMIT 1
 	~;
-	my $statement = db->statement($query);
+	my $statement = db()->statement($query);
 
 	my $count = 0;
 	while (1) {
@@ -168,7 +166,7 @@ sub gen_output_multi(;$$)
 			ORDER BY RANDOM()
 			LIMIT 1
 		~;
-		my $start = $word = db->query($query, $first, $second)->fetch;
+		my $start = $word = db()->query($query, $first, $second)->fetch;
 
 		$phrase  = $word->{'this'};
 
@@ -180,7 +178,7 @@ sub gen_output_multi(;$$)
 			ORDER BY RANDOM()
 			LIMIT 1
 		~;
-		my $statement = db->statement($query);
+		my $statement = db()->statement($query);
 
 		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
 			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
@@ -194,7 +192,7 @@ sub gen_output_multi(;$$)
 			WHERE prev = ? AND this = ?
 			ORDER BY RANDOM()
 		~;
-		$statement = db->statement($query);
+		$statement = db()->statement($query);
 
 		$word = $start;
 		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
@@ -210,7 +208,7 @@ sub gen_output_multi(;$$)
 			ORDER BY RANDOM()
 			LIMIT 1
 		~;
-		my $start = $word = db->query($query, $first)->fetch;
+		my $start = $word = db()->query($query, $first)->fetch;
 
 		$phrase  = $word->{'this'};
 
@@ -221,7 +219,7 @@ sub gen_output_multi(;$$)
 			WHERE this = ? AND next = ?
 			ORDER BY RANDOM()
 		~;
-		my $statement = db->statement($query);
+		my $statement = db()->statement($query);
 
 		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
 			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
@@ -235,7 +233,7 @@ sub gen_output_multi(;$$)
 			WHERE prev = ? AND this = ?
 			ORDER BY RANDOM()
 		~;
-		$statement = db->statement($query);
+		$statement = db()->statement($query);
 
 		$word = $start;
 		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
@@ -284,7 +282,7 @@ sub gen_output_from_end(;$$)
 			ORDER BY RANDOM() DESC
 			LIMIT 1
 		~;
-		$word = db->query($query, $first, $second)->fetch;
+		$word = db()->query($query, $first, $second)->fetch;
 
 		if ($word && $word->{'next'}) {
 			$phrase .= "$word->{'next'} ";
@@ -300,7 +298,7 @@ sub gen_output_from_end(;$$)
 			ORDER BY RANDOM() DESC
 			LIMIT 1
 		~;
-		$word = db->query($query, $first)->fetch;
+		$word = db()->query($query, $first)->fetch;
 
 		unless ($word && $word->{'this'}) {
 			return $first;
@@ -313,7 +311,7 @@ sub gen_output_from_end(;$$)
 			FROM words
 			WHERE next = '__END__'
 		~;
-		my $count = db->statement($query)->fetch('count');
+		my $count = db()->statement($query)->fetch('count');
 
 		## Now pick a random number between 0 and $count - 1
 		my $row = int(rand($count));
@@ -326,7 +324,7 @@ sub gen_output_from_end(;$$)
 			OFFSET ${row}
 			LIMIT 1
 		~;
-		$word = db->query($query)->fetch;
+		$word = db()->query($query)->fetch;
 	}
 
 	$phrase = "$word->{'this'} $phrase";
@@ -341,7 +339,7 @@ sub gen_output_from_end(;$$)
 		ORDER BY RANDOM() DESC
 		LIMIT 1
 	~;
-	my $statement = db->statement($query);
+	my $statement = db()->statement($query);
 
 	my $count = 0;
 	do {
@@ -379,7 +377,7 @@ sub learn($)
 		FROM words
 		WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255)
 	);
-	my $lookup = db->statement($lookup_sql);
+	my $lookup = db()->statement($lookup_sql);
 
 	my $insert_sql = q(
 		INSERT INTO words
@@ -387,7 +385,7 @@ sub learn($)
 		VALUES
 		(?, ?, ?)
 	);
-	my $insert = db->statement($insert_sql);
+	my $insert = db()->statement($insert_sql);
 
 	for (my $i = 1; $i < scalar(@parts) - 1; $i++) {
 		my $word = $lookup->execute($parts[$i - 1], $parts[$i], $parts[$i + 1])->fetch;

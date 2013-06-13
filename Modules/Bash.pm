@@ -2,8 +2,6 @@ package Modules::Bash;
 
 use strict;
 
-use GIR::Util;
-
 use HTML::Entities;
 
 my $bash_url_expr = qr[^http://bash.org/\?(\d+)$];
@@ -47,7 +45,7 @@ sub _get_quote($)
 		FROM bashquotes
 		WHERE id = ?
 	);
-	my $row = db->query($sql, $id)->fetch;
+	my $row = db()->query($sql, $id)->fetch;
 
 	my $quote = $row ? $row->{'quote'} : undef;
 
@@ -77,7 +75,7 @@ sub _get_quote($)
 			VALUES
 			(?, ?)
 		);
-		db->query($sql, $id, $quote);
+		db()->query($sql, $id, $quote);
 
 		return $quote;
 	} else {

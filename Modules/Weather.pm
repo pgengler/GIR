@@ -2,8 +2,6 @@ package Modules::Weather;
 
 use strict;
 
-use GIR::Util;
-
 use JSON;
 use URI::Escape qw/ uri_escape /;
 

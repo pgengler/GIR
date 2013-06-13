@@ -2,8 +2,6 @@ package Modules::Translate;
 
 use strict;
 
-use GIR::Util;
-
 use Encode;
 use URI::Escape qw/ uri_escape /;
 use XML::Simple qw/ xml_in /;

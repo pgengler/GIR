@@ -2,8 +2,6 @@ package Modules::ExchangeRates;
 
 use strict;
 
-use GIR::Util;
-
 use XML::Simple qw/ xml_in /;
 
 my $handleRE = qr/\s*exchange\s+(\d*(\.\d+)?)?\s*(\w{3})\s+(for|to)\s+(\w{3})\s*/;

@@ -2,7 +2,6 @@ package Modules::QDB;
 
 use strict;
 
-use GIR::Util;
 use HTML::Entities;
 
 my $qdb_expr = qr[^http://qdb.us/(\d+)$];
@@ -47,7 +46,7 @@ sub _get_quote($)
 		FROM qdbquotes
 		WHERE id = ?
 	);
-	my $quote = db->query($sql, $id)->fetch('quote');
+	my $quote = db()->query($sql, $id)->fetch('quote');
 
 	if ($quote) {
 		return $quote;
@@ -103,7 +102,7 @@ sub _save_quote($$)
 		VALUES
 		(?, ?)
 	);
-	db->query($sql, $id, $quote);
+	db()->query($sql, $id, $quote);
 }
 
 1;

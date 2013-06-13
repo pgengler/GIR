@@ -3,7 +3,6 @@ package Modules::Infobot;
 use strict;
 
 use GIR::Message;
-use GIR::Util;
 
 #######
 ## GLOBALS
@@ -91,7 +90,7 @@ sub learn($$$$)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $result = db->query($query, $phrase)->fetch;
+	my $result = db()->query($query, $phrase)->fetch;
 
 	if ($result) {
 		if ($message->is_explicit()) {
@@ -106,7 +105,7 @@ sub learn($$$$)
 			VALUES
 			(?, ?, ?)
 		~;
-		db->query($query, $phrase, $relates, $value);
+		db()->query($query, $phrase, $relates, $value);
 
 		GIR::Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
 	}
@@ -128,7 +127,7 @@ sub append($$$$)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $result = db->query($query, $phrase)->fetch;
+	my $result = db()->query($query, $phrase)->fetch;
 
 	if ($result) {
 		# Make sure the item isn't locked
@@ -153,7 +152,7 @@ sub append($$$$)
 				value = ?
 			WHERE LOWER(phrase) = LOWER(?)
 		~;
-		db->query($query, $result->{'value'}, $result->{'phrase'});
+		db()->query($query, $result->{'value'}, $result->{'phrase'});
 	} else {
 		if ($message->is_explicit()) {
 			return "I didn't have anything matching '$phrase', " . $message->from();
@@ -181,7 +180,7 @@ sub forget($$)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $statement = db->query($query, $what);
+	my $statement = db()->query($query, $what);
 
 	while (my $result = $statement->fetch) {
 		if ($result->{'locked'}) {
@@ -195,7 +194,7 @@ sub forget($$)
 				DELETE FROM infobot
 				WHERE LOWER(phrase) = LOWER(?)
 			~;
-			db->query($query, $what);
+			db()->query($query, $what);
 
 			GIR::Bot::status('FORGET: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 		}
@@ -227,7 +226,7 @@ sub amend($$$$)
 		WHERE LOWER(phrase) = LOWER(?)
 		LIMIT 1
 	~;
-	my $result = db->query($query, $what)->fetch;
+	my $result = db()->query($query, $what)->fetch;
 
 	unless ($result) {
 		if ($message->is_explicit()) {
@@ -269,7 +268,7 @@ sub amend($$$$)
 			value = ?
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	db->query($query, $result->{'value'}, $result->{'phrase'});
+	db()->query($query, $result->{'value'}, $result->{'phrase'});
 
 	if ($message->is_explicit()) {
 		return "OK, " . $message->from();
@@ -286,7 +285,7 @@ sub replace($$$$)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $result = db->query($query, $what)->fetch;
+	my $result = db()->query($query, $what)->fetch;
 
 	unless ($result) {
 		if ($message->is_explicit()) {
@@ -316,7 +315,7 @@ sub replace($$$$)
 			relates = ?
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	db->query($query, $value, $relates, $what);
+	db()->query($query, $value, $relates, $what);
 
 	if ($message->is_explicit()) {
 		return "OK, " . $message->from();
@@ -455,7 +454,7 @@ sub find_match_aux($@)
 		WHERE LOWER(phrase) = LOWER(?)
 		LIMIT 1
 	~;
-	my $result = db->query($query, $data)->fetch;
+	my $result = db()->query($query, $data)->fetch;
 
 	if ($result) {
 		# Make sure there's a suitable match
@@ -556,7 +555,7 @@ sub lock($)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $entry = db->query($query, $phrase)->fetch;
+	my $entry = db()->query($query, $phrase)->fetch;
 
 	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
@@ -568,7 +567,7 @@ sub lock($)
 			locked = true
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	db->query($query, $phrase);
+	db()->query($query, $phrase);
 
 	return "OK, " . $message->from();
 }
@@ -594,7 +593,7 @@ sub unlock($)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $entry = db->query($query, $phrase)->fetch;
+	my $entry = db()->query($query, $phrase)->fetch;
 
 	unless ($entry) {
 		return "I don't have anything matching '$phrase', " . $message->from();
@@ -606,7 +605,7 @@ sub unlock($)
 			locked = false
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	db->query($query, $phrase);
+	db()->query($query, $phrase);
 
 	return "OK, " . $message->from();
 }
@@ -627,7 +626,7 @@ sub literal($)
 		FROM infobot
 		WHERE LOWER(phrase) = LOWER(?)
 	~;
-	my $result = db->query($query, $phrase)->fetch;
+	my $result = db()->query($query, $phrase)->fetch;
 
 	if ($result) {
 		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});

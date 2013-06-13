@@ -2,8 +2,6 @@ package Modules::CharacterCount;
 
 use strict;
 
-use GIR::Util;
-
 sub register
 {
   GIR::Modules::register_action('charcount', \&count_chars);
