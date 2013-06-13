@@ -105,6 +105,7 @@ sub load()
 	eval qq~
 		no strict 'refs';
 		require '$file';
+		use GIR::Module;
 		\@{\"${class}::ISA\"} = 'GIR::Module';
 		\$self->{'_obj'} = $self->{'_class'}->new();
 	~;
