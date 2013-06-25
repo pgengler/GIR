@@ -43,14 +43,19 @@ sub get_url($)
 	return $response->content;
 }
 
-sub config()
+sub config(;$)
 {
+	my ($property) = @_;
+
+	my $config = { };
+
 	my ($package) = caller;
 	if ($package =~ /^Modules::(.+?)$/) {
 		my $module_name = $1;
-		return $GIR::Bot::config->{'modules'}->{ $module_name } || { };
+		$config = $GIR::Bot::config->{'modules'}->{ $module_name } || { };
 	}
-	return { };
+
+	return $property ? $config->{ $property } : $config;
 }
 
 1;
