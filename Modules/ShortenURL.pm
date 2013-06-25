@@ -12,8 +12,7 @@ use URI::Escape;
 sub register
 {
 	# Check that both a login and API key are provided in the configuration
-	my $moduleConfig = config();
-	if ($moduleConfig->{'login'} && $moduleConfig->{'api_key'}) {
+	if (config('login') && config('api_key')) {
 		GIR::Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {
 		GIR::Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
@@ -42,8 +41,8 @@ sub shorten()
 	$url = URI::Escape::uri_escape($url);
 
 	# Build request URL
-	my $login  = config()->{'login'};
-	my $apiKey = config()->{'api_key'};
+	my $login  = config('login');
+	my $apiKey = config('api_key');
 	my $requestURL = sprintf(API_URL_FORMAT, $login, $apiKey, $url);
 
 	my $content = eval { get_url($requestURL) };

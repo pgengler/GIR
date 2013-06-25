@@ -525,7 +525,7 @@ sub should_ignore($)
 {
 	my ($nick) = @_;
 
-	my $nicks_to_ignore = config()->{'ignore'} || [ ];
+	my $nicks_to_ignore = config('ignore') || [ ];
 
 	GIR::Bot::debug("Modules::Markov: checking whether to ignore '%s': %s", $nick, ($nick ~~ $nicks_to_ignore) ? 'yes' : 'no');
 
