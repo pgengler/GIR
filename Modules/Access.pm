@@ -9,17 +9,14 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('show access', \&Modules::Access::show_access);
-	GIR::Modules::register_action('add access', \&Modules::Access::add_access);
-	GIR::Modules::register_action('remove access', \&Modules::Access::remove_access);
+	GIR::Modules::register_private('show access', \&Modules::Access::show_access);
+	GIR::Modules::register_private('add access', \&Modules::Access::add_access);
+	GIR::Modules::register_private('remove access', \&Modules::Access::remove_access);
 }
 
 sub show_access($)
 {
 	my $message = shift;
-
-	# Only reply to this privately
-	return if $message->is_public();
 
 	my $user = $message->from();
 	my $isSelf = 1;
@@ -94,9 +91,6 @@ sub add_access($)
 {
 	my $message = shift;
 
-	# Only reply to this privately
-	return if $message->is_public();
-
 	# Get the parts; syntax is <password> <user> <access>
 	my $user = $message->from();
 	my ($password, $target_user, $to_add) = split(/\s+/, $message->message(), 3);
@@ -165,9 +159,6 @@ sub add_access($)
 sub remove_access($)
 {
 	my $message = shift;
-
-	# Only reply to this privately
-	return if $message->is_public();
 
 	# Get the parts; syntax is <password> <user> <access>
 	my $user = $message->from();

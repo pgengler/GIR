@@ -30,8 +30,8 @@ sub register
 	GIR::Modules::register_action($question_reply_expr, \&process); # reply
 	GIR::Modules::register_action($replace_expr, \&process, 2); # replace()
 	GIR::Modules::register_action($append_expr, \&process, 2); # append()
-	GIR::Modules::register_action('lock', \&lock); # lock()
-	GIR::Modules::register_action('unlock', \&unlock); # unlock()
+	GIR::Modules::register_private('lock', \&lock); # lock()
+	GIR::Modules::register_private('unlock', \&unlock); # unlock()
 	GIR::Modules::register_action('literal', \&literal); # literal()
 
 	GIR::Modules::register_listener(\&reply_listener, 4); # This is higher priority than the Math module listener for the amusing ability to set incorrect answers to math things
@@ -541,9 +541,6 @@ sub lock($)
 	# Split into parts
 	my ($password, $phrase) = split(/\s+/, $message->message(), 2);
 
-	# Only handle this privately
-	return 'NOREPLY' if $message->is_public();
-
 	# Make sure the user can do that
 	unless (Modules::Access::check_access($message->from(), $password, 'lock')) {
 		return "You don't have permission to do that, " . $message->from() . '!';
@@ -575,9 +572,6 @@ sub lock($)
 sub unlock($)
 {
 	my $message = shift;
-
-	# Only handle this privately
-	return 'NOREPLY' if $message->is_public();
 
 	# Split into parts
 	my ($password, $phrase) = split(/\s+/, $message->message(), 2);
