@@ -101,6 +101,14 @@ my $conversions = {
 		'lb' => \&ounces_to_pounds,
 	},
 
+	# Volume conversions
+	'gal' => {
+		'lt' => \&gallons_to_liters,
+	},
+	'lt' => {
+		'gal' => \&liters_to_gallons,
+	},
+
 	# bytes and such
 	'bits' => {
 		'bytes' => \&bits_to_bytes,
@@ -582,6 +590,23 @@ sub pounds_to_ounces($)
 	my ($pounds) = @_;
 
 	return $pounds * 16.0;
+}
+
+##############
+## VOLUME CONVERSION FUNCTIONS
+##############
+sub gallons_to_liters($)
+{
+	my ($gallons) = @_;
+
+	return $gallons * 3.78541;
+}
+
+sub liters_to_gallons($)
+{
+	my ($liters) = @_;
+
+	return $liters / 3.78541;
 }
 
 ##############
