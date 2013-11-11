@@ -103,9 +103,9 @@ my $conversions = {
 
 	# Volume conversions
 	'gal' => {
-		'lt' => \&gallons_to_liters,
+		'l' => \&gallons_to_liters,
 	},
-	'lt' => {
+	'l' => {
 		'gal' => \&liters_to_gallons,
 	},
 
@@ -155,6 +155,8 @@ sub register
 		'feet'          => 'ft',
 		'foot'          => 'ft',
 		'fps'           => 'ft/s',
+		'gallon'        => 'gal',
+		'gallons'       => 'gal',
 		'gigabyte'      => 'gb',
 		'gigabytes'     => 'gb',
 		'gram'          => 'g',
@@ -184,6 +186,10 @@ sub register
 		'light year'    => 'ly',
 		'light-years'   => 'ly',
 		'light years'   => 'ly',
+		'liter'         => 'l',
+		'liters'        => 'l',
+		'litre'         => 'l',
+		'litres'        => 'l',
 		'megabyte'      => 'mb',
 		'megabytes'     => 'mb',
 		'meter'         => 'm',
