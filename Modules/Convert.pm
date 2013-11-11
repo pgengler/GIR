@@ -107,6 +107,10 @@ my $conversions = {
 	},
 	'l' => {
 		'gal' => \&liters_to_gallons,
+		'ml'  => metric_increase_magnitude(3),
+	},
+	'ml' => {
+		'l' => metric_decrease_magnitude(3),
 	},
 
 	# bytes and such
@@ -198,6 +202,10 @@ sub register
 		'metres'        => 'm',
 		'mile'          => 'mi',
 		'miles'         => 'mi',
+		'milliliter'    => 'ml',
+		'milliliters'   => 'ml',
+		'millilitre'    => 'ml',
+		'millilitres'   => 'ml',
 		'minute'        => 'min',
 		'minutes'       => 'min',
 		'mph'           => 'mi/hr',
