@@ -15,8 +15,8 @@ my $conversions = {
 	},
 	'cm' => {
 		'in' => \&centimeters_to_inches,
-		'm'  => \&centimeters_to_meters,
-		'mm' => \&centimeters_to_millimeters,
+		'm'  => metric_decrease_magnitude(2),
+		'mm' => metric_increase_magnitude(1),
 	},
 	'ft' => {
 		'in' => \&feet_to_inches,
@@ -30,7 +30,7 @@ my $conversions = {
 	'km' => {
 		'au' => \&kilometers_to_astronomical_units,
 		'ly' => \&kilometers_to_light_years,
-		'm'  => \&kilometers_to_meters,
+		'm'  => metric_increase_magnitude(3),
 	},
 	'ls' => {
 		'ly' => \&light_seconds_to_light_years,
@@ -41,15 +41,15 @@ my $conversions = {
 		'pc' => \&light_years_to_parsecs,
 	},
 	'm'  => {
-		'cm' => \&meters_to_centimeters,
-		'km' => \&meters_to_kilometers,
+		'cm' => metric_increase_magnitude(2),
+		'km' => metric_decrease_magnitude(3),
 	},
 	'mi' => {
 		'ft' => \&miles_to_feet,
 		'nm' => \&miles_to_nautical_miles,
 	},
 	'mm' => {
-		'cm' => \&millimeters_to_centimeters,
+		'cm' => metric_decrease_magnitude(1),
 	},
 	'nm' => {
 		'mi' => \&nautical_miles_to_miles,
@@ -87,11 +87,11 @@ my $conversions = {
 
 	# Weight/mass conversions
 	'g' => {
-		'kg' => \&grams_to_kilograms,
+		'kg' => metric_decrease_magnitude(3),
 	},
 	'kg' => {
 		'lb' => \&kilograms_to_pounds,
-		'g'  => \&kilograms_to_grams,
+		'g'  => metric_increase_magnitude(3),
 	},
 	'lb' => {
 		'kg' => \&pounds_to_kilograms,
@@ -316,6 +316,49 @@ sub _buildGraph()
 }
 
 ##############
+## GENERIC METRIC CONVERSIONS
+## Since metric is clean we can specify two functions to deal with
+## order-of-magnitude changes: one that multiplies by 10 and one that
+## divides by 10.
+##
+## For these functions, order-of-magnitude refers to the raw number, not
+## to the unit. (For example, going from centimeters to millimeters is an
+## increase in OOM while from centimeters to meters is a decrease.)
+##
+## The functions 'metric_increase_magnitude' and 'metric_decrease_magnitude'
+## are meta-functions; they take one parameter, the number of places that
+## the magnitude should be changed. They return a function to handle the
+## actual conversion.
+##############
+sub metric_increase_magnitude($)
+{
+	my ($order) = @_;
+
+	return sub {
+		my ($value) = @_;
+		for (1..$order) {
+			$value *= 10.0;
+		}
+		return $value;
+	};
+}
+
+sub metric_decrease_magnitude($)
+{
+	my ($order) = @_;
+
+	return sub {
+		my ($value) = @_;
+
+		for (1..$order) {
+			$value /= 10.0;
+		}
+
+		return $value;
+	}
+}
+
+##############
 ## TEMPERATURE CONVERSION FUNCTIONS
 ##############
 sub celcius_to_fahrenheit($)
@@ -362,20 +405,6 @@ sub centimeters_to_inches($)
 	my ($centimeters) = @_;
 
 	return $centimeters * 0.393700787;
-}
-
-sub centimeters_to_meters($)
-{
-	my ($centimeters) = @_;
-
-	return $centimeters / 100.0;
-}
-
-sub centimeters_to_millimeters($)
-{
-	my ($centimeters) = @_;
-
-	return $centimeters * 10;
 }
 
 sub feet_to_inches($)
@@ -427,13 +456,6 @@ sub kilometers_to_light_years($)
 	return $kilometers / 9_460_730_472_580.8;
 }
 
-sub kilometers_to_meters($)
-{
-	my ($kilometers) = @_;
-
-	return $kilometers * 1000;
-}
-
 sub light_seconds_to_light_years($)
 {
 	my ($lightSeconds) = @_;
@@ -462,20 +484,6 @@ sub light_years_to_parsecs($)
 	return $lightYears / 3.26156;
 }
 
-sub meters_to_centimeters($)
-{
-	my ($meters) = @_;
-
-	return $meters * 100.0;
-}
-
-sub meters_to_kilometers($)
-{
-	my ($meters) = @_;
-
-	return $meters / 1000.0;
-}
-
 sub miles_to_feet($)
 {
 	my ($miles) = @_;
@@ -488,13 +496,6 @@ sub miles_to_nautical_miles($)
 	my ($miles) = @_;
 
 	return $miles * 0.868976242;
-}
-
-sub millimeters_to_centimeters()
-{
-	my ($millimeters) = @_;
-
-	return $millimeters / 10.0;
 }
 
 sub nautical_miles_to_miles($)
