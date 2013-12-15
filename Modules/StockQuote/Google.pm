@@ -69,8 +69,11 @@ sub fetch()
 	};
 
 	foreach my $key (keys %$info) {
+		# Trim leading/trailing whitespace characters
 		$info->{ $key } =~ s/^\s*//;
 		$info->{ $key } =~ s/\s*$//;
+		# Convert any remaining whitespace into single space characters
+		$info->{ $key } =~ s/\s+/ /g;
 	}
 
 	return $info;
