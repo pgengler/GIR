@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('how much is oil', \&Modules::Oil::fetch);
+	GIR::Modules::register_action('how much is oil', \&fetch, 2);
 }
 
 sub fetch($)
