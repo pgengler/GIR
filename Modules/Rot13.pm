@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('rot13', \&Modules::Rot13::rot13);
+	GIR::Modules::register_action('rot13', \&Modules::Rot13::rot13, 2);
 
 	GIR::Modules::register_help('rot13', \&Modules::Rot13::help);
 }
