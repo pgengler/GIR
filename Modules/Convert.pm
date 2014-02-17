@@ -239,6 +239,9 @@ sub process($)
 		my $fromUnit = lc($3);
 		my $toUnit   = lc($4);
 
+		$fromUnit = $aliases{ $fromUnit } || $fromUnit;
+		$toUnit   = $aliases{ $toUnit }   || $toUnit;
+
 		my $converted;
 
 		if ($fromUnit =~ m|/|) {
@@ -269,9 +272,6 @@ sub process($)
 			$toUnit   = sprintf('%s/%s', $toUnit,   $toPer);
 
 		} else {
-			$fromUnit = $aliases{ $fromUnit } || $fromUnit;
-			$toUnit   = $aliases{ $toUnit }   || $toUnit;
-
 			$converted = _convert($value, $fromUnit, $toUnit);
 		}
 
