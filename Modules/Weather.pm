@@ -37,7 +37,7 @@ sub process($)
 
 	GIR::Bot::debug("Modules::Weather: Looking up weather for '%s'", $location);
 
-	my $url = sprintf(URL_FORMAT, config('api_key'), uri_escape($location));
+	my $url = sprintf(URL_FORMAT, config('api_key'), uri_escape(uc($location)));
 	my $content = eval { get_url($url) };
 
 	if ($@) {
