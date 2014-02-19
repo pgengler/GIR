@@ -45,7 +45,7 @@ sub process($)
 		return $message->is_explicit ? 'Something failed in contacting the weather server.' : undef;
 	}
 
-  my $data = from_json($content);
+	my $data = from_json($content);
 
 	if ($data->{'response'}->{'error'}) {
 		GIR::Bot::debug('Modules::Weather: weather server returned an error: %s', $data->{'response'}->{'error'}->{'description'});
@@ -63,29 +63,43 @@ sub process($)
 		return $message->is_explicit ? "No weather information available for ${location}" : undef;
 	}
 
-  my @components = (
-    { 'field' => 'weather',            'label' => 'Sky conditions' },
-    { 'field' => 'temperature_string', 'label' => 'Temperature' },
-    { 'field' => 'dewpoint_string',    'label' => 'Dewpoint' },
-    { 'field' => 'heat_index_string',  'label' => 'Heat index' },
-    { 'field' => 'windchill_string',   'label' => 'Wind chill' },
-    { 'field' => 'relative_humidity',  'label' => 'Relative humidity' },
-    { 'field' => 'pressure_string',    'label' => 'Pressure' },
-    { 'field' => 'wind_string',        'label' => 'Winds' },
-    { 'field' => 'visibility_mi',      'label' => 'Visibility', 'append' => ' mile(s)' },
-  );
+	# Preprocess data
 
-	my $weather = "Current conditions for $data->{'display_location'}->{'full'} ($data->{'station_id'}). $data->{'observation_time'}. ";
+	if (is_valid($data->{'visibility_mi'})) {
+		$data->{'visibility_string'} = "$data->{'visibility_mi'} mi ($data->{'visibility_km'} km)";
+	}
 
-  foreach my $component (@components) {
-    my $field        = $component->{'field'};
-    my $label        = $component->{'label'};
-    my $textToAppend = $component->{'append'} || '';
+	if (is_valid($data->{'pressure_mb'})) {
+		$data->{'pressure_string'} = "$data->{'pressure_in'} in ($data->{'pressure_mb'} mb) ($data->{'pressure_trend'})";
+	}
+
+	# Build output string
+	my @components = (
+		{ 'field' => 'windchill_string',   'label' => 'Wind chill', 'process' => \&format_temperature },
+		{ 'field' => 'heat_index_string',  'label' => 'Heat index', 'process' => \&format_temperature },
+		{ 'field' => 'wind_string',        'label' => 'Winds' },
+		{ 'field' => 'dewpoint_string',    'label' => 'Dewpoint',   'process' => \&format_temperature },
+		{ 'field' => 'relative_humidity',  'label' => 'Relative humidity' },
+		{ 'field' => 'pressure_string',    'label' => 'Pressure' },
+		{ 'field' => 'visibility_string',  'label' => 'Visibility' },
+		{ 'field' => 'station_id',         'label' => 'Station' },
+		{ 'field' => 'observation_time',   'label' => 'Updated',    'process' => sub { $_[0] =~ s/Last Updated on //; $_[0] } },
+	);
+
+	my $temperature = format_temperature($data->{'temperature_string'});
+	my $weather = "$data->{'display_location'}->{'full'}: $data->{'weather'}, ${temperature}. ";
+
+	foreach my $component (@components) {
+		my $field        = $component->{'field'};
+		my $label        = $component->{'label'};
+		my $textToAppend = $component->{'append'} || '';
 
 		my $value = $data->{ $field };
 		# Skip missing data
-		if (ref($value) || $value eq 'NA' || $value eq 'N/A' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)' || $value eq ' in ( mb)' || $value eq ' F ( C)' || $value eq '-9999.00 in (-9999 mb)') {
-			next;
+		next unless is_valid($value);
+
+		if (exists $component->{'process'}) {
+			$value = $component->{'process'}->($value);
 		}
 
 		if ($value) {
@@ -106,6 +120,26 @@ sub help($)
 	my $message = shift;
 
 	return "Usage: weather <location>\nReturns a formatted string with the latest weather observation for the given location (airport code, ZIP code, etc.).";
+}
+
+##############
+sub is_valid($)
+{
+	my ($value) = @_;
+
+	if (ref($value) || $value eq 'NA' || $value eq 'N/A' || $value eq 'N/A%' || $value eq '-9999' || $value eq '-9999 F (-9999 C)' || $value eq ' in ( mb)' || $value eq ' F ( C)' || $value eq '-9999.00 in (-9999 mb)' || $value eq '') {
+		return 0;
+	}
+	return 1;
+}
+
+sub format_temperature($)
+{
+	my ($value) = @_;
+
+	$value =~ s/ (C|F)/°$1/g;
+
+	return $value;
 }
 
 1;
