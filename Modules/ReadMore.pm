@@ -65,7 +65,7 @@ sub readmorestats
 		my $statement = $db->statement($sql)->execute($message->message);
 		my $count = $statement->fetch('readmored');
 		if ($count) {
-			return "${who} has been readmored ${count} time(s)";
+			return pluralize("${who} has been readmored ${count} time{s}", $count);
 		} else {
 			return "${who} has never been readmored";
 		}
@@ -82,9 +82,21 @@ sub readmorestats
 		my $who = $row->{'nick'};
 		my $count = $row->{'readmored'};
 
-		return "${who} has been readmored the most (${count} times)";
+		return pluralize("${who} has been readmored the most (${count} time{s})", $count);
+	}
+}
+
+sub pluralize($$)
+{
+	my ($string, $count) = @_;
+
+	my $replacement = '';
+	if ($count != 1) {
+		$replacement = 's';
 	}
 
+	$string =~ s/{s}/$replacement/g;
+	return $string;
 }
 
 1;
