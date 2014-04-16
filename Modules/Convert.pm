@@ -236,7 +236,7 @@ sub process($)
 	my $message = shift;
 
 	if ($message->message() =~ $match_expr) {
-		my $value    = $1;
+		my $value    = $1 || 1;
 		my $fromUnit = lc($3);
 		my $toUnit   = lc($4);
 
