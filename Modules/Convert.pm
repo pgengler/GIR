@@ -165,6 +165,7 @@ sub register
 		'gigabytes'     => 'gb',
 		'gram'          => 'g',
 		'grams'         => 'g',
+		'h'             => 'hr',
 		'hour'          => 'hr',
 		'hours'         => 'hr',
 		'inch'          => 'in',
