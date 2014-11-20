@@ -63,7 +63,7 @@ sub readmorestats
 			FROM readmore
 			WHERE nick = LOWER(?)
 		);
-		my $statement = $db->statement($sql)->execute($message->message);
+		my $statement = $db->statement($sql)->execute($who);
 		my $count = $statement->fetch('readmored');
 		if ($count) {
 			return pluralize("${who} has been readmored ${count} time{s}", $count);
