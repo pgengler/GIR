@@ -47,7 +47,7 @@ sub log_and_laugh
 	}
 	$db->statement($sql)->execute($message->from);
 
-	return sprintf("LOL %s got readmored", $message->from);
+	return sprintf("lol %s got readmored", $message->from);
 }
 
 sub readmorestats
@@ -57,6 +57,7 @@ sub readmorestats
 	my $db = db();
 	if ($message->message ne '') {
 		my $who = $message->message;
+		$who =~ s/^\s*(.+?)\s*$/$1/;
 		my $sql = q(
 			SELECT readmored
 			FROM readmore
