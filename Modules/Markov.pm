@@ -49,7 +49,7 @@ sub gen_output(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 			LIMIT 1
 		~;
 		$word = db()->query($query, $first, $second)->fetch;
@@ -65,7 +65,7 @@ sub gen_output(;$$)
 			SELECT this, next
 			FROM words
 			WHERE this = ? AND next <> '__END__'
-			ORDER BY RANDOM()
+			ORDER BY random()
 			LIMIT 1
 		~;
 		$word = db()->query($query, $first)->fetch;
@@ -75,25 +75,13 @@ sub gen_output(;$$)
 		}
 	} else {
 		# Pick random starting word
-		## First, get count of rows
-		my $query = qq~
-			SELECT COUNT(*) AS count
-			FROM words
-			WHERE prev = '__BEGIN__'
-		~;
-		my $count = db()->query($query)->fetch('count');
-
-		## Now pick a random number between 0 and $count - 1
-		my $row = int(rand($count));
-
-		## Now get the $row-th row
-		$query = qq~
+		my $query = q[
 			SELECT this, next
 			FROM words
 			WHERE prev = '__BEGIN__'
-			OFFSET ${row}
+			ORDER BY random()
 			LIMIT 1
-		~;
+		];
 		$word = db()->query($query)->fetch;
 	}
 
@@ -106,7 +94,7 @@ sub gen_output(;$$)
 		SELECT this, next
 		FROM words
 		WHERE prev = ? AND this = ?
-		ORDER BY RANDOM() DESC
+		ORDER BY random()
 		LIMIT 1
 	~;
 	my $statement = db()->statement($query);
@@ -163,7 +151,7 @@ sub gen_output_multi(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 			LIMIT 1
 		~;
 		my $start = $word = db()->query($query, $first, $second)->fetch;
@@ -175,7 +163,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 			LIMIT 1
 		~;
 		my $statement = db()->statement($query);
@@ -190,7 +178,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 		~;
 		$statement = db()->statement($query);
 
@@ -205,7 +193,7 @@ sub gen_output_multi(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 			LIMIT 1
 		~;
 		my $start = $word = db()->query($query, $first)->fetch;
@@ -217,7 +205,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 		~;
 		my $statement = db()->statement($query);
 
@@ -231,7 +219,7 @@ sub gen_output_multi(;$$)
 			SELECT *
 			FROM words
 			WHERE prev = ? AND this = ?
-			ORDER BY RANDOM()
+			ORDER BY random()
 		~;
 		$statement = db()->statement($query);
 
@@ -279,7 +267,7 @@ sub gen_output_from_end(;$$)
 			SELECT prev, this, next
 			FROM words
 			WHERE this = ? AND next = ?
-			ORDER BY RANDOM() DESC
+			ORDER BY random()
 			LIMIT 1
 		~;
 		$word = db()->query($query, $first, $second)->fetch;
@@ -295,7 +283,7 @@ sub gen_output_from_end(;$$)
 			SELECT prev, this
 			FROM words
 			WHERE this = ? AND next = '__END__'
-			ORDER BY RANDOM() DESC
+			ORDER BY random()
 			LIMIT 1
 		~;
 		$word = db()->query($query, $first)->fetch;
@@ -305,25 +293,13 @@ sub gen_output_from_end(;$$)
 		}
 	} else {
 		# Pick random starting word
-		## First, get count of rows
-		my $query = qq~
-			SELECT COUNT(*) AS count
-			FROM words
-			WHERE next = '__END__'
-		~;
-		my $count = db()->statement($query)->fetch('count');
-
-		## Now pick a random number between 0 and $count - 1
-		my $row = int(rand($count));
-
-		## Now get the $row-th row
-		$query = qq~
+		my $query = q[
 			SELECT prev, this
 			FROM words
 			WHERE next = '__END__'
-			OFFSET ${row}
+			ORDER BY random()
 			LIMIT 1
-		~;
+		];
 		$word = db()->query($query)->fetch;
 	}
 
@@ -336,7 +312,7 @@ sub gen_output_from_end(;$$)
 		SELECT prev, this
 		FROM words
 		WHERE this = ? AND next = ?
-		ORDER BY RANDOM() DESC
+		ORDER BY random()
 		LIMIT 1
 	~;
 	my $statement = db()->statement($query);
