@@ -41,7 +41,7 @@ sub quote($)
 
 	unless ($info) {
 		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
-		if ($message->addressed()) {
+		if ($message->is_addressed()) {
 			return "Unable to get quote for '$symbol'";
 		}
 		return undef;
@@ -74,7 +74,7 @@ sub short_quote($)
 
 	unless ($info) {
 		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
-		if ($message->addressed()) {
+		if ($message->is_addressed()) {
 			return "Unable to get quote for '$symbol'";
 		}
 		return undef;
