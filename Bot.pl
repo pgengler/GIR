@@ -5,6 +5,7 @@ use threads;
 use threads::shared;
 use lib qw/ lib /;
 
+use Encode;
 use File::Copy;
 use File::Spec;
 use Getopt::Long;
@@ -350,12 +351,12 @@ sub log($;@)
 	my $outputMessage = '[' . localtime() . '] ' . sprintf($message, @parameters);
 
 	unless ($no_console) {
-		print $outputMessage, "\n";
+		print Encode::encode('utf-8', $outputMessage), "\n";
 	}
 
 	if ($config->{'config_nick'}) {
 		open(my $log, '>>', $config->{'config_nick'} . '.log');
-		print $log $outputMessage, "\n";
+		print $log Encode::encode('utf-8', $outputMessage), "\n";
 		close($log);
 	}
 }
@@ -629,7 +630,7 @@ sub say($$)
 	foreach my $line (@lines) {
 		next unless $line;
 		status('</%s> %s', $where, $line);
-		$connection->privmsg($where, $line);
+		$connection->privmsg($where, Encode::encode('utf-8', $line));
 	}
 }
 
