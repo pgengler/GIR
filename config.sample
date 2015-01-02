@@ -14,8 +14,9 @@ channels:
 # Full path to the directory where data files can be stored
 data_dir: /home/ircbot/Modules/data
 
-# Connection information for the MySQL database used by the bot
+# Connection information for the Postgres database used by the bot
 database:
+  host: localhost
   name: ircbot
   password: <your db password>
   user: ircbot

@@ -17,7 +17,15 @@ sub connect
 		$self->{'error'}->(Carp::longmess("Missing database or user name"), $self);
 	}
 
-	$self->{'_dbh'} = DBI->connect("DBI:Pg:database=$self->{'database'}", $self->{'username'}, $self->{'password'}) or $self->{'error'}->(Carp::longmess(DBI::errstr), $self);
+	my $connectString = "DBI:Pg:database=$self->{'database'}";
+	if ($self->{'host'}) {
+		$connectString .= ";host=$self->{'host'}";
+	}
+	if ($self->{'port'}) {
+		$connectString .= ";port=$self->{'port'}";
+	}
+
+	$self->{'_dbh'} = DBI->connect($connectString, $self->{'username'}, $self->{'password'}) or $self->{'error'}->(Carp::longmess(DBI::errstr), $self);
 
 	$self->{'_connected'} = 1;
 

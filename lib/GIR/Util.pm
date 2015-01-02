@@ -18,7 +18,9 @@ sub db()
 	unless (defined $db) {
 		$db = Database::Postgres->new(
 			'database' => $GIR::Bot::config->{'database'}->{'name'},
+			'host'     => $GIR::Bot::config->{'database'}->{'host'},
 			'password' => $GIR::Bot::config->{'database'}->{'password'},
+			'port'     => $GIR::Bot::config->{'database'}->{'port'},
 			'username' => $GIR::Bot::config->{'database'}->{'user'},
 		);
 	}
