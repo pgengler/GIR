@@ -59,6 +59,7 @@ GIR::Modules::init();
 # Unbuffer standard output
 select(STDOUT);
 $| = 1;
+binmode(STDOUT, ':utf8');
 
 # Intercept Ctrl+C
 $SIG{'INT'} = \&shutdown;
@@ -351,12 +352,13 @@ sub log($;@)
 	my $outputMessage = '[' . localtime() . '] ' . sprintf($message, @parameters);
 
 	unless ($no_console) {
-		print Encode::encode('utf-8', $outputMessage), "\n";
+		print $outputMessage, "\n";
 	}
 
 	if ($config->{'config_nick'}) {
 		open(my $log, '>>', $config->{'config_nick'} . '.log');
-		print $log Encode::encode('utf-8', $outputMessage), "\n";
+		binmode($log, ':utf8');
+		print $log $outputMessage, "\n";
 		close($log);
 	}
 }
@@ -629,8 +631,9 @@ sub say($$)
 
 	foreach my $line (@lines) {
 		next unless $line;
+		$line = Encoce::encode('utf-8', $line);
 		status('</%s> %s', $where, $line);
-		$connection->privmsg($where, Encode::encode('utf-8', $line));
+		$connection->privmsg($where, $line);
 	}
 }
 
