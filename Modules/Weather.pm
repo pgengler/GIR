@@ -1,6 +1,7 @@
 package Modules::Weather;
 
 use strict;
+use utf8;
 
 use JSON;
 use URI::Escape qw/ uri_escape /;

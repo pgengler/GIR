@@ -5,7 +5,6 @@ use threads;
 use threads::shared;
 use lib qw/ lib /;
 
-use Encode;
 use File::Copy;
 use File::Spec;
 use Getopt::Long;
@@ -631,8 +630,8 @@ sub say($$)
 
 	foreach my $line (@lines) {
 		next unless $line;
-		$line = Encoce::encode('utf-8', $line);
 		status('</%s> %s', $where, $line);
+		utf8::encode($line);
 		$connection->privmsg($where, $line);
 	}
 }
