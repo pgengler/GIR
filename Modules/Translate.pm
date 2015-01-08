@@ -2,7 +2,6 @@ package Modules::Translate;
 
 use strict;
 
-use Encode;
 use URI::Escape qw/ uri_escape /;
 use XML::Simple qw/ xml_in /;
 
@@ -56,7 +55,7 @@ sub _getTranslation($$$)
 	}
 
 	my $doc = xml_in($content);
-	return Encode::encode('UTF-8', $doc->{'content'});
+	return $doc->{'content'};
 }
 
 sub help($)
