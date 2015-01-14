@@ -14,7 +14,7 @@ sub watch_for_readmore
 
 	return unless $message->is_public;
 
-	if ($message->message =~ /Read more( here)?:?\s*http/) {
+	if ($message->message =~ /Read more( (at|here))?:?\s*http/) {
 		log_and_laugh($message);
 	}
 }
