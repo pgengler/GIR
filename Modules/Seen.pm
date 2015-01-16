@@ -14,9 +14,7 @@ sub seen($)
 {
 	my $message = shift;
 
-	print \&db, "\n";
-
-	my $nick    = $message->message();
+	my $nick = $message->message;
 
 	# Remove leading/trailing whitespace
 	$nick =~ s/^\s*(.+?)\s*$/$1/;
@@ -34,7 +32,7 @@ sub seen($)
 	my $seen = db()->query($query, $nick)->fetch;
 
 	if ($seen) {
-		my $howlong = time() - $seen->{'when'};
+		my $howlong = time - $seen->{'when'};
 		$seen->{'when'} = localtime($seen->{'when'});
 
 		my $tstring = ' ago';
@@ -79,7 +77,7 @@ sub seen($)
 
 		return "$nick was last seen on $seen->{'where'} $tstring, saying: $seen->{'what'} [$seen->{'when'}]";
 	} else {
-		return "I haven't seen '$nick', " . $message->from();
+		return "I haven't seen '$nick', " . $message->from;
 	}
 }
 
@@ -87,10 +85,10 @@ sub update($)
 {
 	my $message = shift;
 
-	my $where = $message->where();
-	my $data  = $message->raw();
+	my $where = $message->where;
+	my $data  = $message->raw;
 
-	unless ($message->is_public()) {
+	unless ($message->is_public) {
 		$where = 'a private message';
 		$data = '<private>';
 	}
