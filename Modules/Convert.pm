@@ -9,7 +9,7 @@ my %aliases;
 my $match_expr = qr/^\s*convert\s+([+-]?\d*(\.\d+)?)\s*(.+)\s+to\s+(.+)\s*$/;
 
 my $conversions = {
-	# Distance conversions
+	# distance conversions
 	'au' => {
 		'km' => \&astronomical_units_to_kilometers,
 	},
@@ -61,7 +61,7 @@ my $conversions = {
 		'ft' => \&yards_to_feet,
 	},
 
-	# Temperature conversions
+	# temperature conversions
 	'c' => {
 		'f' => \&celcius_to_fahrenheit,
 		'k' => \&celcius_to_kelvin,
@@ -73,7 +73,7 @@ my $conversions = {
 		'c' => \&kelvin_to_celcius,
 	},
 
-	# Time conversions
+	# time conversions
 	'hr'  => {
 		'min' => \&hours_to_minutes,
 	},
@@ -85,7 +85,7 @@ my $conversions = {
 		'min' => \&seconds_to_minutes,
 	},
 
-	# Weight/mass conversions
+	# weight/mass conversions
 	'g' => {
 		'kg' => metric_decrease_magnitude(3),
 	},
@@ -101,7 +101,7 @@ my $conversions = {
 		'lb' => \&ounces_to_pounds,
 	},
 
-	# Volume conversions
+	# volume conversions
 	'gal' => {
 		'l' => \&gallons_to_liters,
 	},
@@ -111,6 +111,44 @@ my $conversions = {
 	},
 	'ml' => {
 		'l' => metric_decrease_magnitude(3),
+	},
+
+	# pressure conversions
+	'atm' => {
+		'bar' => \&atmospheres_to_bars,
+		'pa'  => \&atmospheres_to_pascals,
+		'psi' => \&atmospheres_to_psi,
+	},
+	'bar' => {
+		'atm' => \&bars_to_atmospheres,
+		'mbar' => metric_increase_magnitude(3),
+		'pa'  => metric_increase_magnitude(5),
+		'psi' => \&bars_to_psi,
+	},
+	'mbar' => {
+		'bar' => metric_decrease_magnitude(3),
+	},
+	'hpa' => {
+		'pa' => metric_decrease_magnitude(2),
+	},
+	'kpa' => {
+		'pa' => metric_decrease_magnitude(3),
+	},
+	'mpa' => {
+		'pa' => metric_decrease_magnitude(6),
+	},
+	'pa' => {
+		'atm' => \&pascals_to_atmospheres,
+		'bar' => metric_decrease_magnitude(5),
+		'hpa' => metric_increase_magnitude(2),
+		'kpa' => metric_increase_magnitude(3),
+		'mpa' => metric_increase_magnitude(6),
+		'psi' => \&pascals_to_psi,
+	},
+	'psi' => {
+		'atm' => \&psi_to_atmospheres,
+		'bar' => \&psi_to_bars,
+		'pa'  => \&psi_to_pascals,
 	},
 
 	# bytes and such
@@ -147,6 +185,8 @@ sub register
 {
 	# Initialize conversions
 	%aliases = (
+		'atmosphere'    => 'atm',
+		'atmospheres'   => 'atm',
 		'bit'           => 'bits',
 		'byte'          => 'bytes',
 		'celcius'       => 'c',
@@ -166,6 +206,8 @@ sub register
 		'gram'          => 'g',
 		'grams'         => 'g',
 		'h'             => 'hr',
+		'hectopascal'   => 'hpa',
+		'hectopascals'  => 'hpa',
 		'hour'          => 'hr',
 		'hours'         => 'hr',
 		'inch'          => 'in',
@@ -179,10 +221,17 @@ sub register
 		'kilometers'    => 'km',
 		'kilometre'     => 'km',
 		'kilometres'    => 'km',
+		'kilopascal'    => 'kpa',
+		'kilopascals'   => 'kpa',
 		'knot'          => 'nm/hr',
 		'knots'         => 'nm/hr',
 		'kph'           => 'km/hr',
 		'kt'            => 'nm/hr',
+		'lb/in2'        => 'psi',
+		'lb/square in'  => 'psi',
+		'lb/sq.in'      => 'psi',
+		'lb/sq. in'     => 'psi',
+		'lb/sqin'       => 'psi',
 		'light-second'  => 'ls',
 		'light second'  => 'ls',
 		'light-seconds' => 'ls',
@@ -197,6 +246,8 @@ sub register
 		'litres'        => 'l',
 		'megabyte'      => 'mb',
 		'megabytes'     => 'mb',
+		'megapascal'    => 'mpa',
+		'megapascals'   => 'mpa',
 		'meter'         => 'm',
 		'meters'        => 'm',
 		'metre'         => 'm',
@@ -231,11 +282,11 @@ sub register
 	GIR::Modules::register_action($match_expr, \&Modules::Convert::process);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	if ($message->message() =~ $match_expr) {
+	if ($message->message =~ $match_expr) {
 		my $value    = $1 || 1;
 		my $fromUnit = lc($3);
 		my $toUnit   = lc($4);
@@ -284,7 +335,7 @@ sub process($)
 	}
 }
 
-sub _convert($$$)
+sub _convert
 {
 	my ($value, $fromUnit, $toUnit) = @_;
 
@@ -311,9 +362,9 @@ sub _convert($$$)
 	return $converted;
 }
 
-sub _buildGraph()
+sub _buildGraph
 {
-	my $graph = new Graph();
+	my $graph = Graph->new;
 
 	foreach my $from (keys %$conversions) {
 		foreach my $to (keys %{ $conversions->{ $from } }) {
@@ -339,7 +390,7 @@ sub _buildGraph()
 ## the magnitude should be changed. They return a function to handle the
 ## actual conversion.
 ##############
-sub metric_increase_magnitude($)
+sub metric_increase_magnitude
 {
 	my ($order) = @_;
 
@@ -352,7 +403,7 @@ sub metric_increase_magnitude($)
 	};
 }
 
-sub metric_decrease_magnitude($)
+sub metric_decrease_magnitude
 {
 	my ($order) = @_;
 
@@ -370,28 +421,28 @@ sub metric_decrease_magnitude($)
 ##############
 ## TEMPERATURE CONVERSION FUNCTIONS
 ##############
-sub celcius_to_fahrenheit($)
+sub celcius_to_fahrenheit
 {
 	my ($celcius) = @_;
 
 	return ((9.0 * $celcius) / 5.0) + 32;
 }
 
-sub celcius_to_kelvin($)
+sub celcius_to_kelvin
 {
 	my ($celcius) = @_;
 
 	return $celcius + 273.15;
 }
 
-sub fahrenheit_to_celcius($)
+sub fahrenheit_to_celcius
 {
 	my ($fahrenheit) = @_;
 
 	return (5.0 * ($fahrenheit - 32)) / 9.0;
 }
 
-sub kelvin_to_celcius($)
+sub kelvin_to_celcius
 {
 	my ($kelvin) = @_;
 
@@ -402,126 +453,126 @@ sub kelvin_to_celcius($)
 ## DISTANCE CONVERSION FUNCTIONS
 ##############
 
-sub astronomical_units_to_kilometers($)
+sub astronomical_units_to_kilometers
 {
 	my ($au) = @_;
 
 	return $au * 149_597_870.7;
 }
 
-sub centimeters_to_inches($)
+sub centimeters_to_inches
 {
 	my ($centimeters) = @_;
 
 	return $centimeters * 0.393700787;
 }
 
-sub feet_to_inches($)
+sub feet_to_inches
 {
 	my ($feet) = @_;
 
 	return $feet * 12;
 }
 
-sub feet_to_miles($)
+sub feet_to_miles
 {
 	my ($feet) = @_;
 
 	return $feet / 5280;
 }
 
-sub feet_to_yards($)
+sub feet_to_yards
 {
 	my ($feet) = @_;
 
 	return $feet / 3;
 }
 
-sub inches_to_centimeters($)
+sub inches_to_centimeters
 {
 	my ($inches) = @_;
 
 	return $inches / 0.393700787;
 }
 
-sub inches_to_feet($)
+sub inches_to_feet
 {
 	my ($inches) = @_;
 
 	return $inches / 12.0;
 }
 
-sub kilometers_to_astronomical_units($)
+sub kilometers_to_astronomical_units
 {
 	my ($kilometers) = @_;
 
 	return $kilometers / 149_597_870.7;
 }
 
-sub kilometers_to_light_years($)
+sub kilometers_to_light_years
 {
 	my ($kilometers) = @_;
 
 	return $kilometers / 9_460_730_472_580.8;
 }
 
-sub light_seconds_to_light_years($)
+sub light_seconds_to_light_years
 {
 	my ($lightSeconds) = @_;
 
 	return $lightSeconds / 31_557_600.0;
 }
 
-sub light_years_to_light_seconds($)
+sub light_years_to_light_seconds
 {
 	my ($lightYears) = @_;
 
 	return $lightYears * 31_557_600;
 }
 
-sub light_years_to_kilometers($)
+sub light_years_to_kilometers
 {
 	my ($lightYears) = @_;
 
 	return $lightYears * 9_460_730_472_580.8;
 }
 
-sub light_years_to_parsecs($)
+sub light_years_to_parsecs
 {
 	my ($lightYears) = @_;
 
 	return $lightYears / 3.26156;
 }
 
-sub miles_to_feet($)
+sub miles_to_feet
 {
 	my ($miles) = @_;
 
 	return $miles * 5280;
 }
 
-sub miles_to_nautical_miles($)
+sub miles_to_nautical_miles
 {
 	my ($miles) = @_;
 
 	return $miles * 0.868976242;
 }
 
-sub nautical_miles_to_miles($)
+sub nautical_miles_to_miles
 {
 	my ($nauticalMiles) = @_;
 
 	return $nauticalMiles / 0.868976242;
 }
 
-sub parsecs_to_light_years($)
+sub parsecs_to_light_years
 {
 	my ($parsecs) = @_;
 
 	return $parsecs * 3.26156;
 }
 
-sub yards_to_feet($)
+sub yards_to_feet
 {
 	my ($yards) = @_;
 
@@ -531,28 +582,28 @@ sub yards_to_feet($)
 ##############
 ## TIME CONVERSION FUNCTIONS
 ##############
-sub hours_to_minutes($)
+sub hours_to_minutes
 {
 	my ($hours) = @_;
 
 	return $hours * 60;
 }
 
-sub minutes_to_hours($)
+sub minutes_to_hours
 {
 	my ($minutes) = @_;
 
 	return $minutes / 60.0;
 }
 
-sub minutes_to_seconds($)
+sub minutes_to_seconds
 {
 	my ($minutes) = @_;
 
 	return $minutes * 60;
 }
 
-sub seconds_to_minutes($)
+sub seconds_to_minutes
 {
 	my ($seconds) = @_;
 
@@ -566,42 +617,42 @@ sub seconds_to_minutes($)
 ## when converting between mass and weight.
 ##############
 
-sub grams_to_kilgrams($)
+sub grams_to_kilgrams
 {
 	my ($grams) = @_;
 
 	return $grams / 1000.0;
 }
 
-sub kilograms_to_grams($)
+sub kilograms_to_grams
 {
 	my ($kilograms) = @_;
 
 	return $kilograms * 1000.0;
 }
 
-sub kilograms_to_pounds($)
+sub kilograms_to_pounds
 {
 	my ($kilograms) = @_;
 
 	return $kilograms * 2.20462262;
 }
 
-sub ounces_to_pounds($)
+sub ounces_to_pounds
 {
 	my ($ounces) = @_;
 
 	return $ounces / 16.0;
 }
 
-sub pounds_to_kilograms($)
+sub pounds_to_kilograms
 {
 	my ($pounds) = @_;
 
 	return $pounds / 2.20462262;
 }
 
-sub pounds_to_ounces($)
+sub pounds_to_ounces
 {
 	my ($pounds) = @_;
 
@@ -611,14 +662,14 @@ sub pounds_to_ounces($)
 ##############
 ## VOLUME CONVERSION FUNCTIONS
 ##############
-sub gallons_to_liters($)
+sub gallons_to_liters
 {
 	my ($gallons) = @_;
 
 	return $gallons * 3.78541;
 }
 
-sub liters_to_gallons($)
+sub liters_to_gallons
 {
 	my ($liters) = @_;
 
@@ -626,16 +677,89 @@ sub liters_to_gallons($)
 }
 
 ##############
+## PRESSURE CONVERSION FUNCTIONS
+##############
+sub atmospheres_to_bars
+{
+	my ($atmospheres) = @_;
+
+	return $atmospheres * 1.01325;
+}
+
+sub atmospheres_to_pascals
+{
+	my ($atmospheres) = @_;
+
+	return $atmospheres * 101325;
+}
+
+sub atmospheres_to_psi
+{
+	my ($atmospheres) = @_;
+
+	return $atmospheres * 14.69595;
+}
+
+sub bars_to_atmospheres
+{
+	my ($bars) = @_;
+
+	return $bars * 0.98692;
+}
+
+sub bars_to_psi
+{
+	my ($bars) = @_;
+
+	return $bars * 14.50377;
+}
+
+sub pascals_to_atmospheres
+{
+	my ($pascals) = @_;
+
+	return $pascals * 0.00000986923267;
+}
+
+sub pascals_to_psi
+{
+	my ($pascals) = @_;
+
+	return $pascals * 0.000145037738;
+}
+
+sub psi_to_atmospheres
+{
+	my ($psi) = @_;
+
+	return $psi * 0.068046;
+}
+
+sub psi_to_bars
+{
+	my ($psi) = @_;
+
+	return $psi * 0.068948;
+}
+
+sub psi_to_pascals
+{
+	my ($psi) = @_;
+
+	return $psi * 6894.75729;
+}
+
+##############
 ## COMPUTER UNIT CONVERSIONS
 ##############
-sub bits_to_bytes($)
+sub bits_to_bytes
 {
 	my ($bits) = @_;
 
 	return $bits / 8;
 }
 
-sub bytes_to_bits($)
+sub bytes_to_bits
 {
 	my ($bytes) = @_;
 
@@ -643,14 +767,14 @@ sub bytes_to_bits($)
 }
 
 # e.g., mb -> kb
-sub byte_order_of_magnitude_down($)
+sub byte_order_of_magnitude_down
 {
 	my ($value) = @_;
 
 	return $value * 1024.0;
 }
 
-sub byte_order_of_magnitude_up($)
+sub byte_order_of_magnitude_up
 {
 	my ($value) = @_;
 
