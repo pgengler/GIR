@@ -48,7 +48,7 @@ sub new
 ## Return Value:
 ##   The name of the currently-loaded module.
 #######
-sub name(
+sub name
 {
 	my $self = shift;
 
