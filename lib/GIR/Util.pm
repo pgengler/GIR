@@ -11,7 +11,7 @@ use LWP::UserAgent;
 
 our @EXPORT = qw/ config db get_url /;
 
-sub db()
+sub db
 {
 	state $db;
 
@@ -28,7 +28,7 @@ sub db()
 	return $db;
 }
 
-sub get_url($)
+sub get_url
 {
 	my ($url) = @_;
 
@@ -45,7 +45,7 @@ sub get_url($)
 	return $response->content;
 }
 
-sub config(;$)
+sub config
 {
 	my ($property) = @_;
 

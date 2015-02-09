@@ -14,29 +14,29 @@ sub register
 	GIR::Modules::register_help('bash', \&Modules::Bash::help);
 }
 
-sub process_from_url($)
+sub process_from_url
 {
 	my ($message) = @_;
 
-	if ($message->message() =~ $bash_url_expr) {
+	if ($message->message =~ $bash_url_expr) {
 		return _get_quote($1);
 	}
 
 	return undef;
 }
 
-sub process_from_text($)
+sub process_from_text
 {
 	my ($message) = @_;
 
-	if ($message->message() =~ /(\d+)/) {
+	if ($message->message =~ /(\d+)/) {
 		return _get_quote($1);
 	}
 
 	return undef;
 }
 
-sub _get_quote($)
+sub _get_quote
 {
 	my ($id) = @_;
 
@@ -83,7 +83,7 @@ sub _get_quote($)
 	}
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

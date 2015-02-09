@@ -41,11 +41,11 @@ sub register
 	GIR::Modules::register_help('infobot', \&help);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	my $data = $message->message();
+	my $data = $message->message;
 
 	# Figure out what we're doing
 	if ($data =~ $force_learn_expr) {
@@ -75,7 +75,7 @@ sub process($)
 	}
 }
 
-sub learn($$$$)
+sub learn
 {
 	my ($message, $phrase, $relates, $value) = @_;
 
@@ -93,7 +93,7 @@ sub learn($$$$)
 	my $result = db()->query($query, $phrase)->fetch;
 
 	if ($result) {
-		if ($message->is_explicit()) {
+		if ($message->is_explicit) {
 			return "... but $phrase $relates $result->{'value'}...";
 		} else {
 			return 'NOREPLY';
@@ -110,14 +110,14 @@ sub learn($$$$)
 		GIR::Bot::status('LEARN: %s =%s=> %s', $phrase, $relates, $value);
 	}
 
-	if ($message->is_explicit()) {
-		return "OK, " . $message->from();
+	if ($message->is_explicit) {
+		return "OK, " . $message->from;
 	} else {
 		return 'NOREPLY';
 	}
 }
 
-sub append($$$$)
+sub append
 {
 	my ($message, $phrase, $relates, $value) = @_;
 
@@ -132,9 +132,9 @@ sub append($$$$)
 	if ($result) {
 		# Make sure the item isn't locked
 		if ($result->{'locked'}) {
-			if ($message->is_explicit()) {
+			if ($message->is_explicit) {
 				GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
-				return "I can't update that, " . $message->from();
+				return "I can't update that, " . $message->from;
 			} else {
 				return 'NOREPLY';
 			}
@@ -154,18 +154,18 @@ sub append($$$$)
 		~;
 		db()->query($query, $result->{'value'}, $result->{'phrase'});
 	} else {
-		if ($message->is_explicit()) {
-			return "I didn't have anything matching '$phrase', " . $message->from();
+		if ($message->is_explicit) {
+			return "I didn't have anything matching '$phrase', " . $message->from;
 		}
 	}
 
-	if ($message->is_explicit()) {
-		return "OK, " . $message->from();
+	if ($message->is_explicit) {
+		return "OK, " . $message->from;
 	}
 	return 'NOREPLY';
 }
 
-sub forget($$)
+sub forget
 {
 	my ($message, $what) = @_;
 
@@ -201,19 +201,19 @@ sub forget($$)
 	}
 
 	if ($found) {
-		return $message->from() . ": I forgot $what";
+		return $message->from . ": I forgot $what";
 	} elsif ($locked) {
-		if ($message->is_explicit()) {
-			return "I can't forget that, " . $message->from();
+		if ($message->is_explicit) {
+			return "I can't forget that, " . $message->from;
 		} else {
 			return 'NOREPLY';
 		}
-	} elsif ($message->is_explicit()) {
-		return $message->from() . ", I didn't have anything matching $what";
+	} elsif ($message->is_explicit) {
+		return $message->from . ", I didn't have anything matching $what";
 	}
 }
 
-sub amend($$$$)
+sub amend
 {
 	my ($message, $what, $replace, $with) = @_;
 
@@ -229,8 +229,8 @@ sub amend($$$$)
 	my $result = db()->query($query, $what)->fetch;
 
 	unless ($result) {
-		if ($message->is_explicit()) {
-			return "I don't have anything matching '$what', " . $message->from();
+		if ($message->is_explicit) {
+			return "I don't have anything matching '$what', " . $message->from;
 		} else {
 			return 'NOREPLY';
 		}
@@ -238,9 +238,9 @@ sub amend($$$$)
 
 	# Check if it's locked
 	if ($result->{'locked'}) {
-		if ($message->is_explicit()) {
+		if ($message->is_explicit) {
 			GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
-			return "I can't update that, " . $message->from();
+			return "I can't update that, " . $message->from;
 		} else {
 			return 'NOREPLY';
 		}
@@ -248,8 +248,8 @@ sub amend($$$$)
 
 	# Check that it matches
 	unless ($result->{'value'} =~ /$rep_part/i) {
-		if ($message->is_explicit()) {
-			return "That doesn't contain '$replace', " . $message->from();
+		if ($message->is_explicit) {
+			return "That doesn't contain '$replace', " . $message->from;
 		} else {
 			return;
 		}
@@ -270,12 +270,12 @@ sub amend($$$$)
 	~;
 	db()->query($query, $result->{'value'}, $result->{'phrase'});
 
-	if ($message->is_explicit()) {
-		return "OK, " . $message->from();
+	if ($message->is_explicit) {
+		return "OK, " . $message->from;
 	}
 }
 
-sub replace($$$$)
+sub replace
 {
 	my ($message, $what, $relates, $value) = @_;
 
@@ -288,8 +288,8 @@ sub replace($$$$)
 	my $result = db()->query($query, $what)->fetch;
 
 	unless ($result) {
-		if ($message->is_explicit()) {
-			return "I don't have anything matching '$what', " . $message->from();
+		if ($message->is_explicit) {
+			return "I don't have anything matching '$what', " . $message->from;
 		} else {
 			return 'NOREPLY';
 		}
@@ -297,9 +297,9 @@ sub replace($$$$)
 
 	# Check if the item is locked
 	if ($result->{'locked'}) {
-		if ($message->is_explicit()) {
+		if ($message->is_explicit) {
 			GIR::Bot::status('LOCKED: %s', $result->{'phrase'});
-			return "I can't update that, " . $message->from();
+			return "I can't update that, " . $message->from;
 		} else {
 			return 'NOREPLY';
 		}
@@ -317,28 +317,28 @@ sub replace($$$$)
 	~;
 	db()->query($query, $value, $relates, $what);
 
-	if ($message->is_explicit()) {
-		return "OK, " . $message->from();
+	if ($message->is_explicit) {
+		return "OK, " . $message->from;
 	}
 	return 'NOREPLY';
 }
 
-sub reply_listener($)
+sub reply_listener
 {
 	my $message = shift;
 
 	return undef unless $message->is_explicit;
 
-	return reply($message, $message->message());
+	return reply($message, $message->message);
 }
 
-sub reply($$)
+sub reply
 {
 	my ($message, $data) = @_;
 
 	# Determine if this was likely something explicitly requested.
 	# This means that it included the bot's name and ended in a question mark
-	my $explicit = ($message->is_addressed() && $data =~ /\?\s*$/);
+	my $explicit = ($message->is_addressed && $data =~ /\?\s*$/);
 
 	# Trim whitespace
 	$data =~ s/^\s*(.+?)\s*$/$1/;
@@ -356,7 +356,7 @@ sub reply($$)
 
 	unless ($phrase) {
 		if ($explicit) {
-			return $dunno[int(rand(scalar(@dunno)))] . ', ' . $message->from();
+			return $dunno[int(rand(scalar(@dunno)))] . ', ' . $message->from;
 		} else {
 			return undef;
 		}
@@ -384,7 +384,7 @@ sub reply($$)
 	} elsif ($value =~ /^\s*\<reply\>\s*$/) {
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<action\>\s*(.+)$/) {
-		GIR::Bot::enqueue_action($message->where(), parse_special($1, $message));
+		GIR::Bot::enqueue_action($message->where, parse_special($1, $message));
 		return 'NOREPLY';
 	} elsif ($value =~ /^\s*\<feedback\>\s*(.+)$/) {
 		if (++$feedbacked > 2) {
@@ -433,14 +433,14 @@ sub reply($$)
 	}
 }
 
-sub find_match($)
+sub find_match
 {
 	my ($data) = @_;
 
-	return find_match_aux($data, ( ));	
+	return find_match_aux($data, ( ));
 }
 
-sub find_match_aux($@)
+sub find_match_aux
 {
 	my ($data, @params) = @_;
 
@@ -534,16 +534,16 @@ sub find_match_aux($@)
 	return find_match_aux($data, @params);
 }
 
-sub lock($)
+sub lock
 {
 	my $message = shift;
 
 	# Split into parts
-	my ($password, $phrase) = split(/\s+/, $message->message(), 2);
+	my ($password, $phrase) = split(/\s+/, $message->message, 2);
 
 	# Make sure the user can do that
-	unless (Modules::Access::check_access($message->from(), $password, 'lock')) {
-		return "You don't have permission to do that, " . $message->from() . '!';
+	unless (Modules::Access::check_access($message->from, $password, 'lock')) {
+		return "You don't have permission to do that, " . $message->from . '!';
 	}
 
 	# Make sure phrase exists
@@ -555,7 +555,7 @@ sub lock($)
 	my $entry = db()->query($query, $phrase)->fetch;
 
 	unless ($entry) {
-		return "I don't have anything matching '$phrase', " . $message->from();
+		return "I don't have anything matching '$phrase', " . $message->from;
 	}
 
 	# Update record
@@ -566,19 +566,19 @@ sub lock($)
 	~;
 	db()->query($query, $phrase);
 
-	return "OK, " . $message->from();
+	return "OK, " . $message->from;
 }
 
-sub unlock($)
+sub unlock
 {
 	my $message = shift;
 
 	# Split into parts
-	my ($password, $phrase) = split(/\s+/, $message->message(), 2);
+	my ($password, $phrase) = split(/\s+/, $message->message, 2);
 
 	# Make sure the user can do that
-	unless (Modules::Access::check_access($message->from(), $password, 'unlock')) {
-		return "You don't have permission to do that, " . $message->from() . '!';
+	unless (Modules::Access::check_access($message->from, $password, 'unlock')) {
+		return "You don't have permission to do that, " . $message->from . '!';
 	}
 
 	# Make sure phrase exists
@@ -590,7 +590,7 @@ sub unlock($)
 	my $entry = db()->query($query, $phrase)->fetch;
 
 	unless ($entry) {
-		return "I don't have anything matching '$phrase', " . $message->from();
+		return "I don't have anything matching '$phrase', " . $message->from;
 	}
 
 	# Update record
@@ -601,14 +601,14 @@ sub unlock($)
 	~;
 	db()->query($query, $phrase);
 
-	return "OK, " . $message->from();
+	return "OK, " . $message->from;
 }
 
-sub literal($)
+sub literal
 {
 	my $message = shift;
 
-	my $phrase  = $message->message();
+	my $phrase  = $message->message;
 
 	return undef unless $phrase;
 
@@ -626,8 +626,8 @@ sub literal($)
 		return sprintf('%s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 	} else {
 		# Not found; only reply if explicitly addressed publicly or privately
-		if ($message->is_explicit()) {
-			return "I don't have anything matching '$phrase', " . $message->from();
+		if ($message->is_explicit) {
+			return "I don't have anything matching '$phrase', " . $message->from;
 		} else {
 			return undef;
 		}
@@ -636,7 +636,7 @@ sub literal($)
 
 
 # Handle $who in string
-sub parse_special($$)
+sub parse_special
 {
 	my ($str, $message) = @_;
 
@@ -649,7 +649,7 @@ sub parse_special($$)
 	return $str;
 }
 
-sub trim($)
+sub trim
 {
 	my $str = shift;
 
@@ -661,7 +661,7 @@ sub trim($)
 	return $str;
 }
 
-sub nick_changed($)
+sub nick_changed
 {
 	my $params = shift;
 
@@ -671,7 +671,7 @@ sub nick_changed($)
 	GIR::Modules::register_action($replace_expr, \&process, 2);
 }
 
-sub feedback($)
+sub feedback
 {
 	my ($message) = @_;
 
@@ -684,7 +684,7 @@ sub feedback($)
 	return $result;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

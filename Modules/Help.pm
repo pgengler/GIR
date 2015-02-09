@@ -7,13 +7,13 @@ sub register
 	GIR::Modules::register_action('help', \&Modules::Help::process);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	return unless $message->is_explicit();
+	return unless $message->is_explicit;
 
-	my $topic = $message->message();
+	my $topic = $message->message;
 
 	if ($topic && $topic !~ /^\s*help\s*$/) {
 		if ($GIR::Modules::help{ $topic }) {

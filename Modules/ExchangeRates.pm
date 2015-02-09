@@ -14,7 +14,7 @@ sub register
 	GIR::Modules::register_help('exchange', \&Modules::ExchangeRates::help);
 }
 
-sub convert($)
+sub convert
 {
 	my $message = shift;
 
@@ -50,14 +50,14 @@ sub convert($)
 	return $conversion;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 
 	return "'exchange <from> to <to>': gets the exchange rate between the two currencies";
 }
 
-sub _parse($)
+sub _parse
 {
 	my ($data) = @_;
 

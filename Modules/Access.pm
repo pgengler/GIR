@@ -14,15 +14,15 @@ sub register
 	GIR::Modules::register_private('remove access', \&Modules::Access::remove_access);
 }
 
-sub show_access($)
+sub show_access
 {
 	my $message = shift;
 
-	my $user = $message->from();
+	my $user = $message->from;
 	my $isSelf = 1;
 
-	if ($message->message()) {
-		$user = $message->message();
+	if ($message->message) {
+		$user = $message->message;
 		$isSelf = 0;
 	}
 
@@ -54,7 +54,7 @@ sub show_access($)
 ## Takes a nick, password, and access, and returns 1 if the user has that access (and a correct password).
 ## This function is intended to be called from other modules.
 #######
-sub check_access($$$)
+sub check_access
 {
 	my ($user, $password, $access) = @_;
 
@@ -87,13 +87,13 @@ sub check_access($$$)
 	return 0;
 }
 
-sub add_access($)
+sub add_access
 {
 	my $message = shift;
 
 	# Get the parts; syntax is <password> <user> <access>
-	my $user = $message->from();
-	my ($password, $target_user, $to_add) = split(/\s+/, $message->message(), 3);
+	my $user = $message->from;
+	my ($password, $target_user, $to_add) = split(/\s+/, $message->message, 3);
 
 	my $allowed = check_access($user, $password, 'add_access');
 
@@ -156,13 +156,13 @@ sub add_access($)
 	return 'Permission added';
 }
 
-sub remove_access($)
+sub remove_access
 {
 	my $message = shift;
 
 	# Get the parts; syntax is <password> <user> <access>
-	my $user = $message->from();
-	my ($password, $target_user, $to_remove) = split(/\s+/, $message->message(), 3);
+	my $user = $message->from;
+	my ($password, $target_user, $to_remove) = split(/\s+/, $message->message, 3);
 
 	my $allowed = check_access($user, $password, 'remove_access');
 

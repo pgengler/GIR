@@ -2,7 +2,7 @@ package GIR::Command;
 
 use strict;
 
-sub parse($)
+sub parse
 {
 	my ($string) = @_;
 
@@ -40,7 +40,7 @@ sub parse($)
 	GIR::Bot::status("Unrecognized command '%s'", $string);
 }
 
-sub _command_string($@)
+sub _command_string
 {
 	my ($command, @parameters) = @_;
 

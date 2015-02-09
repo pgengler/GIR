@@ -13,11 +13,11 @@ sub register
 	GIR::Modules::register_help('squote', \&Modules::Stock::help);
 }
 
-sub quote($)
+sub quote
 {
 	my $message = shift;
 
-	my $symbol = $message->message();
+	my $symbol = $message->message;
 
 	return unless $symbol;
 
@@ -37,11 +37,11 @@ sub quote($)
 
 	my $finance = new StockQuote::Google($symbol);
 
-	my $info = $finance->fetch();
+	my $info = $finance->fetch;
 
 	unless ($info) {
 		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
-		if ($message->is_addressed()) {
+		if ($message->is_addressed) {
 			return "Unable to get quote for '$symbol'";
 		}
 		return undef;
@@ -50,11 +50,11 @@ sub quote($)
 	return sprintf('%s: Last: %s Change: %s %s Open: %s Day Range: %s Year Range: %s', $info->{'name'}, $info->{'price'}, $info->{'change'}, $info->{'pctChange'}, $info->{'open'}, $info->{'dayRange'}, $info->{'yearRange'});
 }
 
-sub short_quote($)
+sub short_quote
 {
 	my $message = shift;
 
-	my $symbol = $message->message();
+	my $symbol = $message->message;
 
 	GIR::Bot::status("Looking up stock quote for '%s'", $symbol);
 
@@ -70,11 +70,11 @@ sub short_quote($)
 
 	my $quote = new StockQuote::Google($symbol);
 
-	my $info = $quote->fetch();
+	my $info = $quote->fetch;
 
 	unless ($info) {
 		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
-		if ($message->is_addressed()) {
+		if ($message->is_addressed) {
 			return "Unable to get quote for '$symbol'";
 		}
 		return undef;
@@ -83,11 +83,11 @@ sub short_quote($)
 	return sprintf('%s: %s, %s %s', $info->{'name'}, $info->{'price'}, $info->{'change'}, $info->{'pctChange'});
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 
-	if ($message->message() eq 'quote') {
+	if ($message->message eq 'quote') {
 		return "'quote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site. See also 'squote'.";
 	} else {
 		return "'squote <symbol>' displays current stock information for the given symbol, retrieved from the Yahoo! Finance site, in a compact format. See also 'quote'.";

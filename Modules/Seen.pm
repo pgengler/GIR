@@ -10,7 +10,7 @@ sub register
 	GIR::Modules::register_help('seen', \&Modules::Seen::help);
 }
 
-sub seen($)
+sub seen
 {
 	my $message = shift;
 
@@ -81,7 +81,7 @@ sub seen($)
 	}
 }
 
-sub update($)
+sub update
 {
 	my $message = shift;
 
@@ -122,7 +122,7 @@ sub update($)
 	return undef;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

@@ -7,11 +7,11 @@ sub register
 	GIR::Modules::register_action('buttbuttinate', \&Modules::Replace::replace);
 }
 
-sub replace($)
+sub replace
 {
 	my $message = shift;
 
-	my $data = $message->message();
+	my $data = $message->message;
 
 	$data =~ s/ass/butt/gi;
 	$data =~ s/tit/breast/gi;

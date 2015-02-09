@@ -11,7 +11,7 @@ use constant {
 	URL_FORMAT => 'http://www.google.com/finance?q=%s',
 };
 
-sub new()
+sub new
 {
 	my $class = shift;
 	my ($symbol) = @_;
@@ -23,7 +23,7 @@ sub new()
 	return bless $self, $class;
 }
 
-sub fetch()
+sub fetch
 {
 	my $self = shift;
 	my ($symbol) = @_;
@@ -37,19 +37,19 @@ sub fetch()
 	# Get Google Finance page
 	my $url = sprintf(URL_FORMAT, $symbol);
 
-	my $userAgent = new LWP::UserAgent();
+	my $userAgent = LWP::UserAgent->new;
 	$userAgent->timeout(10);
 
 	my $request = new HTTP::Request('GET', $url);
 
 	my $response = $userAgent->request($request);
 
-	if (!$response->is_success()) {
+	if (!$response->is_success) {
 		return undef;
 	}
 
-	my $tree = new HTML::TreeBuilder::XPath();
-	$tree->parse_content($response->content());
+	my $tree = HTML::TreeBuilder::XPath->new;
+	$tree->parse_content($response->content);
 
 	my $title = $tree->findvalue('/html/head/title');
 	return undef unless $title =~ /quotes & news/;
@@ -79,7 +79,7 @@ sub fetch()
 	return $info;
 }
 
-sub AUTOLOAD()
+sub AUTOLOAD
 {
 	my $self = shift;
 

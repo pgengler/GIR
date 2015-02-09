@@ -61,7 +61,7 @@ use Database::Statement;
 ## are all database-specific. See the documentation for a particular
 ## Database subclass for more information about connection options.
 #######
-sub new()
+sub new
 {
 	my ($class, %params) = @_;
 
@@ -80,7 +80,7 @@ sub new()
 
 	bless $self, $class;
 
-	$self->connect();
+	$self->connect;
 
 	return $self;
 }
@@ -102,7 +102,7 @@ sub new()
 ## check whether the database connection was closed), a subclassing object can
 ## override this method.
 #######
-sub connected()
+sub connected
 {
 	my $self = shift;
 
@@ -120,7 +120,7 @@ sub connected()
 ## Return value:
 ##   NONE
 #######
-sub disconnect()
+sub disconnect
 {
 	my $self = shift;
 
@@ -128,7 +128,7 @@ sub disconnect()
 		$self->{'error'}->(Carp::longmess("No active connection to disconnect from"), $self);
 	}
 
-	$self->{'_dbh'}->disconnect();
+	$self->{'_dbh'}->disconnect;
 
 	undef $self->{'_dbh'};
 }
@@ -155,7 +155,7 @@ sub disconnect()
 ##   If the auto_prepare option is enabled, the statement is prepared before
 ##   returning it.
 #######
-sub statement()
+sub statement
 {
 	my ($self, $sql, $auto_prepare) = @_;
 
@@ -166,7 +166,7 @@ sub statement()
 	my $statement = Database::Statement->new($self, $sql, 'error' => $self->{'error'});
 
 	if ($auto_prepare || (not defined($auto_prepare) && $self->{'auto_prepare'})) {
-		$statement->prepare();
+		$statement->prepare;
 	}
 
 	return $statement;
@@ -191,7 +191,7 @@ sub statement()
 ##
 ##   Returns the Database::Statement object with the query active.
 #######
-sub query()
+sub query
 {
 	my $self = shift;
 	my ($sql, @values) = @_;
@@ -210,7 +210,7 @@ sub query()
 ## Return value:
 ##   NONE
 #######
-sub start_transaction()
+sub start_transaction
 {
 	my $self = shift;
 
@@ -219,7 +219,7 @@ sub start_transaction()
 		$self->{'error'}->(Carp::longmess("Cannot start new transaction; one is already active."), $self);
 	}
 
-	$self->statement("BEGIN", 1)->execute();
+	$self->statement("BEGIN", 1)->execute;
 
 	$self->{'_transaction'} = 1;
 }
@@ -235,7 +235,7 @@ sub start_transaction()
 ## Return value:
 ##   NONE
 #######
-sub commit_transaction()
+sub commit_transaction
 {
 	my $self = shift;
 
@@ -244,7 +244,7 @@ sub commit_transaction()
 		$self->{'error'}->(Carp::longmess("No active transaction to commit"), $self);
 	}
 
-	$self->statement('COMMIT', 1)->execute();
+	$self->statement('COMMIT', 1)->execute;
 
 	$self->{'_transaction'} = 0;
 }
@@ -260,7 +260,7 @@ sub commit_transaction()
 ## Return value:
 ##   NONE
 #######
-sub rollback_transaction()
+sub rollback_transaction
 {
 	my $self = shift;
 
@@ -269,10 +269,10 @@ sub rollback_transaction()
 		$self->{'error'}->(Carp::longmess("No active transaction to roll back"), $self);
 	}
 
-	$self->statement('ROLLBACK', 1)->execute();
+	$self->statement('ROLLBACK', 1)->execute;
 
 	$self->{'_transaction'} = 0;
-}	
+}
 
 #######
 ## GET DATABASE HANDLE
@@ -290,7 +290,7 @@ sub rollback_transaction()
 ## available if needed. It is primarily intended for use by
 ## Database::Statement objects.
 #######
-sub _handle()
+sub _handle
 {
 	my $self = shift;
 
@@ -316,7 +316,7 @@ sub _handle()
 ## By passing a function as the 'error' parameter during construction, a
 ## custom function can override this behavior.
 #######
-sub error()
+sub error
 {
 	my ($message, $obj) = @_;
 

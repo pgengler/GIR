@@ -10,11 +10,11 @@ sub register
 	GIR::Modules::register_action($update_expr, \&Modules::Karma::update);
 }
 
-sub get($)
+sub get
 {
 	my $message = shift;
 
-	my $name = $message->message();
+	my $name = $message->message;
 
 	return unless $name;
 
@@ -34,25 +34,25 @@ sub get($)
 	}
 }
 
-sub update($)
+sub update
 {
 	my $message = shift;
 
-	unless ($message->is_public()) {
+	unless ($message->is_public) {
 		return 'Karma updates must be done in public!';
 	}
 
 	# Parse message for name and direction
 	my $name;
 	my $direction;
-	if ($message->message() =~ $update_expr) {
+	if ($message->message =~ $update_expr) {
 		$name      = $1;
 		$direction = $2;
 	} else {
 		return;
 	}
 
-	if (lc($message->from()) eq lc($name)) {
+	if (lc($message->from) eq lc($name)) {
 		return "You can't change your own karma!";
 	}
 

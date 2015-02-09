@@ -87,7 +87,7 @@ sub readmorestats
 	}
 }
 
-sub pluralize($$)
+sub pluralize
 {
 	my ($string, $count) = @_;
 

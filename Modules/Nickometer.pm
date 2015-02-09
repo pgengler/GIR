@@ -11,14 +11,14 @@ sub register
 	GIR::Modules::register_help('nickometer', \&Modules::Nickometer::help);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	my $nick = $message->message();
+	my $nick = $message->message;
 
 	if (lc($nick) eq 'me') {
-		$nick = $message->from();
+		$nick = $message->from;
 	}
 
 	# Remove leading and trailing whitespace
@@ -32,10 +32,10 @@ sub process($)
 		$percentage = $percentage . '%';
 	}
 
-	return "'$nick' is $percentage lame, " . $message->from();
+	return "'$nick' is $percentage lame, " . $message->from;
 }
 
-sub nickometer($)
+sub nickometer
 {
 	my $nick = shift;
 
@@ -146,7 +146,7 @@ sub nickometer($)
 	return sprintf("%.${digits}f", $percentage);
 }
 
-sub case_shifts($)
+sub case_shifts
 {
 	# This is a neat trick suggested by freeside. Thanks freeside!
 	my $shifts = shift;
@@ -158,7 +158,7 @@ sub case_shifts($)
 	return length($shifts) - 1;
 }
 
-sub number_shifts($)
+sub number_shifts
 {
 	my $shifts = shift;
 
@@ -169,28 +169,28 @@ sub number_shifts($)
 	return length($shifts) - 1;
 }
 
-sub slow_pow($$)
+sub slow_pow
 {
 	my ($x, $y) = @_;
 
 	return $x ** slow_exponent($y);
 }
 
-sub slow_exponent($)
+sub slow_exponent
 {
 	my $x = shift;
 
 	return 1.3 * $x * (1 - atan($x / 6) * 2 / 3.14159);
 }
 
-sub round_up($)
+sub round_up
 {
 	my $float = shift;
 
 	return int($float) + ((int($float) == $float) ? 0 : 1);
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

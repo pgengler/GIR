@@ -8,14 +8,14 @@ sub register
 	GIR::Modules::register_private('unignore', \&Modules::Ignore::unignore);
 }
 
-sub ignore($)
+sub ignore
 {
 	my $message = shift;
 
-	my ($password, $nick) = split(/\s+/, $message->message(), 2);
+	my ($password, $nick) = split(/\s+/, $message->message, 2);
 
 	# Check that we have access for this
-	unless (Modules::Access::check_access($message->from(), $password, 'ignore')) {
+	unless (Modules::Access::check_access($message->from, $password, 'ignore')) {
 		return "You don't have access for that!";
 	}
 
@@ -25,14 +25,14 @@ sub ignore($)
 	return "$nick has been added to the ignore list";
 }
 
-sub unignore($)
+sub unignore
 {
 	my $message = shift;
 
-	my ($password, $nick) = split(/\s+/, $message->message(), 2);
+	my ($password, $nick) = split(/\s+/, $message->message, 2);
 
 	# Check that we have access for this
-	unless (Modules::Access::check_access($message->from(), $password, 'ignore')) {
+	unless (Modules::Access::check_access($message->from, $password, 'ignore')) {
 		return "You don't have access for that!";
 	}
 
@@ -40,6 +40,6 @@ sub unignore($)
 	GIR::Bot::remove_ignore($nick);
 
 	return "$nick has been removed from the ignore list";
-}	
+}
 
 1;

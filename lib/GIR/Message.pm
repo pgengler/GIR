@@ -17,7 +17,7 @@ use constant {
 ## Return value:
 ##   Returns a new instance of the GIR::Message class.
 #######
-sub new()
+sub new
 {
 	my ($class, $obj, $params) = @_;
 
@@ -39,13 +39,13 @@ sub new()
 		my $message = $obj;
 		$params ||= { };
 		$self = {
-			'_nick'      => $params->{'nick'}      // $message->from(),
-			'_where'     => $params->{'where'}     // $message->where(),
-			'_raw'       => $params->{'message'}   // $message->raw(),
-			'_host'      => $params->{'host'}      // $message->host(),
-			'_fullhost'  => $params->{'fullhost'}  // $message->fullhost(),
-			'_public'    => $params->{'public'}    // $message->is_public(),
-			'_addressed' => $params->{'addressed'} // $message->is_addressed(),
+			'_nick'      => $params->{'nick'}      // $message->from,
+			'_where'     => $params->{'where'}     // $message->where,
+			'_raw'       => $params->{'message'}   // $message->raw,
+			'_host'      => $params->{'host'}      // $message->host,
+			'_fullhost'  => $params->{'fullhost'}  // $message->fullhost,
+			'_public'    => $params->{'public'}    // $message->is_public,
+			'_addressed' => $params->{'addressed'} // $message->is_addressed,
 			'_parsed'    => undef,
 		};
 	} else {
@@ -54,7 +54,7 @@ sub new()
 
 	bless $self, $class;
 
-	$self->_parse();
+	$self->_parse;
 
 	return $self;
 }
@@ -68,11 +68,11 @@ sub new()
 ## Return value:
 ##   The message, with any bot addressing removed.
 #######
-sub message()
+sub message
 {
 	my $self = shift;
 
-	return $self->{'_parsed'} || $self->raw();
+	return $self->{'_parsed'} || $self->raw;
 }
 
 #######
@@ -84,7 +84,7 @@ sub message()
 ## Return value:
 ##   Returns the raw message with no parsing done.
 #######
-sub raw()
+sub raw
 {
 	my $self = shift;
 
@@ -100,7 +100,7 @@ sub raw()
 ## Return value:
 ##   Returns the nickname of the user who originated the message.
 #######
-sub from()
+sub from
 {
 	my $self = shift;
 
@@ -116,7 +116,7 @@ sub from()
 ## Return value:
 ##   Returns the host of the user who originated the message.
 #######
-sub host()
+sub host
 {
 	my $self = shift;
 
@@ -133,7 +133,7 @@ sub host()
 ##   Returns the nickname, username, and host of the user who originated
 ##   the message, in the form <nick>!<user>@<host>
 #######
-sub fullhost()
+sub fullhost
 {
 	my $self = shift;
 
@@ -151,7 +151,7 @@ sub fullhost()
 ##     the name of the channel; for private messages, it is the nickname of
 ##     the sender.
 #######
-sub where()
+sub where
 {
 	my $self = shift;
 
@@ -168,7 +168,7 @@ sub where()
 ##   If the message was addressed to the bot, returns true.
 ##   Otherwiese, returns false.
 #######
-sub is_addressed()
+sub is_addressed
 {
 	my $self = shift;
 
@@ -185,7 +185,7 @@ sub is_addressed()
 ##   If the message originated in a channel, returns true.
 ##   Otherwise, returns false.
 #######
-sub is_public()
+sub is_public
 {
 	my $self = shift;
 
@@ -203,11 +203,11 @@ sub is_public()
 ##     returns true.
 ##   Otherwise, returns false.
 #######
-sub is_explicit()
+sub is_explicit
 {
 	my $self = shift;
 
-	if ($self->{'_addressed'} || !$self->is_public()) {
+	if ($self->{'_addressed'} || !$self->is_public) {
 		return true;
 	}
 	return false;
@@ -232,7 +232,7 @@ sub is_explicit()
 ## This method also checks if the message originated in a channel, and if so,
 ## sets $self->{'_public'} to 'true'.
 #######
-sub _parse()
+sub _parse
 {
 	my $self = shift;
 

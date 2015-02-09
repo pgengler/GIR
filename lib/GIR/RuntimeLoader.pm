@@ -22,7 +22,7 @@ use File::Spec;
 ##   $name
 ##   - the name of the module to load at runtime.
 #######
-sub new()
+sub new
 {
 	my ($class, $name) = @_;
 
@@ -48,7 +48,7 @@ sub new()
 ## Return Value:
 ##   The name of the currently-loaded module.
 #######
-sub name()
+sub name(
 {
 	my $self = shift;
 
@@ -67,7 +67,7 @@ sub name()
 ## Return value:
 ##   NONE
 #######
-sub add_path()
+sub add_path
 {
 	my ($self, @paths) = @_;
 
@@ -88,7 +88,7 @@ sub add_path()
 ##   Returns a new instance of the specified object if successful. On failure,
 ##   returns 'undef' and $@ contains the error.
 #######
-sub load()
+sub load
 {
 	my $self = shift;
 
@@ -107,11 +107,11 @@ sub load()
 		require '$file';
 		use GIR::Module;
 		\@{\"${class}::ISA\"} = 'GIR::Module';
-		\$self->{'_obj'} = $self->{'_class'}->new();
+		\$self->{'_obj'} = $self->{'_class'}->new;
 	~;
 
 	# Remove custom paths from @INC
-	$self->_clean_inc();
+	$self->_clean_inc;
 
 	return $self->{'_obj'};
 }
@@ -127,7 +127,7 @@ sub load()
 ## Return Value:
 ##   NONE
 #######
-sub unload()
+sub unload
 {
 	my $self = shift;
 
@@ -149,7 +149,7 @@ sub unload()
 ## Return Value:
 ##   NONE
 #######
-sub _clean_inc()
+sub _clean_inc
 {
 	my $self = shift;
 

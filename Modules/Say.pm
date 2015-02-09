@@ -11,7 +11,7 @@ sub register
 	GIR::Modules::register_help('action', \&Modules::Say::help);
 }
 
-sub say($)
+sub say
 {
 	my $message = shift;
 
@@ -25,7 +25,7 @@ sub say($)
 	}
 }
 
-sub action($)
+sub action
 {
 	my $message = shift;
 
@@ -39,7 +39,7 @@ sub action($)
 	}
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

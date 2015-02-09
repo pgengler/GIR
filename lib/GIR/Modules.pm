@@ -71,16 +71,16 @@ my $suppress_rebuild = 0;
 #######
 ## FUNCTIONS
 #######
-sub init()
+sub init
 {
 	restart_thread_pool();
 }
 
-sub restart_thread_pool()
+sub restart_thread_pool
 {
 	if ($pool) {
 		# If we have an existing pool, wait for its threads to complete
-		$pool->join();
+		$pool->join;
 		# Then destroy the pool
 		undef $pool;
 	}
@@ -92,7 +92,7 @@ sub restart_thread_pool()
 	);
 }
 
-sub load_modules()
+sub load_modules
 {
 	# Unload any existing modules
 	unload_modules();
@@ -134,7 +134,7 @@ sub load_modules()
 	restart_thread_pool();
 }
 
-sub load_module($$$)
+sub load_module
 {
 	my ($name, $suppress_restart, $auto) = @_;
 
@@ -142,11 +142,11 @@ sub load_module($$$)
 
 	$class->add_path($GIR::Bot::config->{'module_dir'} . '../');
 
-	my $module = $class->load();
+	my $module = $class->load;
 
 	unless ($module) {
 		GIR::Bot::status("Failed to load module '%s': %s", $name, $@);
-		$class->unload();
+		$class->unload;
 		return;
 	}
 
@@ -172,17 +172,17 @@ sub load_module($$$)
 	restart_thread_pool() unless $suppress_restart;
 }
 
-sub unload_modules()
+sub unload_modules
 {
 	while (my $class = shift(@loaded_modules)) {
-		$class->unload();
+		$class->unload;
 	}
 
 	# Clear lists of handlers
 	%registered     = ( );
 
 	%actions        = ( );
-	%private        = ( );	
+	%private        = ( );
 	%listeners      = ( );
 	%help           = ( );
 	%event_handlers = _empty_event_handlers();
@@ -190,7 +190,7 @@ sub unload_modules()
 	restart_thread_pool();
 }
 
-sub unload_module($;$)
+sub unload_module
 {
 	my ($name, $silent) = @_;
 
@@ -198,7 +198,7 @@ sub unload_module($;$)
 
 	for (my $i = 0; $i < scalar(@loaded_modules); $i++) {
 		my $class = $loaded_modules[$i];
-		if ($class->name() eq $mod_name) {
+		if ($class->name eq $mod_name) {
 			GIR::Bot::status("Unloading module '%s'", $name);
 
 			# Remove from list of modules
@@ -210,7 +210,7 @@ sub unload_module($;$)
 			restart_thread_pool();
 
 			# Unload
-			$class->unload();
+			$class->unload;
 
 			return;
 		}
@@ -219,13 +219,13 @@ sub unload_module($;$)
 	GIR::Bot::status("Can't unload module '$name' because it isn't loaded", $name) unless $silent;
 }
 
-sub loaded_modules()
+sub loaded_modules
 {
 	my @module_names = map { (my $name = $_->name) =~ s/Modules:://; $name } @loaded_modules;
 	return sort { $a cmp $b } @module_names;
 }
 
-sub register_action($$;$)
+sub register_action
 {
 	my ($action, $func, $priority) = @_;
 
@@ -257,7 +257,7 @@ sub register_action($$;$)
 	rebuild_registration_list() unless $suppress_rebuild;
 }
 
-sub unregister_action($)
+sub unregister_action
 {
 	my $action = shift;
 
@@ -278,7 +278,7 @@ sub unregister_action($)
 	restart_thread_pool();
 }
 
-sub register_private($$)
+sub register_private
 {
 	my ($action, $func) = @_;
 
@@ -304,7 +304,7 @@ sub register_private($$)
 	}
 }
 
-sub register_listener($$)
+sub register_listener
 {
 	my ($func, $priority) = @_;
 
@@ -330,7 +330,7 @@ sub register_listener($$)
 	}
 }
 
-sub register_help($$)
+sub register_help
 {
 	my ($command, $func) = @_;
 
@@ -358,7 +358,7 @@ sub register_help($$)
 	}
 }
 
-sub register_event($$)
+sub register_event
 {
 	my ($event, $function) = @_;
 
@@ -379,7 +379,7 @@ sub register_event($$)
 	}
 }
 
-sub rebuild_registration_list()
+sub rebuild_registration_list
 {
 	# Reset to empty states
 	%actions    = ( );
@@ -403,7 +403,7 @@ sub rebuild_registration_list()
 			$help{ $help->{'command'} } = $help->{'function'};
 		}
 		foreach my $listener (@{ $registered{ $module }->{'listeners'} }) {
-			push @{ $listeners{ $listener->{'priority'} } }, $listener->{'function'};			
+			push @{ $listeners{ $listener->{'priority'} } }, $listener->{'function'};
 		}
 		foreach my $event (keys %event_handlers) {
 			if (exists $registered{ $module }->{ $event }) {
@@ -413,7 +413,7 @@ sub rebuild_registration_list()
 	}
 }
 
-sub event($$)
+sub event
 {
 	my ($event, $params) = @_;
 
@@ -426,30 +426,30 @@ sub event($$)
 	}
 }
 
-sub dispatch($)
+sub dispatch
 {
 	my $message = shift;
 
 	$pool->add($message);
 }
 
-sub dispatch_t($)
+sub dispatch_t
 {
 	my $message = shift;
 
 	my $result = process($message);
 
 	if ($result && $result ne 'NOREPLY') {
-		GIR::Bot::enqueue_say($message->where(), $result);
+		GIR::Bot::enqueue_say($message->where, $result);
 	}
 }
 
-sub process($;$)
+sub process
 {
 	my ($message, $nests) = @_;
 	$nests ||= 0;
 
-	if ($message->message() =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $GIR::Bot::config->{'max_nest'}) {
+	if ($message->message =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $GIR::Bot::config->{'max_nest'}) {
 		my $pre  = $1 || '';
 		my $nest = $2 || '';
 		my $post = $3 || '';
@@ -479,16 +479,16 @@ sub process($;$)
 		foreach my $action (@{ $actions{ $priority } }) {
 			my $act = $action->{'action'};
 			if (ref($act) eq 'Regexp') {
-				if ($message->message() =~ $act) {
+				if ($message->message =~ $act) {
 					$result = eval { $action->{'function'}->($message) };
 					GIR::Bot::error($@) if $@;
 					return $result if $result;
 				}
 			} else {
 				my $msg;
-				if ($message->message() =~ /^$act(\!|\.|\?)*$/i) {
+				if ($message->message =~ /^$act(\!|\.|\?)*$/i) {
 					$msg = GIR::Message->new($message, { 'message' => '' });
-				} elsif ($message->message() =~ /^$act\s+(.+?)$/i) {
+				} elsif ($message->message =~ /^$act\s+(.+?)$/i) {
 					$msg = GIR::Message->new($message, {
 						'message' => $1,
 					});
@@ -502,15 +502,15 @@ sub process($;$)
 		}
 	}
 
-	unless ($message->is_public()) {
+	unless ($message->is_public) {
 		foreach my $private (@private) {
 			if (ref($private) eq 'Regexp') {
-				if ($message->message() =~ $private) {
+				if ($message->message =~ $private) {
 					$result = eval { $private{ $private }->($message) };
 					GIR::Bot::error($@) if $@;
 					return $result if $result;
 				}
-			} elsif ($message->message() =~ /^$private(\!|\.|\?)*$/i || $message->message() =~ /^$private\s+(.+)$/i) {
+			} elsif ($message->message =~ /^$private(\!|\.|\?)*$/i || $message->message =~ /^$private\s+(.+)$/i) {
 				my $msg = GIR::Message->new($message, {
 					'message'  => $1,
 				});
@@ -530,18 +530,18 @@ sub process($;$)
 	}
 }
 
-sub shutdown()
+sub shutdown
 {
 	GIR::Bot::debug('Cleaning up modules...');
 
 	# Wait for threads to finish before exiting
 	if ($pool) {
-		$pool->join();
+		$pool->join;
 	}
 }
 
 # Get a hash structure for event handlers with no stored data
-sub _empty_event_handlers()
+sub _empty_event_handlers
 {
 	return (
 		'join'         => [ ],
@@ -553,4 +553,3 @@ sub _empty_event_handlers()
 }
 
 1;
-

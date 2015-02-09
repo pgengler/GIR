@@ -20,11 +20,11 @@ sub register
 	}
 }
 
-sub shorten()
+sub shorten
 {
 	my ($message) = @_;
 
-	my $url = $message->message();
+	my $url = $message->message;
 
 	# Remove leading and trailing whitespace
 	$url =~ s/^\s*(.+?)\s*$/$1/;
@@ -64,11 +64,11 @@ sub shorten()
 	return $data->{'data'}->{'url'};
 }
 
-sub _error($)
+sub _error
 {
 	my ($message) = @_;
 
-	if ($message->is_explicit()) {
+	if ($message->is_explicit) {
 		return "Error connecting to bit.ly API";
 	} else {
 		return 'NOREPLY';

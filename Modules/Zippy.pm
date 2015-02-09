@@ -6,7 +6,7 @@ sub register
 	GIR::Modules::register_help('yow', \&Modules::Zippy::help);
 }
 
-sub zippy($)
+sub zippy
 {
 	my $message = shift;
 
@@ -18,10 +18,10 @@ sub zippy($)
 	close($zippy);
 	$yow =~ s/\n/ /g;
 
-	return $yow;	
+	return $yow;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

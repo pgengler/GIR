@@ -41,10 +41,10 @@ use constant _EXECUTED => 2;
 ##   - A hash of any options that should be set. Valid options are:
 ##     error
 ##     - A custom function to receive errors. Defaults to the parent Database
-##       object's handler, or a simple function that merely die()s with the 
+##       object's handler, or a simple function that merely die()s with the
 ##       error text.
 #######
-sub new()
+sub new
 {
 	my ($class, $database, $statement, %options) = @_;
 
@@ -79,7 +79,7 @@ sub new()
 ## Return Value:
 ##   Returns the current Database::Statement object.
 #######
-sub prepare()
+sub prepare
 {
 	my ($self, $statement_str) = @_;
 
@@ -87,11 +87,11 @@ sub prepare()
 		$self->{'_statement'} = $statement_str;
 	}
 
-	unless ($self->{'_database'} && $self->{'_database'}->connected()) {
+	unless ($self->{'_database'} && $self->{'_database'}->connected) {
 		$self->{'error'}->(Carp::longmess("No database connection active!"), $self);
 	}
 
-	$self->{'_sth'} = $self->{'_database'}->_handle()->prepare($self->{'_statement'});
+	$self->{'_sth'} = $self->{'_database'}->_handle->prepare($self->{'_statement'});
 
 	$self->{'_state'} = _PREPARED;
 
@@ -113,11 +113,11 @@ sub prepare()
 ## Return Value:
 ##   Returns the current Database::Statement object.
 #######
-sub execute()
+sub execute
 {
 	my ($self, @values) = @_;
 
-	unless ($self->{'_database'} && $self->{'_database'}->connected()) {
+	unless ($self->{'_database'} && $self->{'_database'}->connected) {
 		$self->{'error'}->(Carp::longmess("No database connection active!"), $self);
 	}
 
@@ -125,7 +125,7 @@ sub execute()
 		$self->{'error'}->(Carp::longmess("Statement is not active; call prepare() first!"), $self);
 	}
 
-	$self->{'_sth'}->execute(@values) or $self->{'error'}->(Carp::longmess("Error executing query: " . $self->{'_sth'}->errstr()), $self);
+	$self->{'_sth'}->execute(@values) or $self->{'error'}->(Carp::longmess("Error executing query: " . $self->{'_sth'}->errstr), $self);
 
 	$self->{'_state'} = _EXECUTED;
 
@@ -145,7 +145,7 @@ sub execute()
 ##   The number of rows returned or affected by the last executed statement.
 ##   If no statement has been executed, returns -1.
 #######
-sub rows()
+sub rows
 {
 	my $self = shift;
 
@@ -153,7 +153,7 @@ sub rows()
 		return -1;
 	}
 
-	return $self->{'_sth'}->rows();
+	return $self->{'_sth'}->rows;
 }
 
 #######
@@ -174,11 +174,11 @@ sub rows()
 ##     Otherwise, returns a hash reference where the keys are the column names
 ##       and the values are the column value for that row.
 #######
-sub fetch()
+sub fetch
 {
 	my ($self, $column) = @_;
 
-	unless ($self->{'_database'} && $self->{'_database'}->connected()) {
+	unless ($self->{'_database'} && $self->{'_database'}->connected) {
 		$self->{'error'}->(Carp::longmess("No database connection active"), $self);
 	}
 
@@ -189,7 +189,7 @@ sub fetch()
 	if (defined($column)) {
 		my $row = $self->{'_sth'}->fetchrow_hashref;
 		return $row ? $row->{ $column } : undef;
-	} elsif (wantarray()) {
+	} elsif (wantarray) {
 		return $self->{'_sth'}->fetchrow_array;
 	} else {
 		return $self->{'_sth'}->fetchrow_hashref;
@@ -208,11 +208,11 @@ sub fetch()
 ##   Returns an arrayref, the elements of which are hashrefs for each row
 ##   of data (the same format as returned by fetch()).
 #######
-sub fetchall()
+sub fetchall
 {
 	my $self = shift;
 
-	unless ($self->{'_database'} && $self->{'_database'}->connected()) {
+	unless ($self->{'_database'} && $self->{'_database'}->connected) {
 		$self->{'error'}->(Carp::longmess("No database connection active"), $self);
 	}
 
@@ -235,7 +235,7 @@ sub fetchall()
 ## Return Value:
 ##   Returns the statement handle for the current statement.
 #######
-sub handle()
+sub handle
 {
 	my $self = shift;
 
@@ -261,7 +261,7 @@ sub handle()
 ## By passing a function as the 'error' parameter during construction, a
 ## custom function can override this behavior.
 #######
-sub error()
+sub error
 {
 	my ($message, $obj) = @_;
 

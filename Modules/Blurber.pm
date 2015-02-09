@@ -59,7 +59,7 @@ sub blurber
 	return sprintf("\"%s\" by %s. %s", $data->{'title'}, $data->{'author'}, $data->{'descr'});
 }
 
-sub _error($)
+sub _error
 {
 	my ($message) = @_;
 

@@ -14,29 +14,29 @@ sub register
 	GIR::Modules::register_help('qdb', \&Modules::QDB::help);
 }
 
-sub process_from_url($)
+sub process_from_url
 {
 	my ($message) = @_;
 
 	# Extract ID
-	if ($message->message() =~ $qdb_expr) {
+	if ($message->message =~ $qdb_expr) {
 		return _get_quote($1);
 	}
 	return undef;
 }
 
-sub process_from_text($)
+sub process_from_text
 {
 	my ($message) = @_;
 
 	# Check for valid id
-	if ($message->message() =~ /^\s*(\d+)\s*$/) {
+	if ($message->message =~ /^\s*(\d+)\s*$/) {
 		return _get_quote($1);
 	}
 	return undef;
 }
 
-sub _get_quote($)
+sub _get_quote
 {
 	my ($id) = @_;
 
@@ -74,14 +74,14 @@ sub _get_quote($)
 	}
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 
 	return "'qdb <id>': retrieves quote <id> from qdb.us and displays it.";
 }
 
-sub _process($)
+sub _process
 {
 	my ($quote) = @_;
 
@@ -92,7 +92,7 @@ sub _process($)
 	return $quote;
 }
 
-sub _save_quote($$)
+sub _save_quote
 {
 	my ($id, $quote) = @_;
 

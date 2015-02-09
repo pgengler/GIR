@@ -9,17 +9,17 @@ sub register
 	GIR::Modules::register_help('rot13', \&Modules::Rot13::help);
 }
 
-sub rot13($)
+sub rot13
 {
 	my $message = shift;
 
-	my $data = $message->message();
+	my $data = $message->message;
 	$data =~ y/A-Za-z/N-ZA-Mn-za-m/;
 
 	return $data;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

@@ -11,7 +11,7 @@ sub register
 	GIR::Modules::register_help('8ball', \&Modules::Eightball::help);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
@@ -21,14 +21,14 @@ sub process($)
 	return $responses[rand(@responses)];
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 
 	return "'8ball <question>': Used a magic 8-ball to try to divine an answer to your question.";
 }
 
-sub load_responses()
+sub load_responses
 {
 	state $data_position = tell DATA;
 

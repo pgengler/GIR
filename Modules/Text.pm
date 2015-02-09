@@ -2,9 +2,6 @@ package Modules::Text;
 
 use strict;
 
-##############
-sub new { bless { }, shift }
-
 sub register
 {
 	my $self = shift;
@@ -30,7 +27,7 @@ sub do_lcfirst
 	return lcfirst($message->message);
 }
 
-sub do_reverse($)
+sub do_reverse
 {
 	my $message = shift;
 

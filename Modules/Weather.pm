@@ -23,16 +23,16 @@ sub register
 	GIR::Modules::register_help('weather', \&Modules::Weather::help);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	my $location = $message->message();
+	my $location = $message->message;
 
 	return unless $location;
 
 	# Check if we have cached data, and it's still valid
-	if ($cache{ $location } && $cache{ $location }->{'retrieved'} + ($CACHE_TIME * 60) > time()) {
+	if ($cache{ $location } && $cache{ $location }->{'retrieved'} + ($CACHE_TIME * 60) > time) {
 		return $cache{ $location }->{'weather'};
 	}
 
@@ -109,14 +109,14 @@ sub process($)
 	}
 
 	my %info = (
-		'retrieved' => time(),
+		'retrieved' => time,
 		'weather'   => $weather
 	);
 	$cache{ $location } = \%info;
 	return $weather;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 
@@ -124,7 +124,7 @@ sub help($)
 }
 
 ##############
-sub is_valid($)
+sub is_valid
 {
 	my ($value) = @_;
 
@@ -134,7 +134,7 @@ sub is_valid($)
 	return 1;
 }
 
-sub format_temperature($)
+sub format_temperature
 {
 	my ($value) = @_;
 

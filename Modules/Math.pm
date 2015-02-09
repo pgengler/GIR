@@ -7,11 +7,11 @@ sub register
 	GIR::Modules::register_listener(\&Modules::Math::process, 3);
 }
 
-sub process()
+sub process
 {
 	my $message = shift;
 
-	my $data = $message->message();
+	my $data = $message->message;
 
 	if (($data !~ /^\s*$/) && ($data !~ /(\d+\.){2,}/)) {
 		my $expr = $data;

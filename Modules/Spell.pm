@@ -10,11 +10,11 @@ sub register
 	GIR::Modules::register_help('spell', \&help);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	my $data = $message->message();
+	my $data = $message->message;
 	$data =~ s/^\s+//;
 	$data =~ s/\s+$//;
 
@@ -38,7 +38,7 @@ sub process($)
 	return $result;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

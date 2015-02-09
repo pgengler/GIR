@@ -5,7 +5,7 @@ use feature ':5.10';
 use File::Spec;
 use IO::Socket::UNIX;
 
-my $temp_directory = File::Spec->tmpdir();
+my $temp_directory = File::Spec->tmpdir;
 my $socket_path = File::Spec->catfile($temp_directory, 'ircbot');
 
 if (scalar(@ARGV) == 0) {
@@ -18,7 +18,7 @@ unless (-S $socket_path) {
   exit(1);
 }
 
-my $socket = new IO::Socket::UNIX(
+my $socket = IO::Socket::UNIX->new(
   'Peer' => $socket_path,
   'Type' => SOCK_STREAM,
 );

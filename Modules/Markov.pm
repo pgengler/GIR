@@ -18,10 +18,10 @@ sub register
 #######
 ## OUTPUT
 #######
-sub output($)
+sub output
 {
 	my $message = shift;
-	my $data    = $message->message();
+	my $data    = $message->message;
 
 	my $first  = undef;
 	my $second = undef;
@@ -36,7 +36,7 @@ sub output($)
 	return gen_output($first, $second);
 }
 
-sub gen_output(;$$)
+sub gen_output
 {
 	my ($first, $second) = @_;
 
@@ -121,10 +121,10 @@ sub gen_output(;$$)
 #######
 ## OUTPUT (FORWARD & BACKWARD)
 #######
-sub output_multi($)
+sub output_multi
 {
 	my $message = shift;
-	my $data    = $message->message();
+	my $data    = $message->message;
 
 	my $first  = undef;
 	my $second = undef;
@@ -137,7 +137,7 @@ sub output_multi($)
 	return gen_output_multi($first, $second);
 }
 
-sub gen_output_multi(;$$)
+sub gen_output_multi
 {
 	my ($first, $second) = @_;
 
@@ -237,10 +237,10 @@ sub gen_output_multi(;$$)
 #######
 ## OUTPUT FROM END
 #######
-sub output_from_end($)
+sub output_from_end
 {
 	my $message = shift;
-	my $data    = $message->message();
+	my $data    = $message->message;
 
 	my $first  = undef;
 	my $second = undef;
@@ -253,7 +253,7 @@ sub output_from_end($)
 	return gen_output_from_end($first, $second);
 }
 
-sub gen_output_from_end(;$$)
+sub gen_output_from_end
 {
 	my ($first, $second) = @_;
 	my $word;
@@ -334,12 +334,12 @@ sub gen_output_from_end(;$$)
 #######
 ## LEARN
 #######
-sub learn($)
+sub learn
 {
 	my $message = shift;
-	my $data    = $message->message();
+	my $data    = $message->message;
 
-	return if should_ignore($message->from());
+	return if should_ignore($message->from);
 
 	my @parts = split(/\s+/, $data);
 
@@ -378,12 +378,12 @@ sub learn($)
 ## If no other module handled this message and the bot was addressed, generate
 ## a response using markov stuff.
 #######
-sub respond_if_addressed($)
+sub respond_if_addressed
 {
 	my $message = shift;
-	my $data    = $message->message();
+	my $data    = $message->message;
 
-	return unless $message->is_explicit();
+	return unless $message->is_explicit;
 
 	# Based on random numbers, decide which markov method to use and which word(s) to seed with
 
@@ -393,10 +393,10 @@ sub respond_if_addressed($)
 
 	if (scalar(@words) >= 2) {
 		# First figure out which action to take
-		my $r = rand();
+		my $r = rand;
 		if ($r < .4) { # normal markov
 			# Now figure out which word(s) to use
-			$r = rand();
+			$r = rand;
 			if ($r < .2) {
 				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s' and '%s'", $words[0], $words[1]);
 				# Use first two words
@@ -422,7 +422,7 @@ sub respond_if_addressed($)
 			}
 		} elsif ($r < .8) { # bidirectional markov
 			# Now figure out which word(s) to use
-			$r = rand();
+			$r = rand;
 			if ($r < .25) {
 				# Use first two words
 				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov2 response from '%s' and '%s'", $words[0], $words[1]);
@@ -444,7 +444,7 @@ sub respond_if_addressed($)
 			}
 		} else { # reverse markov
 			# Now figure out which word(s) to use
-			my $r = rand();
+			my $r = rand;
 			if ($r < .3333) {
 				# Use last two words
 				my $n = scalar(@words) - 1;
@@ -463,8 +463,8 @@ sub respond_if_addressed($)
 			}
 		}
 	} else {
-		if (rand() < .5) {
-			if (rand() < .5) {
+		if (rand < .5) {
+			if (rand < .5) {
 				GIR::Bot::debug("Modules::Markov::respond_if_addressed: Generating markov response from '%s'", $words[0]);
 				$msg = gen_output($words[0]);
 			} else {
@@ -482,22 +482,22 @@ sub respond_if_addressed($)
 #######
 ## HELP
 #######
-sub help($)
+sub help
 {
 	my $message = shift;
 
-	if ($message->message() eq 'markov') {
+	if ($message->message eq 'markov') {
 		return "'markov [<word> [<word>]]': create and print a Markov chain starting with the given word(s). At most two words can be used to start the chain. See also 'markov2' and 'vokram'";
-	} elsif ($message->message() eq 'markov2') {
+	} elsif ($message->message eq 'markov2') {
 		return "'markov2 <word> [<word>]': create and print a Markov chain containing the given word(s). This can appear anywhere in the chain, not just at the beginning. See also 'markov' and 'vokram'";
-	} elsif ($message->message() eq 'vokram') {
+	} elsif ($message->message eq 'vokram') {
 		return "'vokram <word> [<word>]': create and print a Markov chain that ends with the given word(s). At most two words can be used as the basis for the chain. See also 'markov' and 'markov2'";
 	}
 }
 
 ##############
 
-sub should_ignore($)
+sub should_ignore
 {
 	my ($nick) = @_;
 

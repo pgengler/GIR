@@ -18,12 +18,12 @@ sub register
 	GIR::Modules::register_help('translate', \&Modules::Translate::help);
 }
 
-sub translate($)
+sub translate
 {
 	my $message = shift;
 
 	# Check for valid format (two-character language code plus some text)
-	my $data = $message->message();
+	my $data = $message->message;
 	unless ($data =~ /^\s*\[?(\w{2})\]?\s+(.+)/) {
 		return;
 	}
@@ -40,7 +40,7 @@ sub translate($)
 	return _getTranslation($fromCode, $toCode, $text);
 }
 
-sub _getTranslation($$$)
+sub _getTranslation
 {
 	my ($fromLanguage, $toLanguage, $text) = @_;
 	$text = uri_escape($text);
@@ -58,7 +58,7 @@ sub _getTranslation($$$)
 	return $doc->{'content'};
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

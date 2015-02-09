@@ -25,16 +25,16 @@ sub register
 	GIR::Modules::register_action(qr/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)(\,|\s)?($GIR::Bot::config->{'nick'})?\s*$/, \&Modules::Greeting::process);
 }
 
-sub process($)
+sub process
 {
 	my $message = shift;
 
-	if (!$message->is_addressed() && rand() > 0.35) {
+	if (!$message->is_addressed && rand > 0.35) {
 		# 65% chance of replying to a random greeting when not addressed
 		return;
 	}
 
-	return $hello[int(rand(@hello))] . ', ' . $message->from();
+	return $hello[int(rand(@hello))] . ', ' . $message->from;
 
 }
 

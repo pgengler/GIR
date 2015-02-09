@@ -32,7 +32,7 @@ sub connect
 	return $self;
 }
 
-sub insert_id()
+sub insert_id
 {
 	my $self = shift;
 	my ($table, $column) = @_;

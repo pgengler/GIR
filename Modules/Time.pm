@@ -26,11 +26,11 @@ sub register
 	GIR::Modules::register_help('time', \&Modules::Time::help);
 }
 
-sub select($)
+sub select
 {
 	my $message = shift;
 
-	return undef unless $message->message() =~ /^\s*time\s*$/;
+	return undef unless $message->message =~ /^\s*time\s*$/;
 
 	my @times = qw/ unix local gmt /;
 	push @times, 'swatch' if $_useSwatch;
@@ -51,48 +51,48 @@ sub select($)
 	}
 }
 
-sub unix_time($)
+sub unix_time
 {
 	my $message = shift;
 
-	return time() . '';
+	return time . '';
 }
 
-sub local_time($)
+sub local_time
 {
 	my $message = shift;
 
-	my @parts = localtime(time());
+	my @parts = localtime;
 
-	return localtime(time()) . ($parts[8] ? ' EDT' : ' EST');
+	return localtime . ($parts[8] ? ' EDT' : ' EST');
 }
 
-sub gm_time($)
+sub gm_time
 {
 	my $message = shift;
 
-	return gmtime(time()) . ' UTC';
+	return gmtime . ' UTC';
 }
 
-sub swatch($)
+sub swatch
 {
 	my $message = shift;
 
 	return undef unless $_useSwatch;
 
-	return '@' . Time::Beat::beats(time());
+	return '@' . Time::Beat::beats(time);
 }
 
-sub veggie($)
+sub veggie
 {
 	my $message = shift;
 
 	return undef unless $_useVeggie;
 
-	return Acme::Time::Asparagus::veggietime();
+	return Acme::Time::Asparagus::veggietime;
 }
 
-sub help($)
+sub help
 {
 	my $message = shift;
 

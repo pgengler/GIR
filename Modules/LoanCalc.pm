@@ -8,31 +8,31 @@ sub register
 	GIR::Modules::register_help('loancalc', \&Modules::LoanCalc::help);
 }
 
-sub calculate()
+sub calculate
 {
 	my $message = shift;
 
-	my ($amount, $rate, $term) = split(/\s+/, $message->message());
+	my ($amount, $rate, $term) = split(/\s+/, $message->message);
 
 	unless (defined $amount && defined $rate && defined $term) {
-		if ($message->is_explicit()) {
+		if ($message->is_explicit) {
 			return "USAGE: loancalc <amount> <rate> <term>";
 		}
 		return undef;
 	}
 
 	if ($amount !~ /^\$?(\d+(\.\d+)?)$/) {
-		return $message->is_explicit() ? "Invalid format for amount" : undef;
+		return $message->is_explicit ? "Invalid format for amount" : undef;
 	}
 	$amount = $1;
 
 	if ($rate !~ /^(\d+(\.\d+)?)\%?$/) {
-		return $message->is_explicit() ? "Invalid format for rate" : undef;
+		return $message->is_explicit ? "Invalid format for rate" : undef;
 	}
 	$rate = $1;
 
 	if ($term !~ /^\d+$/) {
-		return $message->is_explicit() ? "Invalid format for term" : undef;
+		return $message->is_explicit ? "Invalid format for term" : undef;
 	}
 
 	my ($monthlyPayment, $interestPaid) = _calculate($amount, $rate, $term);
@@ -40,7 +40,7 @@ sub calculate()
 	return sprintf('The monthly payment on a %d-month, %.02f%% loan for $%.02f is $%.02f. Total interest paid: $%.02f', $term, $rate, $amount, $monthlyPayment, $interestPaid);
 }
 
-sub _calculate($$$)
+sub _calculate
 {
 	my ($amount, $rate, $term) = @_;
 
@@ -55,7 +55,7 @@ sub _calculate($$$)
 	return ($monthlyPayment, $interestPaid);
 }
 
-sub help()
+sub help
 {
 	return "'loancalc <amount> <rate> <term>' - calculate monthly payment and total interest for a loan of the given amount (in dollars), rate (percent), and term (months)";
 }

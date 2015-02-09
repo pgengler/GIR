@@ -7,24 +7,24 @@ use GIR::Command;
 ##############
 ## CONSOLE INPUT
 ##############
-sub console()
+sub console
 {
-	$SIG{'TERM'} = sub { $GIR::Bot::bot->kill('SIGTERM'); threads->exit(); };
-	$SIG{'INT'} = sub { $GIR::Bot::bot->kill('SIGTERM'); threads->exit(); };
+	$SIG{'TERM'} = sub { $GIR::Bot::bot->kill('SIGTERM'); threads->exit; };
+	$SIG{'INT'} = sub { $GIR::Bot::bot->kill('SIGTERM'); threads->exit; };
 
 	unless ($GIR::Bot::no_console) {
 		while (<>) {
 			console_parse($_);
-			threads->self()->yield();
+			threads->self->yield;
 		}
 	} else {
 		while (1) {
-			threads->self()->yield();
+			threads->self->yield;
 		}
 	}
 }
 
-sub console_parse($)
+sub console_parse
 {
 	my $str = shift;
 
@@ -34,7 +34,7 @@ sub console_parse($)
 
 	if ($command =~ /^quit/) {
 		$GIR::Bot::bot->kill('SIGTERM');
-		threads->exit();
+		threads->exit;
 	}
 
 	if (scalar(@GIR::Bot::commands) > 0) {

@@ -7,7 +7,7 @@ sub register
 	GIR::Modules::register_action('how much is oil', \&fetch, 2);
 }
 
-sub fetch($)
+sub fetch
 {
 	my $message = shift;
 

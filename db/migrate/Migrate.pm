@@ -29,7 +29,7 @@ sub postgres
 	return $dbh;
 }
 
-sub truncate_table($)
+sub truncate_table
 {
 	my ($table) = @_;
 
@@ -39,7 +39,7 @@ sub truncate_table($)
 	postgres->do($sql);
 }
 
-sub copy_table($$)
+sub copy_table
 {
 	my ($table, $columns) = @_;
 
