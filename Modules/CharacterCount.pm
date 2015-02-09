@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-  GIR::Modules::register_action('charcount', \&count_chars);
+  GIR::Modules->register_action('charcount', \&count_chars);
 }
 
 sub count_chars

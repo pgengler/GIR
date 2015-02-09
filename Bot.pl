@@ -53,7 +53,7 @@ Getopt::Long::GetOptions(
 $config = load_config($config_file);
 
 # Perform pre-loading initialization for module stuff
-GIR::Modules::init;
+GIR::Modules->init;
 
 # Unbuffer standard output
 select(STDOUT);
@@ -67,7 +67,7 @@ $SIG{'INT'} = \&shutdown;
 load_ignore();
 
 # Load extras
-GIR::Modules::load_modules;
+GIR::Modules->load_modules;
 
 #######
 ## START IRCING
@@ -88,7 +88,7 @@ sub get_command_socket
 		unlink($socket_path);
 	}
 
-	my $server = new IO::Socket::UNIX(
+	my $server = IO::Socket::UNIX->new(
 		'Listen' => Socket::SOMAXCONN,
 		'Local'  => $socket_path,
 		'Type'   => Socket::SOCK_STREAM,
@@ -108,7 +108,7 @@ sub bot
 		%channels = ();
 
 		# Connect to the server
-		GIR::Bot::connect;
+		GIR::Bot->connect;
 
 		# Set up event handlers
 		$connection->add_global_handler('001', \&on_connect);
@@ -136,11 +136,11 @@ sub bot
 		$irc->addfh($command_socket, sub {
 			my $server = shift;
 			my $client = $server->accept;
-			GIR::Bot::debug('Received new connection via UNIX socket');
+			GIR::Bot->debug('Received new connection via UNIX socket');
 			$irc->addfh($client, sub {
 				my $client = shift;
 				sysread($client, my $data, 1024);
-				GIR::Bot::debug("Received command '%s' via UNIX socket", $data);
+				GIR::Bot->debug("Received command '%s' via UNIX socket", $data);
 				my $command = Command::parse($data);
 				if ($command) {
 					push @commands, $command;
@@ -170,12 +170,12 @@ sub load_config
 	my $config;
 
 	eval {
-		open(my $file, '<', $config_file || 'config') or GIR::Bot::fatal_error("Can't open config file '%s': %s", $config_file, $!);
+		open(my $file, '<', $config_file || 'config') or GIR::Bot->fatal_error("Can't open config file '%s': %s", $config_file, $!);
 		$config = YAML::LoadFile($file);
 		close($file);
 	};
 	if ($@) {
-		GIR::Bot::fatal_error("Failed to read config file; you probably have an error in your YAML syntax (did you use tabs instead of spaces?)");
+		GIR::Bot->fatal_error("Failed to read config file; you probably have an error in your YAML syntax (did you use tabs instead of spaces?)");
 	}
 
 	# 'config_nick' represents the nickname as entered in the config file, while 'nick' represents the actual name in use
@@ -202,9 +202,9 @@ sub on_error
 #######
 sub connect
 {
-	status('Connecting to port %d of server %s...', $config->{'server'}->{'port'}, $config->{'server'}->{'host'});
+	GIR::Bot->status('Connecting to port %d of server %s...', $config->{'server'}->{'port'}, $config->{'server'}->{'host'});
 
-	$irc = new Net::IRC;
+	$irc = Net::IRC->new;
 	$irc->debug($config->{'debug'} ? true : false);
 	$irc->timeout(5);
 	$connection = $irc->newconn(
@@ -228,11 +228,11 @@ sub join_chan
 	my ($conn, $channel) = @_;
 
 	if (exists $channels{ $channel }) {
-		status("I'm already in %s!", $channel);
+		GIR::Bot->status("I'm already in %s!", $channel);
 		return;
 	}
 
-	status('Joining %s...', $channel);
+	GIR::Bot->status('Joining %s...', $channel);
 
 	$conn->join($channel);
 }
@@ -244,7 +244,7 @@ sub on_connect
 {
 	my ($conn, $event) = @_;
 
-	status('Joining channels...');
+	GIR::Bot->status('Joining channels...');
 
 	foreach my $channel (@{ $config->{'channels'}->{'join'} }) {
 		join_chan($conn, $channel);
@@ -256,7 +256,7 @@ sub on_connect
 #######
 sub shutdown
 {
-	status('Shutting down...');
+	GIR::Bot->status('Shutting down...');
 
 	$bot->kill('SIGTERM') if $bot;
 	$console->kill('SIGTERM') if $console;
@@ -267,9 +267,9 @@ sub shutdown
 
 sub bot_shutdown
 {
-	status('Bot thread is shutting down...');
+	GIR::Bot->status('Bot thread is shutting down...');
 
-	GIR::Modules::shutdown;
+	GIR::Modules->shutdown;
 
 	# Look for a quit message
 	my $message = "Leaving";
@@ -299,11 +299,12 @@ sub bot_shutdown
 #######
 sub fatal_error
 {
+	my $package = shift;
 	my ($message, @parameters) = @_;
 
-	GIR::Bot::error($message, @parameters);
+	GIR::Bot->error($message, @parameters);
 
-	GIR::Bot::shutdown;
+	GIR::Bot->shutdown;
 }
 
 #######
@@ -313,9 +314,10 @@ sub fatal_error
 #######
 sub error
 {
+	my $package = shift;
 	my ($message, @parameters) = @_;
 
-	GIR::Bot::log('ERROR: ' . $message, @parameters);
+	GIR::Bot->log('ERROR: ' . $message, @parameters);
 }
 
 #######
@@ -325,11 +327,12 @@ sub error
 #######
 sub debug
 {
+	my $package = shift;
 	my ($message, @parameters) = @_;
 
 	return unless $GIR::Bot::config->{'debug'};
 
-	GIR::Bot::log('DEBUG: ' . $message, @parameters);
+	GIR::Bot->log('DEBUG: ' . $message, @parameters);
 }
 
 #######
@@ -337,13 +340,15 @@ sub debug
 #######
 sub status
 {
+	my $package = shift;
 	my ($message, @parameters) = @_;
 
-	GIR::Bot::log($message, @parameters);
+	GIR::Bot->log($message, @parameters);
 }
 
 sub log
 {
+	my $package = shift;
 	my ($message, @parameters) = @_;
 
 	chomp $message;
@@ -380,19 +385,19 @@ sub message
 
 	if (should_ignore($message)) {
 		if ($message->is_public) {
-			status('IGNORED <%s/%s> %s', $nick, $to, $text);
+			GIR::Bot->status('IGNORED <%s/%s> %s', $nick, $to, $text);
 		} else {
-			status('IGNORED >%s< %s', $nick, $text);
+			GIR::Bot->status('IGNORED >%s< %s', $nick, $text);
 		}
 		return;
 	}
 
 	if ($message->is_public) {
-		status('<%s/%s> %s', $nick, $to, $text);
+		GIR::Bot->status('<%s/%s> %s', $nick, $to, $text);
 	} else {
-		status('>%s< %s', $nick, $text);
+		GIR::Bot->status('>%s< %s', $nick, $text);
 	}
-	GIR::Modules::dispatch($message);
+	GIR::Modules->dispatch($message);
 }
 
 #######
@@ -406,7 +411,7 @@ sub handle_action
 	my $to      = $event->{'to'}[0];
 	my $message = $event->{'args'}[0];
 
-	status('* %s/%s %s', $from, $to, $message);
+	GIR::Bot->status('* %s/%s %s', $from, $to, $message);
 }
 
 ###############
@@ -428,9 +433,9 @@ sub on_nick_change
 	my $old_nick = $event->{'nick'};
 	my $new_nick = $event->{'args'}[0];
 
-	status('%s is now known as %s', $old_nick, $new_nick);
+	GIR::Bot->status('%s is now known as %s', $old_nick, $new_nick);
 
-	GIR::Modules::event('nickchange', {
+	GIR::Modules->event('nickchange', {
 		'from' => $old_nick,
 		'to'   => $new_nick,
 	});
@@ -440,7 +445,7 @@ sub nick_in_use
 {
 	my ($conn, $event) = @_;
 
-	status('Nickname is in use! Trying some alternatives.');
+	GIR::Bot->status('Nickname is in use! Trying some alternatives.');
 
 	$nick_retries++;
 
@@ -459,7 +464,7 @@ sub on_quit
 	my $who     = $event->{'nick'};
 	my $message = $event->{'args'}[0];
 
-	status('%s has quit IRC (%s)', $who, $message);
+	GIR::Bot->status('%s has quit IRC (%s)', $who, $message);
 }
 
 sub on_join
@@ -470,12 +475,12 @@ sub on_join
 	my $nick    = $event->{'nick'};
 
 	if ($config->{'nick'} eq $nick) {
-		status('Joined channel %s', $channel);
+		GIR::Bot->status('Joined channel %s', $channel);
 		$channels{ $channel } = true;
 	} else {
-		status('%s has joined %s', $nick, $channel);
+		GIR::Bot->status('%s has joined %s', $nick, $channel);
 
-		GIR::Modules::event('join', {
+		GIR::Modules->event('join', {
 			'channel' => $channel,
 			'nick'    => $nick,
 		});
@@ -488,7 +493,7 @@ sub banned_from_channel
 
 	my $channel = $event->{'args'}[1];
 
-	status("Can't join %s - I've been banned!", $channel);
+	GIR::Bot->status("Can't join %s - I've been banned!", $channel);
 }
 
 sub on_part
@@ -499,9 +504,9 @@ sub on_part
 	my $user    = $event->{'nick'};
 	my $message = $event->{'args'}[0];
 
-	status('%s has left %s (%s)', $user, $channel, $message);
+	GIR::Bot->status('%s has left %s (%s)', $user, $channel, $message);
 
-	GIR::Modules::event('part', {
+	GIR::Modules->event('part', {
 		'channel' => $channel,
 		'nick'    => $user,
 	});
@@ -528,9 +533,9 @@ sub on_mode
 		}
 
 		if ($event->{'args'}[$i + 1]) {
-			status('%s/%s sets mode %s%s %s', $giver, $channel, $modifier, $modes[ $i ], $event->{'args'}->[ $i + 1 ]);
+			GIR::Bot->status('%s/%s sets mode %s%s %s', $giver, $channel, $modifier, $modes[ $i ], $event->{'args'}->[ $i + 1 ]);
 		} else {
-			status('%s/%s sets mode %s%s', $giver, $channel, $modifier, $modes[ $i ]);
+			GIR::Bot->status('%s/%s sets mode %s%s', $giver, $channel, $modifier, $modes[ $i ]);
 		}
 	}
 }
@@ -542,14 +547,14 @@ sub on_topic
 	if ($event->{'format'} eq 'server') {
 		my $channel = $event->{'args'}[1];
 		my $topic   = $event->{'args'}[2];
-		status("Topic for %s is '%s'", $channel, $topic);
+		GIR::Bot->status("Topic for %s is '%s'", $channel, $topic);
 	} else {
 		my $channel = $event->{'to'}[0];
 		my $topic   = $event->{'args'}[0];
 		my $who     = $event->{'nick'};
 
-		status("%s has changed the topic for %s to '%s'", $who, $channel, $topic);
-		GIR::Modules::event('topicchange', {
+		GIR::Bot->status("%s has changed the topic for %s to '%s'", $who, $channel, $topic);
+		GIR::Modules->event('topicchange', {
 			'channel' => $channel,
 			'nick'    => $who,
 			'topic'   => $topic,
@@ -567,9 +572,9 @@ sub on_kick
 	my $reason  = $event->{'args'}[1] || '';
 
 	if ($kicked ne $config->{'nick'}) {
-		status('%s has kicked %s from %s (%s)', $kicker, $kicked, $channel, $reason);
+		GIR::Bot->status('%s has kicked %s from %s (%s)', $kicker, $kicked, $channel, $reason);
 	} else {
-		status('%s has kicked me from %s (%s)', $kicker, $channel, $reason);
+		GIR::Bot->status('%s has kicked me from %s (%s)', $kicker, $channel, $reason);
 		delete $channels{ $channel };
 		join_chan($conn, $channel);
 	}
@@ -584,14 +589,14 @@ sub on_invite
 	my $channel = $event->{'args'}[0];
 
 	if ($invitee ne $config->{'nick'}) {
-		status('%s invited %s to %s', $inviter, $invitee, $channel);
+		GIR::Bot->status('%s invited %s to %s', $inviter, $invitee, $channel);
 	} else {
-		status('%s invited me to %s', $inviter, $channel);
+		GIR::Bot->status('%s invited me to %s', $inviter, $channel);
 		my %allowed_channels = map { $_ => true } @{ $config->{'channels'}->{'allowed'} };
 		if ($allowed_channels{ $channel }) {
 			join_chan($conn, $channel);
 		} else {
-			status("%s isn't on the allowed channel list, not joining", $channel);
+			GIR::Bot->status("%s isn't on the allowed channel list, not joining", $channel);
 		}
 	}
 }
@@ -600,10 +605,10 @@ sub on_notice
 {
 	my ($conn, $event) = @_;
 
-	status('-%s- %s', $event->{'from'}, $event->{'args'}[0]);
+	GIR::Bot->status('-%s- %s', $event->{'from'}, $event->{'args'}[0]);
 
 	if ($event->{'nick'} eq 'NickServ' && $event->{'args'}[0] =~ /This nickname is registered and protected/i && $config->{'nickserv_pass'}) {
-		GIR::Bot::say('NickServ', 'identify ' . $config->{'nickserv_pass'});
+		GIR::Bot->say('NickServ', 'identify ' . $config->{'nickserv_pass'});
 	}
 }
 
@@ -611,7 +616,7 @@ sub on_server_notice
 {
 	my ($conn, $event) = @_;
 
-	status('-%s', $event->{'args'}[0]);
+	GIR::Bot->status('-%s', $event->{'args'}[0]);
 }
 
 ##############
@@ -621,6 +626,7 @@ sub on_server_notice
 #######
 sub say
 {
+	my $package = shift;
 	my ($where, $message) = @_;
 
 	return unless $message;
@@ -630,7 +636,7 @@ sub say
 
 	foreach my $line (@lines) {
 		next unless $line;
-		status('</%s> %s', $where, $line);
+		GIR::Bot->status('</%s> %s', $where, $line);
 		utf8::encode($line);
 		$connection->privmsg($where, $line);
 	}
@@ -638,6 +644,7 @@ sub say
 
 sub enqueue_say
 {
+	my $package = shift;
 	my ($where, $message) = @_;
 
 	return unless $message;
@@ -648,6 +655,7 @@ sub enqueue_say
 
 sub enqueue_action
 {
+	my $package = shift;
 	my ($where, $message) = @_;
 
 	return unless $message;
@@ -677,7 +685,7 @@ sub bot_command
 		my ($func, @params) = split(/\|\|/, $command);
 
 		if ($funcs{ $func }) {
-			$funcs{ $func }->(@params);
+			$funcs{ $func }->('GIR::Bot', @params);
 		}
 	}
 }
@@ -733,25 +741,28 @@ sub should_ignore
 ##############
 sub quit
 {
-	my $message = shift;
+	my $package = shift;
+	my ($message) = @_;
 
 	$connection->quit($message);
 }
 
 sub join
 {
-	my $channel = shift;
+	my $package = shift;
+	my ($channel) = @_;
 
 	join_chan($connection, $channel);
 }
 
 sub part
 {
+	my $package = shift;
 	my ($channel, $reason) = @_;
 
 	$reason = $reason || '';
 
-	status('Leaving channel %s (%s)', $channel, $reason);
+	GIR::Bot->status('Leaving channel %s (%s)', $channel, $reason);
 
 	$connection->part($channel, $reason);
 
@@ -760,6 +771,7 @@ sub part
 
 sub give_op
 {
+	my $package = shift;
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '+o', $user);
@@ -767,6 +779,7 @@ sub give_op
 
 sub take_op
 {
+	my $package = shift;
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '-o', $user);
@@ -774,6 +787,7 @@ sub take_op
 
 sub give_voice
 {
+	my $package = shift;
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '+v', $user);
@@ -781,6 +795,7 @@ sub give_voice
 
 sub take_voice
 {
+	my $package = shift;
 	my ($channel, $user) = @_;
 
 	$connection->mode($channel, '-v', $user);
@@ -788,6 +803,7 @@ sub take_voice
 
 sub kick
 {
+	my $package = shift;
 	my ($channel, $user, $reason) = @_;
 
 	$connection->kick($channel, $user, $reason);
@@ -795,18 +811,20 @@ sub kick
 
 sub action
 {
+	my $package = shift;
 	my ($where, $what) = @_;
 
-	status('* %s/%s %s', $config->{'nick'}, $where, $what);
+	GIR::Bot->status('* %s/%s %s', $config->{'nick'}, $where, $what);
 
 	$connection->me($where, $what);
 }
 
 sub change_nick
 {
-	my $nick = shift;
+	my $package = shift;
+	my ($nick) = @_;
 
-	status("Changing nick to '%s'", $nick);
+	$package->status("Changing nick to '%s'", $nick);
 
 	$connection->nick($nick);
 
@@ -814,7 +832,7 @@ sub change_nick
 
 	$config->{'nick'} = $nick;
 
-	GIR::Modules::event('mynickchange', { 'old' => $oldnick, 'new' => $nick });
+	GIR::Modules->event('mynickchange', { 'old' => $oldnick, 'new' => $nick });
 }
 
 sub save_ignore_list
@@ -829,9 +847,10 @@ sub save_ignore_list
 
 sub add_ignore
 {
-	my $entry = shift;
+	my $package = shift;
+	my ($entry) = @_;
 
-	status("Adding '%s' to the ignore list", $entry);
+	$package->status("Adding '%s' to the ignore list", $entry);
 
 	$ignores{ lc($entry) } = true;
 
@@ -840,9 +859,10 @@ sub add_ignore
 
 sub remove_ignore
 {
-	my $entry = shift;
+	my $package = shift;
+	my ($entry) = @_;
 
-	status("Removing '%s' from the ignore list", $entry);
+	$package->status("Removing '%s' from the ignore list", $entry);
 
 	delete $ignores{ lc($entry) };
 
@@ -854,11 +874,11 @@ sub reload_modules
 	my $module = shift;
 
 	unless ($module) {
-		status('Reloading modules');
-		GIR::Modules::load_modules;
+		GIR::Bot->status('Reloading modules');
+		GIR::Modules->load_modules;
 	} else {
-		GIR::Modules::unload_module($module);
-		GIR::Modules::load_module($module, false, false);
+		GIR::Modules->unload_module($module);
+		GIR::Modules->load_module($module, false, false);
 	}
 }
 
@@ -866,23 +886,23 @@ sub load_module
 {
 	my $module = shift;
 
-	GIR::Modules::load_module($module, false, false);
+	GIR::Modules->load_module($module, false, false);
 }
 
 sub unload_module
 {
 	my $module = shift;
 
-	GIR::Modules::unload_module($module);
+	GIR::Modules->unload_module($module);
 }
 
 sub list_modules
 {
-	my @loaded_modules = GIR::Modules::loaded_modules;
+	my @loaded_modules = GIR::Modules->loaded_modules;
 
-	status("The following modules are loaded:");
+	GIR::Bot->status("The following modules are loaded:");
 	foreach my $module (@loaded_modules) {
-		status("\t${module}");
+		GIR::Bot->status("\t${module}");
 	}
 }
 
@@ -892,7 +912,7 @@ sub set_debug
 
 	return unless ($debug eq 'on' || $debug eq 'off');
 
-	status('Setting debug status to %s', $debug);
+	GIR::Bot->status('Setting debug status to %s', $debug);
 
 	my $state = ($debug eq 'on');
 

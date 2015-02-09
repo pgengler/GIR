@@ -8,10 +8,10 @@ my $qdb_expr = qr[^http://qdb.us/(\d+)$];
 
 sub register
 {
-	GIR::Modules::register_action('qdb', \&Modules::QDB::process_from_text);
-	GIR::Modules::register_action($qdb_expr, \&Modules::QDB::process_from_url);
+	GIR::Modules->register_action('qdb', \&Modules::QDB::process_from_text);
+	GIR::Modules->register_action($qdb_expr, \&Modules::QDB::process_from_url);
 
-	GIR::Modules::register_help('qdb', \&Modules::QDB::help);
+	GIR::Modules->register_help('qdb', \&Modules::QDB::help);
 }
 
 sub process_from_url
@@ -57,7 +57,7 @@ sub _get_quote
 	my $content = eval { get_url($url) };
 
 	if ($@) {
-		GIR::Bot::error("Modules::QDB: failed to get quote %d from qdb.us: %s", $id, $@);
+		GIR::Bot->error("Modules::QDB: failed to get quote %d from qdb.us: %s", $id, $@);
 		return "Couldn't get quote. Either it doesn't exist or qdb.us is down.";
 	}
 

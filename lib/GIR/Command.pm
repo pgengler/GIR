@@ -4,6 +4,7 @@ use strict;
 
 sub parse
 {
+	my $package = shift;
 	my ($string) = @_;
 
 	chomp $string;
@@ -37,7 +38,7 @@ sub parse
 		return _command_string('debug', $1);
 	}
 
-	GIR::Bot::status("Unrecognized command '%s'", $string);
+	GIR::Bot->status("Unrecognized command '%s'", $string);
 }
 
 sub _command_string

@@ -7,7 +7,7 @@ my $DICE_REGEXP = qr/^(roll\s+)?(\d?)d(\d+)$/;
 
 sub register
 {
-	GIR::Modules::register_action($DICE_REGEXP, \&roll);
+	GIR::Modules->register_action($DICE_REGEXP, \&roll);
 }
 
 sub roll

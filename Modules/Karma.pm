@@ -6,8 +6,8 @@ my $update_expr = qr/^(.+)(\+\+|\-\-)$/;
 
 sub register
 {
-	GIR::Modules::register_action('karma', \&Modules::Karma::get);
-	GIR::Modules::register_action($update_expr, \&Modules::Karma::update);
+	GIR::Modules->register_action('karma', \&Modules::Karma::get);
+	GIR::Modules->register_action($update_expr, \&Modules::Karma::update);
 }
 
 sub get

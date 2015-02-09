@@ -4,8 +4,8 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_listener(\&watch_for_readmore, 1);
-	GIR::Modules::register_action('readmorestats', \&readmorestats);
+	GIR::Modules->register_listener(\&watch_for_readmore, 1);
+	GIR::Modules->register_action('readmorestats', \&readmorestats);
 }
 
 sub watch_for_readmore

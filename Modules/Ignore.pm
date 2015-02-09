@@ -4,8 +4,8 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_private('ignore', \&Modules::Ignore::ignore);
-	GIR::Modules::register_private('unignore', \&Modules::Ignore::unignore);
+	GIR::Modules->register_private('ignore', \&Modules::Ignore::ignore);
+	GIR::Modules->register_private('unignore', \&Modules::Ignore::unignore);
 }
 
 sub ignore
@@ -20,7 +20,7 @@ sub ignore
 	}
 
 	# Add to ignore list
-	GIR::Bot::add_ignore($nick);
+	GIR::Bot->add_ignore($nick);
 
 	return "$nick has been added to the ignore list";
 }
@@ -37,7 +37,7 @@ sub unignore
 	}
 
 	# Add to ignore list
-	GIR::Bot::remove_ignore($nick);
+	GIR::Bot->remove_ignore($nick);
 
 	return "$nick has been removed from the ignore list";
 }

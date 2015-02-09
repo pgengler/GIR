@@ -15,8 +15,8 @@ sub register
 	# get the list of categories, and thereby also make sure we have a valid api connection
 	my $catlist = eval { get_url(GET_CATEGORIES_URL) };
 
-	GIR::Modules::register_action('blurber', \&Modules::Blurber::blurber);
-	GIR::Bot::debug("Modules::Blurber: got category list");
+	GIR::Modules->register_action('blurber', \&Modules::Blurber::blurber);
+	GIR::Bot->debug("Modules::Blurber: got category list");
 
 	# Parse response
 	my $catdata;
@@ -24,7 +24,7 @@ sub register
 		$catdata = JSON::decode_json($catlist);
 	};
 	if (ref($catdata) ne 'HASH') {
-		GIR::Bot::error("Modules::Blurber: JSON parsing failed: %s", $@);
+		GIR::Bot->error("Modules::Blurber: JSON parsing failed: %s", $@);
 		return -1;
 	}
 	@cats = keys $catdata;
@@ -35,13 +35,13 @@ sub blurber
 	my ($message) = @_;
 
 	my $category_requested = $cats[rand @cats];
-	GIR::Bot::debug("Modules::Blurber: getting a blurb for category '%s'", $category_requested);
+	GIR::Bot->debug("Modules::Blurber: getting a blurb for category '%s'", $category_requested);
 
 	# Build request URL
 	my $requestURL = sprintf(GET_BLURB_FORMAT, $category_requested);
 
 	my $content = eval { get_url($requestURL) };
-	GIR::Bot::debug("Modules::Blurber: got %s", $content);
+	GIR::Bot->debug("Modules::Blurber: got %s", $content);
 	if ($@) {
 		return _error($message);
 	}
@@ -52,7 +52,7 @@ sub blurber
 		$data = JSON::decode_json($content);
 	};
 	if ($@ || ref($data) ne 'HASH') {
-		GIR::Bot::error("Modules::Blurber: JSON parsing failed: %s", $@);
+		GIR::Bot->error("Modules::Blurber: JSON parsing failed: %s", $@);
 		return _error($message);
 	}
 

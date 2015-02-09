@@ -13,9 +13,9 @@ sub register
 {
 	# Check that both a login and API key are provided in the configuration
 	if (config('login') && config('api_key')) {
-		GIR::Modules::register_action('shorten', \&Modules::ShortenURL::shorten);
+		GIR::Modules->register_action('shorten', \&Modules::ShortenURL::shorten);
 	} else {
-		GIR::Bot::status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
+		GIR::Bot->status("Modules::ShortenURL: Missing login and/or API key in config, skipping");
 		return -1;
 	}
 }
@@ -31,11 +31,11 @@ sub shorten
 
 	# Check for reasonably URL-like thing
 	unless ($url =~ m[^(ftp|http|https)://]) {
-		GIR::Bot::debug("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url);
+		GIR::Bot->debug("Modules::ShortenURL: rejecting input '%s' because it doesn't look like a URL", $url);
 		return;
 	}
 
-	GIR::Bot::debug("Modules::ShortenURL: shortening URL '%s'", $url);
+	GIR::Bot->debug("Modules::ShortenURL: shortening URL '%s'", $url);
 
 	# URL-encode value
 	$url = URI::Escape::uri_escape($url);
@@ -57,7 +57,7 @@ sub shorten
 		$data = JSON::decode_json($content);
 	};
 	if ($@ || ref($data) ne 'HASH') {
-		GIR::Bot::error("Modules::ShortenURL: JSON parsing failed: %s", $@);
+		GIR::Bot->error("Modules::ShortenURL: JSON parsing failed: %s", $@);
 		return _error($message);
 	}
 

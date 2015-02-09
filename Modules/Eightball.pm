@@ -5,10 +5,10 @@ use feature 'state';
 
 sub register
 {
-	GIR::Modules::register_action('8ball', \&Modules::Eightball::process);
-	GIR::Modules::register_action('8-ball', \&Modules::Eightball::process);
+	GIR::Modules->register_action('8ball', \&Modules::Eightball::process);
+	GIR::Modules->register_action('8-ball', \&Modules::Eightball::process);
 
-	GIR::Modules::register_help('8ball', \&Modules::Eightball::help);
+	GIR::Modules->register_help('8ball', \&Modules::Eightball::help);
 }
 
 sub process

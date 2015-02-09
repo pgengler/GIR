@@ -4,10 +4,10 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('seen', \&Modules::Seen::seen);
-	GIR::Modules::register_listener(\&Modules::Seen::update, -1);
+	GIR::Modules->register_action('seen', \&Modules::Seen::seen);
+	GIR::Modules->register_listener(\&Modules::Seen::update, -1);
 
-	GIR::Modules::register_help('seen', \&Modules::Seen::help);
+	GIR::Modules->register_help('seen', \&Modules::Seen::help);
 }
 
 sub seen

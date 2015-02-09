@@ -16,14 +16,14 @@ sub register
 	};
 	$_useVeggie = 1 unless $@;
 
-	GIR::Modules::register_action('time', \&Modules::Time::select);
-	GIR::Modules::register_action('unixtime', \&Modules::Time::unix_time);
-	GIR::Modules::register_action('localtime', \&Modules::Time::local_time);
-	GIR::Modules::register_action('gmtime', \&Modules::Time::gm_time);
-	GIR::Modules::register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
-	GIR::Modules::register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
+	GIR::Modules->register_action('time', \&Modules::Time::select);
+	GIR::Modules->register_action('unixtime', \&Modules::Time::unix_time);
+	GIR::Modules->register_action('localtime', \&Modules::Time::local_time);
+	GIR::Modules->register_action('gmtime', \&Modules::Time::gm_time);
+	GIR::Modules->register_action('swatch', \&Modules::Time::swatch) if $_useSwatch;
+	GIR::Modules->register_action('veggietime', \&Modules::Time::veggie) if $_useVeggie;
 
-	GIR::Modules::register_help('time', \&Modules::Time::help);
+	GIR::Modules->register_help('time', \&Modules::Time::help);
 }
 
 sub select
@@ -89,7 +89,7 @@ sub veggie
 
 	return undef unless $_useVeggie;
 
-	return Acme::Time::Asparagus::veggietime;
+	return Acme::Time::Asparagus::veggietime();
 }
 
 sub help

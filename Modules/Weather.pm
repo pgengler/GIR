@@ -15,12 +15,12 @@ my %cache;
 sub register
 {
 	unless (config('api_key')) {
-		GIR::Bot::status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
+		GIR::Bot->status("Modules::Weather: no 'api_key' configuration value provided; skipping initialization");
 		return -1;
 	}
 
-	GIR::Modules::register_action('weather', \&Modules::Weather::process);
-	GIR::Modules::register_help('weather', \&Modules::Weather::help);
+	GIR::Modules->register_action('weather', \&Modules::Weather::process);
+	GIR::Modules->register_help('weather', \&Modules::Weather::help);
 }
 
 sub process
@@ -36,25 +36,25 @@ sub process
 		return $cache{ $location }->{'weather'};
 	}
 
-	GIR::Bot::debug("Modules::Weather: Looking up weather for '%s'", $location);
+	GIR::Bot->debug("Modules::Weather: Looking up weather for '%s'", $location);
 
 	my $url = sprintf(URL_FORMAT, config('api_key'), uri_escape(uc($location)));
 	my $content = eval { get_url($url) };
 
 	if ($@) {
-		GIR::Bot::error('Modules::Weather: request to server failed: %s', $@);
+		GIR::Bot->error('Modules::Weather: request to server failed: %s', $@);
 		return $message->is_explicit ? 'Something failed in contacting the weather server.' : undef;
 	}
 
 	my $data = from_json($content);
 
 	if ($data->{'response'}->{'error'}) {
-		GIR::Bot::debug('Modules::Weather: weather server returned an error: %s', $data->{'response'}->{'error'}->{'description'});
+		GIR::Bot->debug('Modules::Weather: weather server returned an error: %s', $data->{'response'}->{'error'}->{'description'});
 		return $message->is_explicit ? "Unable to get weather for ${location}: $data->{'response'}->{'error'}->{'description'}" : undef;
 	}
 
 	unless (exists $data->{'current_observation'}) {
-		GIR::Bot::debug("Modules::Weather: no current conditions found for '%s'; location may be ambiguous", $location);
+		GIR::Bot->debug("Modules::Weather: no current conditions found for '%s'; location may be ambiguous", $location);
 		return $message->is_explicit ? "No weather information available for ${location}" : undef;
 	}
 

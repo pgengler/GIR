@@ -9,9 +9,9 @@ my $urlFormat = 'http://themoneyconverter.com/rss-feed/%s/rss.xml';
 
 sub register
 {
-	GIR::Modules::register_action($handleRE, \&Modules::ExchangeRates::convert);
+	GIR::Modules->register_action($handleRE, \&Modules::ExchangeRates::convert);
 
-	GIR::Modules::register_help('exchange', \&Modules::ExchangeRates::help);
+	GIR::Modules->register_help('exchange', \&Modules::ExchangeRates::help);
 }
 
 sub convert
@@ -21,10 +21,10 @@ sub convert
 	$message =~ /$handleRE/;
 	my ($amount, $from, $to) = ($1, uc($3), uc($5));
 
-	GIR::Bot::debug('Modules::ExchangeRates: Exchanging %s to %s', $from, $to);
+	GIR::Bot->debug('Modules::ExchangeRates: Exchanging %s to %s', $from, $to);
 
 	my $url = sprintf($urlFormat, $from);
-	GIR::Bot::debug('Modules::ExchangeRates: Fetching URL %s', $url);
+	GIR::Bot->debug('Modules::ExchangeRates: Fetching URL %s', $url);
 	my $content = eval { get_url($url) };
 
 	if ($@) {

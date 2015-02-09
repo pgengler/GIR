@@ -6,11 +6,11 @@ use Modules::StockQuote::Google;
 
 sub register
 {
-	GIR::Modules::register_action('quote', \&Modules::Stock::quote);
-	GIR::Modules::register_action('squote', \&Modules::Stock::short_quote);
+	GIR::Modules->register_action('quote', \&Modules::Stock::quote);
+	GIR::Modules->register_action('squote', \&Modules::Stock::short_quote);
 
-	GIR::Modules::register_help('quote', \&Modules::Stock::help);
-	GIR::Modules::register_help('squote', \&Modules::Stock::help);
+	GIR::Modules->register_help('quote', \&Modules::Stock::help);
+	GIR::Modules->register_help('squote', \&Modules::Stock::help);
 }
 
 sub quote
@@ -31,7 +31,7 @@ sub quote
 
 	return unless $symbol;
 
-	GIR::Bot::status("Looking up stock quote for '%s'", $symbol);
+	GIR::Bot->status("Looking up stock quote for '%s'", $symbol);
 
 	$symbol = uc($symbol);
 
@@ -40,7 +40,7 @@ sub quote
 	my $info = $finance->fetch;
 
 	unless ($info) {
-		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
+		GIR::Bot->status("Quote lookup failed for '%s'", $symbol);
 		if ($message->is_addressed) {
 			return "Unable to get quote for '$symbol'";
 		}
@@ -56,7 +56,7 @@ sub short_quote
 
 	my $symbol = $message->message;
 
-	GIR::Bot::status("Looking up stock quote for '%s'", $symbol);
+	GIR::Bot->status("Looking up stock quote for '%s'", $symbol);
 
 	# Remove leading and trailing whitespace
 	$symbol =~ s/^\s*(.+)\s*$/$1/;
@@ -73,7 +73,7 @@ sub short_quote
 	my $info = $quote->fetch;
 
 	unless ($info) {
-		GIR::Bot::status("Quote lookup failed for '%s'", $symbol);
+		GIR::Bot->status("Quote lookup failed for '%s'", $symbol);
 		if ($message->is_addressed) {
 			return "Unable to get quote for '$symbol'";
 		}

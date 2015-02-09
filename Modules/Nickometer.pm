@@ -6,9 +6,9 @@ use POSIX;
 
 sub register
 {
-	GIR::Modules::register_action('nickometer', \&Modules::Nickometer::process);
+	GIR::Modules->register_action('nickometer', \&Modules::Nickometer::process);
 
-	GIR::Modules::register_help('nickometer', \&Modules::Nickometer::help);
+	GIR::Modules->register_help('nickometer', \&Modules::Nickometer::help);
 }
 
 sub process

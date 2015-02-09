@@ -22,7 +22,7 @@ BEGIN {
 
 sub register
 {
-	GIR::Modules::register_action(qr/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)(\,|\s)?($GIR::Bot::config->{'nick'})?\s*$/, \&Modules::Greeting::process);
+	GIR::Modules->register_action(qr/^\s*(h(ello|i( there)?|owdy|ey|ola)|salut|bonjour|niihau|que\s*tal)(\,|\s)?($GIR::Bot::config->{'nick'})?\s*$/, \&Modules::Greeting::process);
 }
 
 sub process

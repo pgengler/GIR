@@ -4,8 +4,8 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('loancalc', \&Modules::LoanCalc::calculate);
-	GIR::Modules::register_help('loancalc', \&Modules::LoanCalc::help);
+	GIR::Modules->register_action('loancalc', \&Modules::LoanCalc::calculate);
+	GIR::Modules->register_help('loancalc', \&Modules::LoanCalc::help);
 }
 
 sub calculate

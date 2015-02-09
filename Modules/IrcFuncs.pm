@@ -4,15 +4,15 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('op', \&Modules::IrcFuncs::op);
-	GIR::Modules::register_action('deop', \&Modules::IrcFuncs::deop);
-	GIR::Modules::register_action('kick', \&Modules::IrcFuncs::kick);
-	GIR::Modules::register_action('nick', \&Modules::IrcFuncs::change_nick);
+	GIR::Modules->register_action('op', \&Modules::IrcFuncs::op);
+	GIR::Modules->register_action('deop', \&Modules::IrcFuncs::deop);
+	GIR::Modules->register_action('kick', \&Modules::IrcFuncs::kick);
+	GIR::Modules->register_action('nick', \&Modules::IrcFuncs::change_nick);
 
-	GIR::Modules::register_help('op', \&Modules::IrcFuncs::help);
-	GIR::Modules::register_help('deop', \&Modules::IrcFuncs::help);
-	GIR::Modules::register_help('kick', \&Modules::IrcFuncs::help);
-	GIR::Modules::register_help('nick', \&Modules::IrcFuncs::help);
+	GIR::Modules->register_help('op', \&Modules::IrcFuncs::help);
+	GIR::Modules->register_help('deop', \&Modules::IrcFuncs::help);
+	GIR::Modules->register_help('kick', \&Modules::IrcFuncs::help);
+	GIR::Modules->register_help('nick', \&Modules::IrcFuncs::help);
 }
 
 sub op
@@ -32,7 +32,7 @@ sub op
 		}
 	}
 
-	GIR::Bot::give_op($channel, $target || $user);
+	GIR::Bot->give_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
@@ -54,7 +54,7 @@ sub deop
 		}
 	}
 
-	GIR::Bot::take_op($channel, $target || $user);
+	GIR::Bot->take_op($channel, $target || $user);
 
 	return 'NOREPLY';
 }
@@ -76,7 +76,7 @@ sub kick
 		}
 	}
 
-	GIR::Bot::kick($channel, $target, $reason);
+	GIR::Bot->kick($channel, $target, $reason);
 
 	return 'NOREPLY';
 }
@@ -99,7 +99,7 @@ sub change_nick
 	}
 
 	# Change nickname
-	GIR::Bot::change_nick($nick);
+	GIR::Bot->change_nick($nick);
 
 	return 'NOREPLY';
 }

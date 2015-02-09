@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_listener(\&Modules::Math::process, 3);
+	GIR::Modules->register_listener(\&Modules::Math::process, 3);
 }
 
 sub process

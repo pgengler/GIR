@@ -9,9 +9,9 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_private('show access', \&Modules::Access::show_access);
-	GIR::Modules::register_private('add access', \&Modules::Access::add_access);
-	GIR::Modules::register_private('remove access', \&Modules::Access::remove_access);
+	GIR::Modules->register_private('show access', \&Modules::Access::show_access);
+	GIR::Modules->register_private('add access', \&Modules::Access::add_access);
+	GIR::Modules->register_private('remove access', \&Modules::Access::remove_access);
 }
 
 sub show_access
@@ -67,7 +67,7 @@ sub check_access
 	my $user_info = db()->query($query, $user, $password)->fetch;
 
 	unless ($user_info && $user_info->{'id'}) {
-		GIR::Bot::debug("Modules::Access::check_access: User '%s' not found.", $user);
+		GIR::Bot->debug("Modules::Access::check_access: User '%s' not found.", $user);
 		return 0;
 	}
 
@@ -83,7 +83,7 @@ sub check_access
 	if ($access && $access->{'permission_id'}) {
 		return 1;
 	}
-	GIR::Bot::debug("Modules::Access::check_access: User %s doesn't have '%s' permission", $user_info->{'id'}, $access);
+	GIR::Bot->debug("Modules::Access::check_access: User %s doesn't have '%s' permission", $user_info->{'id'}, $access);
 	return 0;
 }
 

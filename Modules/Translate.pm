@@ -9,13 +9,13 @@ sub register
 {
 	# Check for necessary configuration parameters
 	unless (config('app_id')) {
-		GIR::Bot::status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
+		GIR::Bot->status("Modules::Translate: no 'app_id' configuration value provided, skipping initialization");
 		return -1;
 	}
 
-	GIR::Modules::register_action('translate', \&Modules::Translate::translate);
+	GIR::Modules->register_action('translate', \&Modules::Translate::translate);
 
-	GIR::Modules::register_help('translate', \&Modules::Translate::help);
+	GIR::Modules->register_help('translate', \&Modules::Translate::help);
 }
 
 sub translate

@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('help', \&Modules::Help::process);
+	GIR::Modules->register_action('help', \&Modules::Help::process);
 }
 
 sub process

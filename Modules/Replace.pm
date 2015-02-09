@@ -4,7 +4,7 @@ use strict;
 
 sub register
 {
-	GIR::Modules::register_action('buttbuttinate', \&Modules::Replace::replace);
+	GIR::Modules->register_action('buttbuttinate', \&Modules::Replace::replace);
 }
 
 sub replace

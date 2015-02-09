@@ -28,7 +28,7 @@ sub console_parse
 {
 	my $str = shift;
 
-	my $command = GIR::Command::parse($str);
+	my $command = GIR::Command->parse($str);
 
 	push @GIR::Bot::commands, $command;
 

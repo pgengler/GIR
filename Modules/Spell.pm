@@ -6,8 +6,8 @@ sub register
 {
 	my $self = shift;
 
-	GIR::Modules::register_action('spell', \&process);
-	GIR::Modules::register_help('spell', \&help);
+	GIR::Modules->register_action('spell', \&process);
+	GIR::Modules->register_help('spell', \&help);
 }
 
 sub process

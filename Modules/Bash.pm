@@ -8,10 +8,10 @@ my $bash_url_expr = qr[^http://bash.org/\?(\d+)$];
 
 sub register
 {
-	GIR::Modules::register_action('bash', \&Modules::Bash::process_from_text);
-	GIR::Modules::register_action($bash_url_expr, \&Modules::Bash::process_from_url);
+	GIR::Modules->register_action('bash', \&Modules::Bash::process_from_text);
+	GIR::Modules->register_action($bash_url_expr, \&Modules::Bash::process_from_url);
 
-	GIR::Modules::register_help('bash', \&Modules::Bash::help);
+	GIR::Modules->register_help('bash', \&Modules::Bash::help);
 }
 
 sub process_from_url
