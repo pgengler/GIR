@@ -35,7 +35,7 @@ sub quote
 
 	$symbol = uc($symbol);
 
-	my $finance = new StockQuote::Google($symbol);
+	my $finance = StockQuote::Google->new($symbol);
 
 	my $info = $finance->fetch;
 
@@ -68,7 +68,7 @@ sub short_quote
 
 	$symbol = uc($symbol);
 
-	my $quote = new StockQuote::Google($symbol);
+	my $quote = StockQuote::Google->new($symbol);
 
 	my $info = $quote->fetch;
 

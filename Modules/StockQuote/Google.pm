@@ -40,7 +40,7 @@ sub fetch
 	my $userAgent = LWP::UserAgent->new;
 	$userAgent->timeout(10);
 
-	my $request = new HTTP::Request('GET', $url);
+	my $request = HTTP::Request->new('GET', $url);
 
 	my $response = $userAgent->request($request);
 
