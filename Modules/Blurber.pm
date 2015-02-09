@@ -7,16 +7,16 @@ use GIR::Util;
 use constant GET_BLURB_FORMAT => 'http://blurber.herokuapp.com/api/%s/0/';
 use constant GET_CATEGORIES_URL => 'http://blurber.herokuapp.com/api/genres/';
 use JSON;
-use URI::Escape;
+
 my @cats;
 
 sub register
 {
-    # get the list of categories, and thereby also make sure we have a valid api connection
-    my $catlist = eval { get_url(GET_CATEGORIES_URL) };
+	# get the list of categories, and thereby also make sure we have a valid api connection
+	my $catlist = eval { get_url(GET_CATEGORIES_URL) };
 
-    GIR::Modules::register_action('blurber', \&Modules::Blurber::blurber);
-    GIR::Bot::debug("Modules::Blurber: got category list");
+	GIR::Modules::register_action('blurber', \&Modules::Blurber::blurber);
+	GIR::Bot::debug("Modules::Blurber: got category list");
 
 	# Parse response
 	my $catdata;
@@ -28,14 +28,12 @@ sub register
 		return -1;
 	}
 	@cats = keys $catdata;
-}    
+}
 
-sub blurber()
+sub blurber
 {
 	my ($message) = @_;
 
-	# Remove leading and trailing whitespace
-#    my $category_requested = 'random';
 	my $category_requested = $cats[rand @cats];
 	GIR::Bot::debug("Modules::Blurber: getting a blurb for category '%s'", $category_requested);
 
@@ -43,7 +41,7 @@ sub blurber()
 	my $requestURL = sprintf(GET_BLURB_FORMAT, $category_requested);
 
 	my $content = eval { get_url($requestURL) };
-    GIR::Bot::debug("Modules::Blurber: got %s", $content);
+	GIR::Bot::debug("Modules::Blurber: got %s", $content);
 	if ($@) {
 		return _error($message);
 	}
@@ -65,7 +63,7 @@ sub _error($)
 {
 	my ($message) = @_;
 
-	if ($message->is_explicit()) {
+	if ($message->is_explicit) {
 		return "Error connecting to blurber API";
 	} else {
 		return 'NOREPLY';
