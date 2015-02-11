@@ -31,6 +31,11 @@ sub quote
 
 	return unless $symbol;
 
+	if (!$message->is_explicit && ignored($symbol)) {
+		GIR::Bot->debug("Modules::Stock::quote: symbol '%s' is on ignore list", $symbol);
+		return 'NOREPLY';
+	}
+
 	GIR::Bot->status("Looking up stock quote for '%s'", $symbol);
 
 	$symbol = uc($symbol);
@@ -81,6 +86,16 @@ sub short_quote
 	}
 
 	return sprintf('%s: %s, %s %s', $info->{'name'}, $info->{'price'}, $info->{'change'}, $info->{'pctChange'});
+}
+
+sub ignored
+{
+	my ($symbol) = @_;
+
+	return 0 unless $GIR::Bot::config->{'modules'}->{'Stock'}->{'ignored_symbols'};
+	my $ignored_symbols = [ map { lc($_) } @{ $GIR::Bot::config->{'modules'}->{'Stock'}->{'ignored_symbols'} } ];
+
+	return (lc($symbol) ~~ $ignored_symbols);
 }
 
 sub help

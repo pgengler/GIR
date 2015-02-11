@@ -81,6 +81,13 @@ modules:
     # bit.ly API key
     api_key: 
 
+  # configuration options for the Stock module
+  Stock:
+    # list of ticker symbols that should be ignored for bare 'quote X' requests
+    # this can be used when another bot provided a 'quote <nick>' function
+    # and you want to avoid trying to get stock quotes for IRC nicknames
+    ignored_symbols:
+
   # configuration options for the Translate module.
   # The module uses the Bing Translate API, and you'll need to register a Bing App ID for it.
 	# See http://www.bing.com/developers/appids.aspx
