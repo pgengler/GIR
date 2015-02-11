@@ -4,8 +4,8 @@ use strict;
 
 use GIR::Util;
 
-use constant GET_BLURB_FORMAT => 'http://blurber.herokuapp.com/api/%s/0/';
-use constant GET_CATEGORIES_URL => 'http://blurber.herokuapp.com/api/genres/';
+use constant GET_BLURB_FORMAT => 'http://www.blurber.io/api/%s/0/?descr_length=30';
+use constant GET_CATEGORIES_URL => 'http://www.blurber.io/api/genres/';
 use JSON;
 
 my @cats;
@@ -37,37 +37,21 @@ sub blurber
 	my $category_requested = $cats[rand @cats];
 	GIR::Bot->debug("Modules::Blurber: getting a blurb for category '%s'", $category_requested);
 
-	# Build request URL
 	my $requestURL = sprintf(GET_BLURB_FORMAT, $category_requested);
 
 	my $content = eval { get_url($requestURL) };
 	GIR::Bot->debug("Modules::Blurber: got %s", $content);
-	if ($@) {
-		return _error($message);
-	}
 
-	# Parse response
 	my $data;
 	eval {
 		$data = JSON::decode_json($content);
 	};
-	if ($@ || ref($data) ne 'HASH') {
-		GIR::Bot->error("Modules::Blurber: JSON parsing failed: %s", $@);
-		return _error($message);
+	if (ref($data) ne 'HASH') {
+		GIR::Bot->error("Modules::Blurber: JSON parsing failed");
+		return $message->is_explicit ? "Error connecting to blurber API" : 'NOREPLY';
 	}
 
-	return sprintf("\"%s\" by %s. %s", $data->{'title'}, $data->{'author'}, $data->{'descr'});
-}
-
-sub _error
-{
-	my ($message) = @_;
-
-	if ($message->is_explicit) {
-		return "Error connecting to blurber API";
-	} else {
-		return 'NOREPLY';
-	}
+	return sprintf("\"%s\" by %s. %s", $data->{'fields'}->{'title'}, $data->{'fields'}->{'author'}, $data->{'fields'}->{'descr'});
 }
 
 1;
