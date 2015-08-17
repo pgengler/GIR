@@ -96,9 +96,13 @@ my $conversions = {
 	'lb' => {
 		'kg' => \&pounds_to_kilograms,
 		'oz' => \&pounds_to_ounces,
+		'st' => \&pounds_to_stones,
 	},
 	'oz' => {
 		'lb' => \&ounces_to_pounds,
+	},
+	'st' => {
+		'lb' => \&stones_to_pounds,
 	},
 
 	# volume conversions
@@ -272,6 +276,8 @@ sub register
 		'second'        => 's',
 		'seconds'       => 's',
 		'sm'            => 'mi',
+		'stone'         => 'st',
+		'stones'        => 'st',
 		'terabyte'      => 'tb',
 		'terabytes'     => 'tb',
 		'ua'            => 'au',
@@ -657,6 +663,20 @@ sub pounds_to_ounces
 	my ($pounds) = @_;
 
 	return $pounds * 16.0;
+}
+
+sub pounds_to_stone
+{
+	my ($pounds) = @_;
+
+	return $pounds * 0.0714286;
+}
+
+sub stone_to_pounds
+{
+	my ($stone) = @_;
+
+	return $stone * 14;
 }
 
 ##############
