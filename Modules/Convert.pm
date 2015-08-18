@@ -96,13 +96,13 @@ my $conversions = {
 	'lb' => {
 		'kg' => \&pounds_to_kilograms,
 		'oz' => \&pounds_to_ounces,
-		'st' => \&pounds_to_stones,
+		'st' => \&pounds_to_stone,
 	},
 	'oz' => {
 		'lb' => \&ounces_to_pounds,
 	},
 	'st' => {
-		'lb' => \&stones_to_pounds,
+		'lb' => \&stone_to_pounds,
 	},
 
 	# volume conversions
