@@ -15,6 +15,7 @@ sub get
 	my $message = shift;
 
 	my $name = $message->message;
+	$name =~ s/^\s+|\s+$//g;
 
 	return unless $name;
 
@@ -25,7 +26,7 @@ sub get
 		FROM karma
 		WHERE LOWER(name) = LOWER(?)
 	~;
-	my $user = db()->query($query, lc($name))->fetch;
+	my $user = db()->query($query, $name)->fetch;
 
 	if ($user && $user->{'karma'}) {
 		return "$name has karma of $user->{'karma'}";
@@ -52,6 +53,8 @@ sub update
 		return;
 	}
 
+	$name =~ s/^\s+|\s+$//g;
+
 	if (lc($message->from) eq lc($name)) {
 		return "You can't change your own karma!";
 	}
@@ -60,9 +63,9 @@ sub update
 	my $query = qq~
 		SELECT name
 		FROM karma
-		WHERE name = ?
+		WHERE LOWER(name) = LOWER(?)
 	~;
-	my $karma = db()->query($query, lc($name))->fetch;
+	my $karma = db()->query($query, $name)->fetch;
 
 	if ($karma) {
 		if ($direction eq '++') {
