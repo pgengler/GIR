@@ -236,6 +236,7 @@ sub register
 		'lb/sq.in'      => 'psi',
 		'lb/sq. in'     => 'psi',
 		'lb/sqin'       => 'psi',
+		'lbs'           => 'lb',
 		'light-second'  => 'ls',
 		'light second'  => 'ls',
 		'light-seconds' => 'ls',
