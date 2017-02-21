@@ -11,7 +11,7 @@ sub fake_git_output
 {
 	my $message = shift;
 
-	if ($message->message =~ /^git\s+(\w+?)(\s|$)/) {
+	if ($message->message =~ /^git\s+(\w+?|--help)(\s|$)/) {
 		my $command = $1;
 		if ($command eq 'clone') {
 			return "ERROR: Repository not found.\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.";
