@@ -133,7 +133,7 @@ my $conversions = {
 		'bar' => metric_decrease_magnitude(3),
 	},
 	'hpa' => {
-		'pa' => metric_decrease_magnitude(2),
+		'pa' => metric_increase_magnitude(2),
 	},
 	'kpa' => {
 		'pa' => metric_decrease_magnitude(3),
@@ -144,7 +144,7 @@ my $conversions = {
 	'pa' => {
 		'atm' => \&pascals_to_atmospheres,
 		'bar' => metric_decrease_magnitude(5),
-		'hpa' => metric_increase_magnitude(2),
+		'hpa' => metric_decrease_magnitude(2),
 		'kpa' => metric_increase_magnitude(3),
 		'mpa' => metric_increase_magnitude(6),
 		'psi' => \&pascals_to_psi,
