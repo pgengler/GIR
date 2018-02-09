@@ -245,6 +245,8 @@ sub register
 		'light year'    => 'ly',
 		'light-years'   => 'ly',
 		'light years'   => 'ly',
+		'lightyear'     => 'ly',
+		'lightyears'    => 'ly',
 		'liter'         => 'l',
 		'liters'        => 'l',
 		'litre'         => 'l',
