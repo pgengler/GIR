@@ -3,9 +3,9 @@ package StockQuote::Google;
 use strict;
 use warnings;
 
-use HTML::TreeBuilder::XPath;
 use HTTP::Request;
 use LWP::UserAgent;
+use Web::Query;
 
 use constant {
 	URL_FORMAT => 'http://www.google.com/finance?q=%s',
@@ -38,6 +38,7 @@ sub fetch
 	my $url = sprintf(URL_FORMAT, $symbol);
 
 	my $userAgent = LWP::UserAgent->new;
+	$userAgent->agent(qq[Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36]);
 	$userAgent->timeout(10);
 
 	my $request = HTTP::Request->new('GET', $url);
@@ -48,24 +49,39 @@ sub fetch
 		return undef;
 	}
 
-	my $tree = HTML::TreeBuilder::XPath->new;
-	$tree->parse_content($response->content);
+	my $query = Web::Query->new($response->content);
 
-	my $title = $tree->findvalue('/html/head/title');
-	return undef unless $title =~ /quotes & news/;
+	my $symbolThing = $query->find('div._EGr')->first->text;
+	if ($symbolThing !~ /^(.+?):\s*(.+?)\s*$/) {
+		return undef;
+	}
+	my $canonicalSymbol = $2;
 
-	my ($name, $extra)      = split(/: /, $title);
-	my ($fullSymbol, $xtra) = split(/\s/, $extra);
+	my ($change, $pctChange) = split(/\s+/, $query->find('span._yHo')->first->text);
+
+	my $price = $query->find('g-card-section._tSo div span')->first->text;
+	$price =~ s/(.+?) USD/\$$1/;
+
+	my $infoTable = $query->find('._qco table');
+	my $miscInfo = { };
+	$infoTable->find('tr')->each(sub {
+		my ($i, $elem) = @_;
+		my $name = $elem->find('td._Aeo')->first->text;
+		my $value = $elem->find('td._Beo')->first->text;
+
+		$miscInfo->{ $name } = $value;
+	});
 
 	my $info = {
-		'symbol'    => $fullSymbol,
-		'name'      => $name,
-		'price'     => $tree->findvalue('/html/body//span[@class="pr"]/span'),
-		'change'    => $tree->findvalue('/html/body//span[@class="chg"][1]') || $tree->findvalue('/html/body//span[@class="chr"][1]'),
-		'pctChange' => $tree->findvalue('/html/body//span[@class="chg"][2]') || $tree->findvalue('/html/body//span[@class="chr"][2]'),
-		'open'      => $tree->findvalue('/html/body//td[@data-snapfield="open"]/following-sibling::td'),
-		'dayRange'  => $tree->findvalue('/html/body//td[@data-snapfield="range"]/following-sibling::td'),
-		'yearRange' => $tree->findvalue('/html/body//td[@data-snapfield="range_52week"]/following-sibling::td'),
+		'symbol'    => $canonicalSymbol,
+		'name'      => $query->find('div._FGr')->first->text,
+		'price'     => $price,
+		'change'    => $change,
+		'pctChange' => $pctChange,
+		'extra'     => $query->find('div._cHp')->first->text,
+		'open'      => $miscInfo->{'Open'},
+		'dayRange'  => "$miscInfo->{'Low'}-$miscInfo->{'High'}",
+		'yearRange' => "$miscInfo->{'52-wk low'}-$miscInfo->{'52-wk high'}",
 	};
 
 	foreach my $key (keys %$info) {
@@ -74,6 +90,9 @@ sub fetch
 		$info->{ $key } =~ s/\s*$//;
 		# Convert any remaining whitespace into single space characters
 		$info->{ $key } =~ s/\s+/ /g;
+
+		# Replace Unicode minus sign with ASCII hyphen
+		$info->{ $key } =~ s/−/-/g;
 	}
 
 	return $info;
