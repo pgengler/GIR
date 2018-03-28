@@ -51,34 +51,37 @@ sub fetch
 
 	my $query = Web::Query->new($response->content);
 
-	my $symbolThing = $query->find('div._EGr')->first->text;
+	my $symbolThing = $query->find('div[role="heading"] > div:nth-child(3)')->first->text;
 	if ($symbolThing !~ /^(.+?):\s*(.+?)\s*$/) {
 		return undef;
 	}
 	my $canonicalSymbol = $2;
 
-	my ($change, $pctChange) = split(/\s+/, $query->find('span._yHo')->first->text);
+	my $changeElem = $query->find('span.fw-price-dn, span.fw-price-up')->first;
+	my ($change, $pctChange) = split(/\s+/, $changeElem->text);
+	if ($changeElem->has_class('fw-price-dn')) {
+		$pctChange =~ s/\((\d)/(-$1/;
+	}
 
-	my $price = $query->find('g-card-section._tSo div span')->first->text;
+	my $price = $query->find('g-card-section span:first-child')->first->text;
 	$price =~ s/(.+?) USD/\$$1/;
 
-	my $infoTable = $query->find('._qco table');
+	my $infoTable = $query->find('table')->not('[class]');
 	my $miscInfo = { };
 	$infoTable->find('tr')->each(sub {
 		my ($i, $elem) = @_;
-		my $name = $elem->find('td._Aeo')->first->text;
-		my $value = $elem->find('td._Beo')->first->text;
+		my $name = $elem->find('td:first-child')->first->text;
+		my $value = $elem->find('td:last-child')->first->text;
 
 		$miscInfo->{ $name } = $value;
 	});
 
 	my $info = {
 		'symbol'    => $canonicalSymbol,
-		'name'      => $query->find('div._FGr')->first->text,
+		'name'      => $query->find('div[role="heading"] > div:nth-child(2)')->first->text,
 		'price'     => $price,
 		'change'    => $change,
 		'pctChange' => $pctChange,
-		'extra'     => $query->find('div._cHp')->first->text,
 		'open'      => $miscInfo->{'Open'},
 		'dayRange'  => "$miscInfo->{'Low'}-$miscInfo->{'High'}",
 		'yearRange' => "$miscInfo->{'52-wk low'}-$miscInfo->{'52-wk high'}",
