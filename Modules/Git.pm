@@ -2,16 +2,18 @@ package Modules::Git;
 
 use strict;
 
+use constant GIT_REGEXP => qr/^git\s+(\w+?|--help)(\s|$)/;
+
 sub register
 {
-	GIR::Modules->register_action(qr/^git\s+(\w+?)(\s|$)/, \&Modules::Git::fake_git_output);
+	GIR::Modules->register_action(GIT_REGEXP, \&Modules::Git::fake_git_output);
 }
 
 sub fake_git_output
 {
 	my $message = shift;
 
-	if ($message->message =~ /^git\s+(\w+?|--help)(\s|$)/) {
+	if ($message->message =~ GIT_REGEXP) {
 		my $command = $1;
 		if ($command eq 'clone') {
 			return "ERROR: Repository not found.\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.";
