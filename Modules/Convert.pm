@@ -111,7 +111,8 @@ my $conversions = {
 
 	# volume conversions
 	'gal' => {
-		'l' => \&gallons_to_liters,
+		'l'  => \&gallons_to_liters,
+		'qt' => \&gallons_to_quarts,
 	},
 	'l' => {
 		'gal' => \&liters_to_gallons,
@@ -119,6 +120,9 @@ my $conversions = {
 	},
 	'ml' => {
 		'l' => metric_decrease_magnitude(3),
+	},
+	'qt' => {
+		'gal' => \&quarts_to_gallons,
 	},
 
 	# pressure conversions
@@ -282,6 +286,8 @@ sub register
 		'petabytes'     => 'pb',
 		'pound'         => 'lb',
 		'pounds'        => 'lb',
+		'quart'         => 'qt',
+		'quarts'        => 'qt',
 		'second'        => 's',
 		'seconds'       => 's',
 		'sm'            => 'mi',
@@ -698,11 +704,25 @@ sub gallons_to_liters
 	return $gallons * 3.78541;
 }
 
+sub gallons_to_quarts
+{
+	my ($gallons) = @_;
+
+	return $gallons * 4;
+}
+
 sub liters_to_gallons
 {
 	my ($liters) = @_;
 
 	return $liters / 3.78541;
+}
+
+sub quarts_to_gallons
+{
+	my ($quarts) = @_;
+
+	return $quarts / 4.0;
 }
 
 ##############
