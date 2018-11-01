@@ -111,7 +111,8 @@ my $conversions = {
 
 	# volume conversions
 	'fl oz' => {
-		'qt' => \&fluid_ounces_to_quarts,
+		'qt'   => \&fluid_ounces_to_quarts,
+		'tbsp' => \&fluid_ounces_to_tablespoons,
 	},
 	'gal' => {
 		'l'  => \&gallons_to_liters,
@@ -127,6 +128,9 @@ my $conversions = {
 	'qt' => {
 		'fl oz' => \&quarts_to_fluid_ounces,
 		'gal'   => \&quarts_to_gallons,
+	},
+	'tbsp' => {
+		'fl oz' => \&tablespoons_to_fluid_ounces,
 	},
 
 	# pressure conversions
@@ -301,6 +305,8 @@ sub register
 		'stones'        => 'st',
 		'terabyte'      => 'tb',
 		'terabytes'     => 'tb',
+		'tablespoon'    => 'tbsp',
+		'tablespoons'   => 'tbsp',
 		'ua'            => 'au',
 		'yard'          => 'yd',
 		'yards'         => 'yd'
@@ -710,6 +716,13 @@ sub fluid_ounces_to_quarts
 	return $floz / 32.0;
 }
 
+sub fluid_ounces_to_tablespoons
+{
+	my ($floz) = @_;
+
+	return $floz * 2;
+}
+
 sub gallons_to_liters
 {
 	my ($gallons) = @_;
@@ -743,6 +756,13 @@ sub quarts_to_gallons
 	my ($quarts) = @_;
 
 	return $quarts / 4.0;
+}
+
+sub tablespoons_to_fluid_ounces
+{
+	my ($tbsp) = @_;
+
+	return $tbsp / 2.0;
 }
 
 ##############
