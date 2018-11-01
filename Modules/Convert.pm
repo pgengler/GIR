@@ -88,10 +88,14 @@ my $conversions = {
 	# weight/mass conversions
 	'g' => {
 		'kg' => metric_decrease_magnitude(3),
+		'mg' => metric_increase_magnitude(3),
 	},
 	'kg' => {
 		'lb' => \&kilograms_to_pounds,
 		'g'  => metric_increase_magnitude(3),
+	},
+	'mg' => {
+		'g' => metric_decrease_magnitude(3),
 	},
 	'lb' => {
 		'kg' => \&pounds_to_kilograms,
@@ -261,6 +265,8 @@ sub register
 		'metres'        => 'm',
 		'mile'          => 'mi',
 		'miles'         => 'mi',
+		'milligram'     => 'mg',
+		'milligrams'    => 'mg',
 		'milliliter'    => 'ml',
 		'milliliters'   => 'ml',
 		'millilitre'    => 'ml',
