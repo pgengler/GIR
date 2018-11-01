@@ -131,6 +131,10 @@ my $conversions = {
 	},
 	'tbsp' => {
 		'fl oz' => \&tablespoons_to_fluid_ounces,
+		'tsp'   => \&tablespoons_to_teaspoons,
+	},
+	'tsp' => {
+		'tbsp' => \&teaspoons_to_tablespoons,
 	},
 
 	# pressure conversions
@@ -307,6 +311,8 @@ sub register
 		'terabytes'     => 'tb',
 		'tablespoon'    => 'tbsp',
 		'tablespoons'   => 'tbsp',
+		'teaspoon'      => 'tsp',
+		'teaspoons'     => 'tsp',
 		'ua'            => 'au',
 		'yard'          => 'yd',
 		'yards'         => 'yd'
@@ -763,6 +769,20 @@ sub tablespoons_to_fluid_ounces
 	my ($tbsp) = @_;
 
 	return $tbsp / 2.0;
+}
+
+sub tablespoons_to_teaspoons
+{
+	my ($tbsp) = @_;
+
+	return $tbsp * 3;
+}
+
+sub teaspoons_to_tablespoons
+{
+	my ($tsp) = @_;
+
+	return $tsp / 3.0;
 }
 
 ##############
