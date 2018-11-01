@@ -110,6 +110,9 @@ my $conversions = {
 	},
 
 	# volume conversions
+	'fl oz' => {
+		'qt' => \&fluid_ounces_to_quarts,
+	},
 	'gal' => {
 		'l'  => \&gallons_to_liters,
 		'qt' => \&gallons_to_quarts,
@@ -122,7 +125,8 @@ my $conversions = {
 		'l' => metric_decrease_magnitude(3),
 	},
 	'qt' => {
-		'gal' => \&quarts_to_gallons,
+		'fl oz' => \&quarts_to_fluid_ounces,
+		'gal'   => \&quarts_to_gallons,
 	},
 
 	# pressure conversions
@@ -209,6 +213,8 @@ sub register
 		'centimetres'   => 'cm',
 		'fahrenheit'    => 'f',
 		'feet'          => 'ft',
+		'fluid ounce'   => 'fl oz',
+		'fluid ounces'  => 'fl oz',
 		'foot'          => 'ft',
 		'fps'           => 'ft/s',
 		'gallon'        => 'gal',
@@ -697,6 +703,13 @@ sub stone_to_pounds
 ##############
 ## VOLUME CONVERSION FUNCTIONS
 ##############
+sub fluid_ounces_to_quarts
+{
+	my ($floz) = @_;
+
+	return $floz / 32.0;
+}
+
 sub gallons_to_liters
 {
 	my ($gallons) = @_;
@@ -716,6 +729,13 @@ sub liters_to_gallons
 	my ($liters) = @_;
 
 	return $liters / 3.78541;
+}
+
+sub quarts_to_fluid_ounces
+{
+	my ($quarts) = @_;
+
+	return $quarts * 32;
 }
 
 sub quarts_to_gallons
