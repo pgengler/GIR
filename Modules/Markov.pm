@@ -351,7 +351,7 @@ sub learn
 	my $lookup_sql = q(
 		SELECT prev, this, next
 		FROM words
-		WHERE prev = LEFT(?, 255) AND this = LEFT(?, 255) AND next = LEFT(?, 255)
+		WHERE COALESCE(prev, '__BEGIN__') = LEFT(COALESCE(?, '__BEGIN__'), 255) AND this = LEFT(?, 255) AND COALESCE(next, '__END__') = LEFT(COALESCE(?, '__END__'), 255)
 	);
 	my $lookup = db()->statement($lookup_sql);
 
