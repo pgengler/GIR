@@ -64,7 +64,7 @@ sub gen_output
 		my $query = qq~
 			SELECT this, next
 			FROM words
-			WHERE this = ? AND next <> '__END__'
+			WHERE this = ? AND next IS NOT NULL
 			ORDER BY random()
 			LIMIT 1
 		~;
@@ -78,7 +78,7 @@ sub gen_output
 		my $query = q[
 			SELECT this, next
 			FROM words
-			WHERE prev = '__BEGIN__'
+			WHERE prev IS NULL
 			ORDER BY random()
 			LIMIT 1
 		];
@@ -86,7 +86,7 @@ sub gen_output
 	}
 
 	$phrase .= "$word->{'this'} ";
-	if ($word->{'next'} eq '__END__') {
+	unless ($word->{'next'}) {
 		return $phrase;
 	}
 
@@ -109,7 +109,7 @@ sub gen_output
 
 		$phrase .= "$word->{'this'} ";
 
-		if ($word->{'next'} eq '__END__' || $count > 25) {
+		if (!$word->{'next'} || $count > 25) {
 			last;
 		}
 
@@ -168,7 +168,7 @@ sub gen_output_multi
 		~;
 		my $statement = db()->statement($query);
 
-		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
+		while ($word && $word->{'prev'}) {
 			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
 			$phrase = "$word->{'this'} $phrase";
 		}
@@ -183,7 +183,7 @@ sub gen_output_multi
 		$statement = db()->statement($query);
 
 		$word = $start;
-		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
+		while ($word && $word->{'next'}) {
 			$word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
 			$phrase = "$phrase $word->{'this'}";
 		}
@@ -209,7 +209,7 @@ sub gen_output_multi
 		~;
 		my $statement = db()->statement($query);
 
-		while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__') {
+		while ($word && $word->{'prev'}) {
 			$word = $statement->execute($word->{'prev'}, $word->{'this'})->fetch;
 			$phrase = "$word->{'this'} $phrase";
 		}
@@ -224,7 +224,7 @@ sub gen_output_multi
 		$statement = db()->statement($query);
 
 		$word = $start;
-		while ($word && $word->{'next'} && $word->{'next'} ne '__END__') {
+		while ($word && $word->{'next'}) {
 			$word = $statement->execute($word->{'this'}, $word->{'next'})->fetch;
 			$phrase = "$phrase $word->{'this'}";
 		}
@@ -282,7 +282,7 @@ sub gen_output_from_end
 		$query = qq~
 			SELECT prev, this
 			FROM words
-			WHERE this = ? AND next = '__END__'
+			WHERE this = ? AND next IS NULL
 			ORDER BY random()
 			LIMIT 1
 		~;
@@ -296,7 +296,7 @@ sub gen_output_from_end
 		my $query = q[
 			SELECT prev, this
 			FROM words
-			WHERE next = '__END__'
+			WHERE next IS NULL
 			ORDER BY random()
 			LIMIT 1
 		];
@@ -304,7 +304,7 @@ sub gen_output_from_end
 	}
 
 	$phrase = "$word->{'this'} $phrase";
-	if ($word->{'prev'} eq '__BEGIN__') {
+	unless ($word->{'prev'}) {
 		return $phrase;
 	}
 
@@ -327,7 +327,7 @@ sub gen_output_from_end
 
 		$phrase = "$word->{'this'} $phrase";
 
-	} while ($word && $word->{'prev'} && $word->{'prev'} ne '__BEGIN__' && $count++ <= 25);
+	} while ($word && $word->{'prev'} && $count++ <= 25);
 	return $phrase;
 }
 
@@ -345,8 +345,8 @@ sub learn
 
 	return if scalar(@parts) == 0;
 
-	unshift @parts, '__BEGIN__';
-	push @parts, '__END__';
+	unshift @parts, undef;
+	push @parts, undef;
 
 	my $lookup_sql = q(
 		SELECT prev, this, next
