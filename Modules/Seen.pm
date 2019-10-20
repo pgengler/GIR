@@ -19,7 +19,7 @@ sub seen
 	# Remove leading/trailing whitespace
 	$nick =~ s/^\s*(.+?)\s*$/$1/;
 
-	return unless $nick;
+	return unless $nick && $nick !~ /\s/;
 
 	$nick = lc($nick);
 
