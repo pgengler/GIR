@@ -2,6 +2,8 @@ package Modules::Git;
 
 use strict;
 
+use POSIX qw/ strftime /;
+
 use constant GIT_REGEXP => qr/^git\s+(\w+?|--help)(\s|$)/;
 
 sub register
@@ -19,6 +21,10 @@ sub fake_git_output
 			return "ERROR: Repository not found.\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.";
 		} elsif ($command eq 'init') {
 			return '/home/gir/.git: Permission denied';
+    } elsif ($command eq 'blame') {
+			my $who = $message->from;
+			my $datetime = strftime('%Y-%m-%d %H:%M:%S %Z', gmtime());
+			return "1234abc\t${who}\t${datetime}\t1) I can't tell IRC and my terminal apart.";
 		} elsif ($command eq 'add' || $command eq 'bisect' || $command eq 'branch' || $command eq 'checkout' || $command eq 'commit' || $command eq 'diff' || $command eq 'fetch' || $command eq 'log' || $command eq 'pull' || $command eq 'push' || $command eq 'merge' || $command eq 'mv' || $command eq 'rebase' || $command eq 'reset' || $command eq 'rm' || $command eq 'show' || $command eq 'status') {
 			return 'fatal: Not a git repository (or any of the parent directories): .git';
 		} elsif ($command eq '--help') {
