@@ -110,6 +110,9 @@ my $conversions = {
 	},
 
 	# volume conversions
+	'cups' => {
+		'qt' => \&cups_to_quarts,
+	},
 	'fl oz' => {
 		'qt'   => \&fluid_ounces_to_quarts,
 		'tbsp' => \&fluid_ounces_to_tablespoons,
@@ -125,9 +128,14 @@ my $conversions = {
 	'ml' => {
 		'l' => metric_decrease_magnitude(3),
 	},
+	'pt' => {
+		'qt' => \&pints_to_quarts,
+	},
 	'qt' => {
+		'cups'  => \&quarts_to_cups,
 		'fl oz' => \&quarts_to_fluid_ounces,
 		'gal'   => \&quarts_to_gallons,
+		'pt'    => \&quarts_to_pints,
 	},
 	'tbsp' => {
 		'fl oz' => \&tablespoons_to_fluid_ounces,
@@ -219,6 +227,7 @@ sub register
 		'centimeters'   => 'cm',
 		'centimetre'    => 'cm',
 		'centimetres'   => 'cm',
+		'cup'           => 'cups',
 		'fahrenheit'    => 'f',
 		'feet'          => 'ft',
 		'fluid ounce'   => 'fl oz',
@@ -298,6 +307,8 @@ sub register
 		'parsecs'       => 'pc',
 		'petabyte'      => 'pb',
 		'petabytes'     => 'pb',
+		'pint'          => 'pt',
+		'pints'         => 'pt',
 		'pound'         => 'lb',
 		'pounds'        => 'lb',
 		'quart'         => 'qt',
@@ -715,6 +726,13 @@ sub stone_to_pounds
 ##############
 ## VOLUME CONVERSION FUNCTIONS
 ##############
+sub cups_to_quarts
+{
+	my ($cups) = @_;
+
+	return $cups / 4.0;
+}
+
 sub fluid_ounces_to_quarts
 {
 	my ($floz) = @_;
@@ -750,6 +768,20 @@ sub liters_to_gallons
 	return $liters / 3.78541;
 }
 
+sub pints_to_quarts
+{
+	my ($pints) = @_;
+
+	return $pints / 2.0;
+}
+
+sub quarts_to_cups
+{
+	my ($quarts) = @_;
+
+	return $quarts * 4;
+}
+
 sub quarts_to_fluid_ounces
 {
 	my ($quarts) = @_;
@@ -762,6 +794,13 @@ sub quarts_to_gallons
 	my ($quarts) = @_;
 
 	return $quarts / 4.0;
+}
+
+sub quarts_to_pints
+{
+	my ($quarts) = @_;
+
+	return $quarts * 2;
 }
 
 sub tablespoons_to_fluid_ounces
