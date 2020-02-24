@@ -10,11 +10,14 @@ BEGIN {
 		'hello',
 		'hi',
 		'hey',
-		'niihau',
+		'nihao',
+		'喂!',
+		'你好',
 		'bonjour',
 		'hola',
+		'¡Oye!',
 		'salut',
-		'que tal',
+		'qué tal',
 		'privet',
 		"what's up"
 	);
