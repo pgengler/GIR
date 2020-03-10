@@ -2,7 +2,7 @@ package Modules::Stock;
 
 use strict;
 
-use Modules::StockQuote::Google;
+use Modules::StockQuote::Yahoo;
 
 sub register
 {
@@ -22,7 +22,7 @@ sub quote
 	return unless $symbol;
 
 	# Remove leading and trailing whitespace
-	$symbol =~ s/^\s*(.+)\s*$/$1/;
+	$symbol =~ s/^\s*(.+?)\s*$/$1/;
 
 	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
@@ -40,7 +40,7 @@ sub quote
 
 	$symbol = uc($symbol);
 
-	my $finance = StockQuote::Google->new($symbol);
+	my $finance = StockQuote::Yahoo->new($symbol);
 
 	my $info = $finance->fetch;
 
@@ -64,7 +64,7 @@ sub short_quote
 	GIR::Bot->status("Looking up stock quote for '%s'", $symbol);
 
 	# Remove leading and trailing whitespace
-	$symbol =~ s/^\s*(.+)\s*$/$1/;
+	$symbol =~ s/^\s*(.+?)\s*$/$1/;
 
 	# If there's any internal whitespace, don't process
 	if ($symbol =~ /\s/) {
@@ -73,7 +73,7 @@ sub short_quote
 
 	$symbol = uc($symbol);
 
-	my $quote = StockQuote::Google->new($symbol);
+	my $quote = StockQuote::Yahoo->new($symbol);
 
 	my $info = $quote->fetch;
 
