@@ -15,7 +15,7 @@ sub register
 sub seenlist
 {
 	my $message = shift;
-	return unless $message->is_explicit;
+	return if $message->is_public;
 	my $count = $message->message;
 
 	$count = 20 if not looks_like_number($count);
