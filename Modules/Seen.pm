@@ -35,7 +35,7 @@ sub seenlist
 	for my $row (@$seenlist) {
 		$retval .= $row->{'when'} . ' - ' . $row->{'peeps'} . "\n";
 	}
-	return $retval;
+	return $retval || 'NOREPLY';
 }
 
 sub seen
