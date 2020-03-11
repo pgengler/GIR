@@ -1,13 +1,40 @@
 package Modules::Seen;
 
 use strict;
+use Scalar::Util 'looks_like_number';
 
 sub register
 {
 	GIR::Modules->register_action('seen', \&Modules::Seen::seen);
+	GIR::Modules->register_action('seenlist', \&Modules::Seen::seenlist);
 	GIR::Modules->register_listener(\&Modules::Seen::update, -1);
 
 	GIR::Modules->register_help('seen', \&Modules::Seen::help);
+}
+
+sub seenlist
+{
+	my $message = shift;
+	return unless $message->is_explicit;
+	my $count = $message->message;
+
+	$count = 20 if not looks_like_number($count);
+	$count = int($count);
+	$count = 40 if ($count > 40); # sanity check
+
+	my $query = qq~
+	    SELECT who, DATE("when") as "when"
+		FROM seen
+		ORDER BY "when" DESC
+		LIMIT ?
+	~;
+	my $seenlist = db()->query($query, $count)->fetchall;
+	my $retval = "";
+	for my $row (@$seenlist)
+	{
+         $retval .= $row->{'when'} . " - " . $row->{'who'} . "\n";
+	}
+	return $retval;
 }
 
 sub seen
