@@ -23,11 +23,14 @@ sub seenlist
 	$count = 40 if ($count > 40); # sanity check
 
 	my $query = qq~
-		SELECT who, DATE("when") as "when"
+		SELECT DATE("when") as "when",
+		       STRING_AGG("who", ', ') as peeps
 		FROM seen
-		ORDER BY "when" DESC
+		GROUP BY 1
+		ORDER BY 1 DESC
 		LIMIT ?
 	~;
+	
 	my $seenlist = db()->query($query, $count)->fetchall;
 	my $retval = '';
 	for my $row (@$seenlist) {
