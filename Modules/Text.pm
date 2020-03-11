@@ -10,7 +10,7 @@ sub register
 	GIR::Modules->register_action('lcfirst', \&do_lcfirst);
 	GIR::Modules->register_action('reverse', \&do_reverse);
 	GIR::Modules->register_action('uc', \&do_uc);
-	GIR::Modules->register_action('uc', \&do_ucfirst);
+	GIR::Modules->register_action('ucfirst', \&do_ucfirst);
 }
 
 sub do_lc
