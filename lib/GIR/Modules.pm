@@ -461,7 +461,7 @@ sub process
 	my ($message, $nests) = @_;
 	$nests ||= 0;
 
-	if ($message->message =~ /^(.+?)?{{(.+)}}(.+?)?$/ && $nests < $GIR::Bot::config->{'max_nest'}) {
+	if ($message->message =~ /^(.+?)?\{\{(.+)\}\}(.+?)?$/ && $nests < $GIR::Bot::config->{'max_nest'}) {
 		my $pre  = $1 || '';
 		my $nest = $2 || '';
 		my $post = $3 || '';

@@ -871,10 +871,11 @@ sub remove_ignore
 
 sub reload_modules
 {
-	my $module = shift;
+	my $package = shift;
+	my ($module) = @_;
 
 	unless ($module) {
-		GIR::Bot->status('Reloading modules');
+		$package->status('Reloading modules');
 		GIR::Modules->load_modules;
 	} else {
 		GIR::Modules->unload_module($module);
@@ -884,7 +885,8 @@ sub reload_modules
 
 sub load_module
 {
-	my $module = shift;
+	my $package = shift;
+	my ($module) = @_;
 
 	GIR::Modules->load_module($module, false, false);
 }
