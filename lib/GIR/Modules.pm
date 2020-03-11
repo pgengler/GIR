@@ -548,6 +548,7 @@ sub shutdown
 
 	# Wait for threads to finish before exiting
 	if ($pool) {
+		$pool->cancel_all;
 		$pool->join;
 	}
 }

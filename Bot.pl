@@ -454,7 +454,7 @@ sub nick_in_use
 	} elsif ($nick_retries == 2) {
 		$config->{'nick'} = $config->{'config_nick'};
 	}
-	change_nick($config->{'nick'});
+	GIR::Bot->change_nick($config->{'nick'});
 }
 
 sub on_quit
