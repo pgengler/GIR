@@ -74,6 +74,10 @@ sub fetch
 		'yearRange' => $data->{'fiftyTwoWeekRange'}->{'fmt'},
 	};
 
+	if (!$info->{'price'}) {
+		return undef;
+	}
+
 	foreach my $key (keys %$info) {
 		# Trim leading/trailing whitespace characters
 		$info->{ $key } =~ s/^\s*//;
