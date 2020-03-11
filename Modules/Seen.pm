@@ -24,7 +24,7 @@ sub seenlist
 
 	my $query = qq~
 		SELECT DATE("when") as "when",
-		       STRING_AGG("who", ', ') as peeps
+		STRING_AGG("who", ', ') as peeps
 		FROM seen
 		GROUP BY 1
 		ORDER BY 1 DESC
