@@ -10,6 +10,7 @@ sub register
 	GIR::Modules->register_listener(\&Modules::Seen::update, -1);
 
 	GIR::Modules->register_help('seen', \&Modules::Seen::help);
+	GIR::Modules->register_help('seenlist', \&Modules::Seen::help);
 }
 
 sub seenlist
@@ -153,8 +154,11 @@ sub update
 sub help
 {
 	my $message = shift;
-
-	return "'seen <user>': displays information about the last time <user> spoke when I was around.";
+	if ($message->message eq 'seen') {
+		return "'seen <user>': displays information about the last time <user> spoke when I was around.";
+	} else {
+		return "'seenlist': displays a summary of last seen users.";
+	}	
 }
 
 1;
