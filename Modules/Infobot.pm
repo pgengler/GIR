@@ -12,7 +12,7 @@ my @dunno = ("I don't know", 'Wish I knew', 'Beats me', 'I have no idea', "I thi
 my $feedbacked = 0;
 
 my $force_learn_expr    = qr/^(.+)\s+\=(is|are)\=\>\s+(.+)$/;
-my $learn_expr          = qr/^(.+)\s+(is|are)\s+(.+)$/;
+my $learn_expr          = qr/^(.+?)\s+(is|are)\s+(.+)$/;
 my $forget_expr         = qr/^forget\s+(.+)$/;
 my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
 my $what_reply_expr     = qr/^(what\s*(\'s|is|are)*\s+)(.+?)\?*$/;
