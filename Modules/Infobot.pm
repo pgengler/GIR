@@ -421,7 +421,7 @@ sub reply
 		});
 
 		if ($extra) {
-			$result = $extra . ' ' . GIR::Modules->process($msg);
+			$result = parse_special($extra) . ' ' . GIR::Modules->process($msg);
 		} else {
 			$result = GIR::Modules->process($msg);
 		}
