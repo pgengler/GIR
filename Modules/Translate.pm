@@ -3,10 +3,8 @@ package Modules::Translate;
 use strict;
 
 use HTTP::Headers;
-use List::MoreUtils qw/ zip /;
+use JSON qw/ decode_json encode_json /;
 use LWP::UserAgent;
-use URI::Escape qw/ uri_escape /;
-use XML::Simple qw/ xml_in /;
 
 my $TRANSLATE_REGEX = qr/^translate\s+(.+?)\s+(from\s+(.+?))?\s*(\s*(in)?to\s+(.+?))?$/;
 
@@ -78,86 +76,55 @@ sub help
 When translating to or from English you can omit that part.);
 }
 
-sub _accessToken
-{
-	my $url = 'https://api.cognitive.microsoft.com/sts/v1.0/issueToken';
-
-	my $headers = new HTTP::Headers(
-		'Accept'       => 'application/jwt',
-		'Content-Type' => 'application/json',
-		'Ocp-Apim-Subscription-Key' => config('subscription_key')
-	);
-
-	my $agent = _userAgent($headers);
-	my $response = $agent->post($url);
-
-	unless ($response->is_success) {
-		die $response->status_line;
-	}
-
-	return $response->content;
-}
-
 sub _loadLanguagesAndCodes
 {
-	my $accessToken = _accessToken();
-	my $headers = new HTTP::Headers(
-		'Authorization' => "Bearer ${accessToken}",
-		'Content-Type' => 'application/xml',
-	);
-
-	my $agent = _userAgent($headers);
-
-	my $response = $agent->get('https://api.microsofttranslator.com/V2/Http.svc/GetLanguagesForTranslate');
+	my $response = _userAgent()->get('https://api.cognitive.microsofttranslator.com/languages?api-version=3.0&scope=translation');
 	unless ($response->is_success) {
 		die $response->status_line;
 	}
-	my $codeXML = $response->content;
-	my $doc = xml_in($codeXML);
-	my $codes = $doc->{'string'};
+	my $data = decode_json($response->content);
 
-	$response = $agent->post('https://api.microsofttranslator.com/V2/Http.svc/GetLanguageNames?locale=en',
-		'Content' => $codeXML,
-		'Content-Type' => 'application/xml'
-	);
-	unless ($response->is_success) {
-		die $response->content;
+	foreach my $code (keys %{ $data->{'translation'} }) {
+		my $lang = $data->{'translation'}->{ $code };
+		my $name = lc($lang->{'name'});
+		my $nativeName = lc($lang->{'nativeName'});
+
+		$languageToCodeMap->{ $name } = $code;
+		$languageToCodeMap->{ $nativeName } = $code;
 	}
-	$doc = xml_in($response->content);
-	my @names = map { lc } @{ $doc->{'string'} };
-	my %nameToCodeMap = zip(@names, @$codes);
-	$languageToCodeMap = \%nameToCodeMap;
+
+	return 1;
 }
 
 sub _performTranslation
 {
 	my ($text, $toLanguageCode, $fromLanguageCode) = @_;
-	$text = uri_escape($text);
 	$fromLanguageCode ||= 'en';
-	$fromLanguageCode = uri_escape($fromLanguageCode);
-	$toLanguageCode = uri_escape($toLanguageCode);
 
-	my $accessToken = _accessToken();
-	my $headers = new HTTP::Headers(
-		'Authorization' => "Bearer ${accessToken}",
-		'Content-Type' => 'text/plain',
+	my $headers = HTTP::Headers->new(
+		'Ocp-Apim-Subscription-Key' => config('subscription_key'),
+		'Content-Type' => 'application/json; charset=UTF-8',
 	);
-	my $agent = _userAgent($headers);
-	my $url = sprintf('https://api.microsofttranslator.com/V2/Http.svc/Translate?from=%s&to=%s&text=%s', $fromLanguageCode, $toLanguageCode, $text);
 
-	my $response = $agent->get($url);
+	my $agent = _userAgent($headers);
+	my $url = sprintf('https://api.cognitive.microsofttranslator.com/translate?api-version=3.0&from=%s&to=%s', $fromLanguageCode, $toLanguageCode);
+
+	my $requestData = encode_json([
+		{ 'Text' => $text }
+	]);
+	my $response = $agent->post($url, 'Content' => $requestData);
 	unless ($response->is_success) {
 		die $response->content;
 	}
-	my $doc = xml_in($response->content);
-	return $doc->{'content'};
+	my $data = decode_json($response->content);
+	return $data->[0]->{'translations'}->[0]->{'text'};
 }
 
 sub _userAgent
 {
 	my ($headers) = @_;
 
-	return new LWP::UserAgent(
+	return LWP::UserAgent->new(
 		'agent' => 'Mozilla/5.0',
 		'default_headers' => $headers,
 		'timeout' => 3,
