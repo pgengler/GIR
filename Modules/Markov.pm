@@ -26,11 +26,11 @@ sub output
 	my $first  = undef;
 	my $second = undef;
 	if ($data && $data =~ /^(.+?)\s+(.+?)$/) {
-		$first  = $1;
-		$second = $2;
+		$first  = trim($1);
+		$second = trim($2);
 		GIR::Bot->debug("Modules::Markov::output: using '%s' and '%s'", $first, $second);
 	} elsif ($data && $data =~ /^(.+)$/) {
-		$first = $1;
+		$first = trim($1);
 		GIR::Bot->debug("Modules::Markov::output: using '%s'", $first);
 	}
 	return gen_output($first, $second);
@@ -506,6 +506,18 @@ sub should_ignore
 	GIR::Bot->debug("Modules::Markov: checking whether to ignore '%s': %s", $nick, ($nick ~~ $nicks_to_ignore) ? 'yes' : 'no');
 
 	return ($nick ~~ $nicks_to_ignore);
+}
+
+sub trim
+{
+	my $str = shift;
+
+	return unless $str;
+
+	$str =~ s/^\s+//;
+	$str =~ s/\s+$//;
+
+	return $str;
 }
 
 1;
