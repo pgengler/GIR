@@ -29,6 +29,9 @@ sub roll
 		$total += $roll;
 	}
 
+	if ($dice == 1) {
+		return $rolls[0];
+	}
 	my $roll_str = join(' + ', @rolls);
 	my $response = sprintf('%s = %d', $roll_str, $total);
 	return $response;
