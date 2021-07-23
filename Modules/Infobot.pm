@@ -14,7 +14,7 @@ my $feedbacked = 0;
 my $force_learn_expr    = qr/^(.+)\s+\=(is|are)\=\>\s+(.+)$/;
 my $learn_expr          = qr/^(.+?)\s+(is|are)\s+(.+)$/;
 my $forget_expr         = qr/^forget\s+(.+)$/;
-my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/$/;
+my $amend_expr          = qr/^(.+)\s+\=\~\s*s\/(.+)\/(.+)\/([g]?)$/;
 my $what_reply_expr     = qr/^(what\s*(\'s|is|are)*\s+)(.+?)\?*$/;
 my $question_reply_expr = qr/^(.+)\?$/;
 my $replace_expr        = qr/^no\,?\s+(($GIR::Bot::config->{'nick'})[,\s]\s*)?(.+?)\s+(is|are)\s+(.+)$/i;
@@ -67,7 +67,7 @@ sub process
 	} elsif ($data =~ $forget_expr) {
 		return forget($message, $1);
 	} elsif ($data =~ $amend_expr) {
-		return amend($message, $1, $2, $3);
+		return amend($message, $1, $2, $3, $4);
 	} elsif ($data =~ $question_reply_expr) {
 		return reply($message, $1);
 	} else {
@@ -215,7 +215,7 @@ sub forget
 
 sub amend
 {
-	my ($message, $what, $replace, $with) = @_;
+	my ($message, $what, $replace, $with, $flags) = @_;
 
 	my $rep_part = quotemeta($replace);
 
@@ -258,7 +258,11 @@ sub amend
 	GIR::Bot->status('OLD: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
 	# Replace
-	$result->{'value'} =~ s/$rep_part/$with/i;
+	if ($flags eq 'g') {
+		$result->{'value'} =~ s/$rep_part/$with/ig;
+	} else {
+		$result->{'value'} =~ s/$rep_part/$with/i;
+	}
 
 	GIR::Bot->status('NEW: %s =%s=> %s', $result->{'phrase'}, $result->{'relates'}, $result->{'value'});
 
