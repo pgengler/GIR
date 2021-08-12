@@ -4,11 +4,45 @@ use strict;
 
 use POSIX qw/ strftime /;
 
-use constant GIT_REGEXP => qr/^git\s+(\w+?|--help)(\s|$)/;
+use constant GIT_REGEXP => qr/^git\s+([\w-]+?|--help)(\s|$)/;
+
+my $VALID_COMMANDS = [
+	'add',
+	'bisect',
+	'branch',
+	'checkout',
+	'cherry-pick',
+	'commit',
+	'diff',
+	'fetch',
+	'grep',
+	'log',
+	'pull',
+	'push',
+	'merge',
+	'mv',
+	'rebase',
+	'remote',
+	'reset',
+	'restore',
+	'rm',
+	'show',
+	'sparse-checkout',
+	'status',
+	'switch',
+	'tag',
+];
 
 sub register
 {
 	GIR::Modules->register_action(GIT_REGEXP, \&Modules::Git::fake_git_output);
+}
+
+sub is_valid_command
+{
+	my $command = shift;
+
+	return $command ~~ @$VALID_COMMANDS;
 }
 
 sub fake_git_output
@@ -25,7 +59,7 @@ sub fake_git_output
 			my $who = $message->from;
 			my $datetime = strftime('%Y-%m-%d %H:%M:%S %Z', gmtime());
 			return "1234abc\t${who}\t${datetime}\t1) I can't tell IRC and my terminal apart.";
-		} elsif ($command eq 'add' || $command eq 'bisect' || $command eq 'branch' || $command eq 'checkout' || $command eq 'commit' || $command eq 'diff' || $command eq 'fetch' || $command eq 'log' || $command eq 'pull' || $command eq 'push' || $command eq 'merge' || $command eq 'mv' || $command eq 'rebase' || $command eq 'reset' || $command eq 'rm' || $command eq 'show' || $command eq 'status') {
+		} elsif (&is_valid_command($command)) {
 			return 'fatal: Not a git repository (or any of the parent directories): .git';
 		} elsif ($command eq '--help') {
 			return "Here's a tip: use a Git client instead of an IRC bot.";
