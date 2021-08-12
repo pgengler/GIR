@@ -19,7 +19,7 @@ sub say
 
 	return undef unless $target && $msg;
 
-	if ($message->is_public) {
+	if ($message->is_public && $message->is_addressed) {
 		GIR::Bot->enqueue_say($target, $msg);
 		return "OK, " . $message->from;
 	}
@@ -33,7 +33,7 @@ sub action
 
 	return undef unless $target && $msg;
 
-	if ($message->is_public) {
+	if ($message->is_public && $message->is_addressed) {
 		GIR::Bot->enqueue_action($target, $msg);
 		return "OK, " . $message->from;
 	}
