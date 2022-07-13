@@ -13,6 +13,7 @@ my $VALID_COMMANDS = [
 	'checkout',
 	'cherry-pick',
 	'commit',
+	'config',
 	'diff',
 	'fetch',
 	'grep',
@@ -59,6 +60,8 @@ sub fake_git_output
 			my $who = $message->from;
 			my $datetime = strftime('%Y-%m-%d %H:%M:%S %Z', gmtime());
 			return "1234abc\t${who}\t${datetime}\t1) I can't tell IRC and my terminal apart.";
+		} elsif ($command eq 'config') {
+			return 'Segmentation fault';
 		} elsif (&is_valid_command($command)) {
 			return 'fatal: Not a git repository (or any of the parent directories): .git';
 		} elsif ($command eq '--help') {
