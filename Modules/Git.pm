@@ -57,7 +57,7 @@ sub fake_git_output
 			return "ERROR: Repository not found.\nfatal: Could not read from remote repository.\n\nPlease make sure you have the correct access rights\nand the repository exists.";
 		} elsif ($command eq 'init') {
 			return '/home/gir/.git: Permission denied';
-    } elsif ($command eq 'blame') {
+		} elsif ($command eq 'blame') {
 			my $who = $message->from;
 			my $datetime = strftime('%Y-%m-%d %H:%M:%S %Z', gmtime());
 			return "1234abc\t${who}\t${datetime}\t1) I can't tell IRC and my terminal apart.";
