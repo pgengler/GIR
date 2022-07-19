@@ -29,6 +29,7 @@ my $VALID_COMMANDS = [
 	'rm',
 	'show',
 	'sparse-checkout',
+	'stash',
 	'status',
 	'switch',
 	'tag',
