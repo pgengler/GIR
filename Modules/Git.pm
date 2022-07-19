@@ -63,6 +63,8 @@ sub fake_git_output
 			return "1234abc\t${who}\t${datetime}\t1) I can't tell IRC and my terminal apart.";
 		} elsif ($command eq 'config') {
 			return 'Segmentation fault';
+		} elsif ($command eq 'diff') {
+			return 'EVERYTHING HAS CHANGED';
 		} elsif (&is_valid_command($command)) {
 			return 'fatal: Not a git repository (or any of the parent directories): .git';
 		} elsif ($command eq '--help') {
