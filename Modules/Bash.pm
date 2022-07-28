@@ -29,7 +29,7 @@ sub process_from_text
 {
 	my ($message) = @_;
 
-	if ($message->message =~ /(\d+)/) {
+	if ($message->message =~ /\s*(\d+)\s*$/) {
 		return _get_quote($1);
 	}
 
