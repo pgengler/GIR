@@ -23,6 +23,7 @@ my $VALID_COMMANDS = [
 	'merge',
 	'mv',
 	'rebase',
+	'reflog',
 	'remote',
 	'reset',
 	'restore',
