@@ -26,7 +26,7 @@ sub parse
 		return _command_string('join', $1);
 	} elsif ($string =~ /^\s*say\s+(.+?)\s+(.+)$/i) {
 		return _command_string('say', $1, $2);
-	} elsif ($string =~ /^\s*action\s+(.+)\s+(.+)$/i) {
+	} elsif ($string =~ /^\s*action\s+(.+?)\s+(.+)$/i) {
 		return _command_string('action', $1, $2);
 	} elsif ($string =~ /^\s*discon(nect)?(\s+(.+))?$/i) {
 		return _command_string('discon', $3);
