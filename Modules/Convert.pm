@@ -31,6 +31,7 @@ my $conversions = {
 		'au' => \&kilometers_to_astronomical_units,
 		'ly' => \&kilometers_to_light_years,
 		'm'  => metric_increase_magnitude(3),
+		'mi' => \&kilometers_to_miles,
 	},
 	'ls' => {
 		'ly' => \&light_seconds_to_light_years,
@@ -46,6 +47,7 @@ my $conversions = {
 	},
 	'mi' => {
 		'ft' => \&miles_to_feet,
+		'km' => \&miles_to_kilometers,
 		'nm' => \&miles_to_nautical_miles,
 	},
 	'mm' => {
@@ -566,6 +568,13 @@ sub kilometers_to_light_years
 	return $kilometers / 9_460_730_472_580.8;
 }
 
+sub kilometers_to_miles
+{
+	my ($kilometers) = @_;
+
+	return $kilometers / 1.60934;
+}
+
 sub light_seconds_to_light_years
 {
 	my ($lightSeconds) = @_;
@@ -599,6 +608,13 @@ sub miles_to_feet
 	my ($miles) = @_;
 
 	return $miles * 5280;
+}
+
+sub miles_to_kilometers
+{
+	my ($miles) = @_;
+
+	return $miles * 1.60934;
 }
 
 sub miles_to_nautical_miles
