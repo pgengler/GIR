@@ -264,6 +264,7 @@ sub register
 		'knots'         => 'nm/hr',
 		'kph'           => 'km/hr',
 		'kt'            => 'nm/hr',
+		'kts'           => 'nm/hr',
 		'lb/in2'        => 'psi',
 		'lb/square in'  => 'psi',
 		'lb/sq.in'      => 'psi',
