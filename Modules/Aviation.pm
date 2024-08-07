@@ -28,7 +28,7 @@ sub metar
 		$data = "K$data";
 	}
 
-	my $metar_url = "http://www.aviationweather.gov/adds/metars/?chk_metars=on&station_ids=${data}";
+	my $metar_url = "https://aviationweather.gov/cgi-bin/data/metar.php?ids=${data}&hours=0&order=id%2C-obs&sep=true";
 
 	# Grab METAR report from Web.
 	my $content = eval { get_url($metar_url) };
@@ -37,8 +37,7 @@ sub metar
 		return "Either $data doesn't exist (try a 4-letter station code like KMMU), or the NOAA site is unavailable right now.";
 	}
 
-	$content =~ m|<FONT FACE="Monospace,Courier">($data\s\d+Z.*?)</FONT>|s;
-	my $metar = $1;
+	my $metar = $content;
 	$metar =~ s/\n//gm;
 	$metar =~ s/\s+/ /g;
 
@@ -65,7 +64,7 @@ sub taf
 		$data = "K$data";
 	}
 
-	my $taf_url = "http://www.aviationweather.gov/adds/metars/?chk_tafs=on&station_ids=${data}";
+	my $taf_url = "https://aviationweather.gov/cgi-bin/data/taf.php?ids=${data}&sep=true";
 
 	# Grab METAR report from Web.
 	my $content = eval { get_url($taf_url) };
@@ -74,11 +73,7 @@ sub taf
 		return "Either $data doesn't exist (try a 4-letter station code like KEWR), or the NOAA site is unavailable right now.";
 	}
 
-	# extract TAF from equally verbose webpage
-	unless ($content =~ m|<font face="Monospace,Courier" size="\+1">\s*($data\s*\d+Z.+?)\s*</font>|ms) {
-		return "I can't find any TAF for ${data}.";
-	}
-	my $taf = $1;
+	my $taf = $content;
 
 	# Highlight FM, TEMP, BECMG, PROB
 	$taf =~ s/(FM\d+Z?|TEMPO \d+|BECMG \d+|PROB\d+)/\cB$1\cB/g;
