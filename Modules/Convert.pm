@@ -250,6 +250,7 @@ sub register
 		'inch'          => 'in',
 		'inches'        => 'in',
 		'kelvin'        => 'k',
+		'kgs'           => 'kg',
 		'kilobyte '     => 'kb',
 		'kilobytes'     => 'kb',
 		'kilogram'      => 'kg',
